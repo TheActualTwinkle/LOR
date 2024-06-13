@@ -1,0 +1,65 @@
+﻿using System.Composition;
+using System.Composition.Hosting;
+using System.Reflection;
+using FluentResults;
+using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application.Factories.Common;
+using TelegramBotApp.Application.Interfaces;
+
+namespace TelegramBotApp.Application.Factories;
+
+public class TelegramCommandFactory(ITelegramBotSettings settings, IGroupScheduleCommunicator scheduleCommunicator)
+{
+    #region ImportsInfo
+
+    private class ImportInfo
+    {
+        [ImportMany]
+        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
+        public IEnumerable<Lazy<ITelegramCommand, TelegramCommandMetadata>> Commands { get; set; } = [];
+    }
+
+    #endregion
+
+    private static readonly ImportInfo s_info = new();
+    
+    static TelegramCommandFactory()
+    {
+        Assembly[] assemblies = [typeof(ITelegramCommand).Assembly];
+        ContainerConfiguration configuration = new();
+        try
+        {
+            configuration = configuration.WithAssemblies(assemblies);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Failed to load AddressablesLoaderFactory");
+            throw;
+        }
+        
+        using CompositionHost container = configuration.CreateContainer();
+        container.SatisfyImports(s_info);   
+    }
+    
+    public async Task<Result<string>> StartCommand(string commandString, long chatId)
+    {
+        ITelegramCommand? command = GetCommand(commandString);
+        
+        if (command == null)
+        {
+            return Result.Fail("Команда не найдена");
+        }
+
+        return await command.Execute(chatId, scheduleCommunicator, settings.Token);
+    }
+    
+    public static IEnumerable<string> GetAllCommandsInfo()
+    {
+        return s_info.Commands.Select(x => $"{x.Metadata.Command} {x.Metadata.Description}");
+    }
+
+    private ITelegramCommand? GetCommand(string command)
+    {
+        return s_info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
+    }
+}

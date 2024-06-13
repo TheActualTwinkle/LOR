@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "GroupScheduleApp.Grpc";
+
+import "google/protobuf/empty.proto";
+
+service GroupSchedule {
+  rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
+  rpc GetAvailableLabClasses (GetAvailableLabClassesRequest) returns (GetAvailableLabClassesReply);
+}
+
+message GetAvailableGroupsReply {
+  map<int32, string> idGroupsMap = 1;
+}
+
+message GetAvailableLabClassesRequest {
+  int32 groupId = 1;
+}
+
+message GetAvailableLabClassesReply {
+  map<int32, string> idClassMap = 1;
+}
