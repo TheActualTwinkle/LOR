@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  telegrambot:
+    build:
+      context: .
+      dockerfile: Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/Dockerfile
+    environment:
+      - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
+      - Profiles:GroupSchedule-http:ApplicationUrl=${GROUP_SCHEDULE_URL}
+
+  groupscheduleapp:
+    build:
+      context: .
+      dockerfile: Lor.GroupScheduleApp/Presentation/GroupScheduleApp.WebApi/Dockerfile
+    ports:
+      - "31401:31401"
+    environment:
+      - ASPNETCORE_URLS=${GROUP_SCHEDULE_URL}
+      - ASPNETCORE_ENVIRONMENT=Production

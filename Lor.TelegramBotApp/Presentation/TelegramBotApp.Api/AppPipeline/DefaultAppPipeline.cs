@@ -19,7 +19,7 @@ public class DefaultAppPipeline : IAppPipeline
                 .ConfigureAppConfiguration(config =>
                     config.AddJsonFile("appsettings.json", false, true))
                 .ConfigureAppConfiguration(config =>
-                    config.AddJsonFile("ScheduleSettings\\launchSettings.json", false, true))
+                    config.AddJsonFile("ScheduleSettings/launchSettings.json", false, true).AddEnvironmentVariables())
                 
                 .ConfigureServices((builder, services) => services
                     .AddApplication(builder.Configuration)

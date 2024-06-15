@@ -19,7 +19,7 @@ public static class DependencyInjection
         
         services.AddSingleton<IGroupScheduleCommunicator>(_ =>
         {
-            string url = configuration.GetSection("profiles:https:applicationUrl").Value ?? throw new InvalidOperationException("GroupScheduleService url is not set.");
+            string url = configuration.GetSection("profiles:GroupSchedule-http:applicationUrl").Value ?? throw new InvalidOperationException("GroupScheduleService url is not set.");
             return new GrpcGroupScheduleCommunicator(url);
         });
 

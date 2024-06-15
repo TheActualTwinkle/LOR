@@ -16,13 +16,11 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
     
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
-    private IGroupScheduleCommunicator _scheduleCommunicator = null!;
 
     public void StartReceiving(IGroupScheduleCommunicator scheduleCommunicator, CancellationToken cancellationToken)
     {
         _telegramCommandFactory = new TelegramCommandFactory(_settings, scheduleCommunicator);
-        _scheduleCommunicator = scheduleCommunicator;
-        
+
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
 
