@@ -1,6 +1,6 @@
 ﻿namespace TelegramBotApp.AppCommunication.Interfaces;
 
-public interface IAppCommunicator
+public interface ICommunicationClient
 {
     Task Start();
 }

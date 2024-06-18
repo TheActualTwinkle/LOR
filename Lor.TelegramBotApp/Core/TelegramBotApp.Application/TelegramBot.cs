@@ -17,9 +17,9 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
 
-    public void StartReceiving(IGroupScheduleCommunicator scheduleCommunicator, CancellationToken cancellationToken)
+    public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
     {
-        _telegramCommandFactory = new TelegramCommandFactory(_settings, scheduleCommunicator);
+        _telegramCommandFactory = new TelegramCommandFactory(_settings, databaseCommunicator);
 
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
@@ -37,7 +37,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         
         Task.Run(async () =>
         {
-            using var cts = new CancellationTokenSource(_settings.Timeout);
+            using CancellationTokenSource cts = new(_settings.Timeout);
             
             try
             {
@@ -45,7 +45,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
 
                 if (result.IsFailed)
                 {
-                    await SendErrorMessage(bot, chatId, new Exception("Неизвестная команда"), cts.Token);
+                    await SendErrorMessage(bot, chatId, new Exception(result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), cts.Token);
                     return;
                 }
 

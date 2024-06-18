@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
+
+import "google/protobuf/empty.proto";
+
+service DatabaseCommunication {  
+  rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
+  rpc GetAvailableLabClasses (GetAvailableLabClassesRequest) returns (GetAvailableLabClassesReply);
+  
+  rpc TrySetGroup (TrySetGroupRequest) returns (TrySetGroupReply);
+  rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
+}
+
+service D {
+  rpc UpdateAvailableGroups (google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc UpdateAvailableLabClasses (google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+message GetAvailableGroupsReply {
+  map<int32, string> idGroupsMap = 1;
+}
+
+message GetAvailableLabClassesRequest {
+  int64 userId = 1;
+}
+
+message GetAvailableLabClassesReply {
+  map<int32, string> idClassMap = 1;
+  string errorMessage = 2;
+}
+
+message TrySetGroupRequest {
+  int64 userId = 1;
+  string groupName = 2;
+}
+
+message TrySetGroupReply {
+  string errorMessage = 1;
+}
+
+message TryEnqueueInClassRequest {
+  int64 userId = 1;
+  int32 classId = 2;
+}
+
+message TryEnqueueInClassReply {
+  repeated string studentsQueue = 1;
+  string errorMessage = 2;
+}

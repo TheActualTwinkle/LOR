@@ -1,5 +1,5 @@
 ﻿using FluentResults;
-using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application.Factories;
 
 namespace TelegramBotApp.Application.Interfaces;
 
@@ -7,9 +7,9 @@ public interface ITelegramCommand
 {
     string Command { get; }
     string Description { get; }
-    IEnumerable<string> Arguments { get; }
 
     Task<Result<string>> Execute(long chatId,
-        IGroupScheduleCommunicator scheduleCommunicator,
+        TelegramCommandFactory telegramCommandFactory,
+        IReadOnlyCollection<string> arguments,
         CancellationToken cancellationToken);
 }

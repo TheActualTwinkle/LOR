@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot.Types;
+using TelegramBotApp.Api.AppPipeline.Interfaces;
 using TelegramBotApp.AppCommunication;
 using TelegramBotApp.Application;
 using TelegramBotApp.Application.Interfaces;
@@ -18,24 +19,24 @@ public class DefaultAppPipeline : IAppPipeline
             using IHost host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration(config =>
                     config.AddJsonFile("appsettings.json", false, true))
-                .ConfigureAppConfiguration(config =>
-                    config.AddJsonFile("ScheduleSettings/launchSettings.json", false, true).AddEnvironmentVariables())
+                .ConfigureAppConfiguration(config => 
+                    config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true).AddEnvironmentVariables())
+                
                 
                 .ConfigureServices((builder, services) => services
                     .AddApplication(builder.Configuration)
                     .AddCommunicators(builder.Configuration))
                 .Build();
             
-            await InitializeAppCommunicators([
-                host.Services.GetRequiredService<IDatabaseCommunicator>(),
-                host.Services.GetRequiredService<IGroupScheduleCommunicator>()
-            ]);
-            
             ITelegramBot botClient = host.Services.GetRequiredService<ITelegramBot>();
-            IGroupScheduleCommunicator scheduleCommunicator = host.Services.GetRequiredService<IGroupScheduleCommunicator>();
+            IDatabaseCommunicationClient databaseCommunicator = host.Services.GetRequiredService<IDatabaseCommunicationClient>();
+            
+            await InitializeAppCommunicators([
+                databaseCommunicator
+            ]);
 
             CancellationTokenSource cancellationToken = new();
-            botClient.StartReceiving(scheduleCommunicator, cancellationToken.Token);
+            botClient.StartReceiving(databaseCommunicator, cancellationToken.Token);
 
             User me = await botClient.GetMeAsync();
             Console.WriteLine($"Start listening for @{me.Username}");
@@ -55,9 +56,9 @@ public class DefaultAppPipeline : IAppPipeline
         }
     }
 
-    private async Task InitializeAppCommunicators(IEnumerable<IAppCommunicator> communicators)
+    private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)
     {
-        foreach (IAppCommunicator appCommunicator in communicators)
+        foreach (ICommunicationClient appCommunicator in communicators)
         {
             await appCommunicator.Start();
         }

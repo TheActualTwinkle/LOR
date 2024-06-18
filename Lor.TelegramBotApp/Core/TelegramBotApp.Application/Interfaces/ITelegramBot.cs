@@ -1,12 +1,11 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using TelegramBotApp.AppCommunication.Interfaces;
 
 namespace TelegramBotApp.Application.Interfaces;
 
 public interface ITelegramBot
 {
-    void StartReceiving(IGroupScheduleCommunicator scheduleCommunicator, CancellationToken cancellationToken);
+    void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken);
 
     Task SendMessageAsync(long telegramId, string message);
     

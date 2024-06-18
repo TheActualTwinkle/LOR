@@ -8,7 +8,7 @@ using TelegramBotApp.Application.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public class TelegramCommandFactory(ITelegramBotSettings settings, IGroupScheduleCommunicator scheduleCommunicator)
+public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseCommunicationClient databaseCommunicator)
 {
     #region ImportsInfo
 
@@ -21,6 +21,8 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IGroupSchedul
 
     #endregion
 
+    public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
+    
     private static readonly ImportInfo s_info = new();
     
     static TelegramCommandFactory()
@@ -43,14 +45,14 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IGroupSchedul
     
     public async Task<Result<string>> StartCommand(string commandString, long chatId)
     {
-        ITelegramCommand? command = GetCommand(commandString);
+        ITelegramCommand? command = GetCommand(commandString.Split(' ').FirstOrDefault()!);
         
         if (command == null)
         {
             return Result.Fail("Команда не найдена");
         }
 
-        return await command.Execute(chatId, scheduleCommunicator, settings.Token);
+        return await command.Execute(chatId, this, GetArguments(commandString), settings.Token);
     }
     
     public static IEnumerable<string> GetAllCommandsInfo()
@@ -61,5 +63,10 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IGroupSchedul
     private ITelegramCommand? GetCommand(string command)
     {
         return s_info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
+    }
+    
+    private string[] GetArguments(string commandString)
+    {
+        return commandString.Split(' ').Skip(1).ToArray();
     }
 }

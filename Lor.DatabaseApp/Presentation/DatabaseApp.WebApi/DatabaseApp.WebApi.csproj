@@ -4,22 +4,15 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>GroupScheduleApp</RootNamespace>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.61.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\GroupScheduleApp.Grpc\GroupScheduleApp.Grpc.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="Properties\launchSettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      <ProjectReference Include="..\..\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj" />
     </ItemGroup>
 
     <ItemGroup>

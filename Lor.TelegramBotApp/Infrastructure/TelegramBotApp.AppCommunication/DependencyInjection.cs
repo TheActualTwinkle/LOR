@@ -8,21 +8,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCommunicators(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IDatabaseCommunicator, GrpcDatabaseCommunicator>();
-        // TODO: Uncomment when IDatabaseCommunicator is implemented.
-        // services.AddSingleton<IDatabaseCommunicator>(_ =>
-        // {
-        //     string hostname = configuration.GetSection("DatabaseCommunicator:Hostname").Value ?? throw new InvalidOperationException("Hostname is not set for IDatabaseCommunicator.");
-        //     string portString = configuration.GetSection("DatabaseCommunicator:Port").Value ?? throw new InvalidOperationException("Port is not set for IDatabaseCommunicator.");
-        //     return new GrpcDatabaseCommunicator();
-        // });
-        
-        services.AddSingleton<IGroupScheduleCommunicator>(_ =>
+        services.AddSingleton<IDatabaseCommunicationClient, GrpcDatabaseCommunicationClient>(_ =>
         {
-            string url = configuration.GetSection("profiles:GroupSchedule-http:applicationUrl").Value ?? throw new InvalidOperationException("GroupScheduleService url is not set.");
-            return new GrpcGroupScheduleCommunicator(url);
+            string url = configuration.GetSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            return new GrpcDatabaseCommunicationClient(url);
         });
-
         return services;
     }
 }

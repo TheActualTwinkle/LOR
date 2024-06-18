@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   telegrambot:
     build:
@@ -7,14 +5,26 @@ services:
       dockerfile: Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/Dockerfile
     environment:
       - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
-      - Profiles:GroupSchedule-http:ApplicationUrl=${GROUP_SCHEDULE_URL}
+      - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
 
-  groupscheduleapp:
+  database:
     build:
       context: .
-      dockerfile: Lor.GroupScheduleApp/Presentation/GroupScheduleApp.WebApi/Dockerfile
+      dockerfile: Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/Dockerfile
     ports:
       - "31401:31401"
     environment:
-      - ASPNETCORE_URLS=${GROUP_SCHEDULE_URL}
+      - ConnectionStrings:Redis=redis:31409
+      - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "31409:31409"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 15s
+      timeout: 15s
+      retries: 3

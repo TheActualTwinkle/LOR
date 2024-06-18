@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
+
+import "google/protobuf/empty.proto";
+
+service DatabaseUpdater {
+  rpc UpdateAvailableGroups (UpdateAvailableGroupsRequest) returns (google.protobuf.Empty);
+  rpc UpdateAvailableLabClasses (UpdateAvailableLabClassesRequest) returns (google.protobuf.Empty);
+}
+
+message UpdateAvailableGroupsRequest {
+  repeated string groupNames = 1;
+}
+
+message UpdateAvailableLabClassesRequest {
+  string groupName = 1;
+  repeated string classNames = 2;
+}

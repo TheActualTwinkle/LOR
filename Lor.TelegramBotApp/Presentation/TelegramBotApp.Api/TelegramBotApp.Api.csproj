@@ -24,14 +24,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\..\Lor.GroupScheduleApp\Presentation\GroupScheduleApp.WebApi\Properties\launchSettings.json">
-        <Link>ScheduleSettings\launchSettings.json</Link>
+      <Content Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\Properties\launchSettings.json">
+        <Link>DatabaseSettings\launchSettings.json</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="DatabaseSettings\" />
     </ItemGroup>
 
 </Project>
