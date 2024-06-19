@@ -3,7 +3,10 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Application.Settings;
@@ -12,8 +15,6 @@ namespace TelegramBotApp.Application;
 
 public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions) : ITelegramBot
 {
-    private const string HelpCommand = "/help";
-    
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
 
@@ -23,13 +24,13 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
 
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
-
-    public Task SendMessageAsync(long telegramId, string message) => telegramBot.SendTextMessageAsync(telegramId, message);
-
+    
     public Task<User> GetMeAsync() => telegramBot.GetMeAsync();
     
     private Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
     {
+        if (update.CallbackQuery is not null) HandleCallbackQuery(bot, update.CallbackQuery);
+        
         if (update.Message is not { } message) return Task.CompletedTask;
         if (message.Text is not { } userMessageText) return Task.CompletedTask;
         
@@ -41,35 +42,32 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
             
             try
             {
-                Result<string> result = await _telegramCommandFactory.StartCommand(userMessageText, chatId);
+                ExecutionResult executionResult = await _telegramCommandFactory.StartCommand(userMessageText, chatId);
 
-                if (result.IsFailed)
+                if (executionResult.Result.IsFailed)
                 {
-                    await SendErrorMessage(bot, chatId, new Exception(result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), cts.Token);
+                    await SendErrorMessage(bot, chatId, new Exception(executionResult.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), executionResult.ReplyMarkup, cts.Token);
                     return;
                 }
 
-                await bot.SendTextMessageAsync(chatId: chatId, result.Value, cancellationToken: cts.Token);
+                await bot.SendTextMessageAsync(chatId: chatId, executionResult.Result.Value, replyMarkup: executionResult.ReplyMarkup, cancellationToken: cts.Token);
             }
             catch (TaskCanceledException)
             {
-                await SendErrorMessage(bot, chatId, new Exception("Время запроса истекло"), cts.Token);
+                await SendErrorMessage(bot, chatId, new Exception("Время запроса истекло"), new ReplyKeyboardRemove(), cts.Token);
             }
             catch (Exception)
             {
-                await SendErrorMessage(bot, chatId, new Exception("Внутрення ошибка"), cts.Token);
+                await SendErrorMessage(bot, chatId, new Exception("Внутрення ошибка"), new ReplyKeyboardRemove(), cts.Token);
             }
         }, cancellationToken);
         
         return Task.CompletedTask;
     }
 
-    private async Task SendErrorMessage(ITelegramBotClient bot, long chatIdInner, Exception exception, CancellationToken cancellationToken)
+    private async Task SendErrorMessage(ITelegramBotClient bot, long chatIdInner, Exception exception, IReplyMarkup replyMarkup, CancellationToken cancellationToken)
     {
-        await bot.SendTextMessageAsync(chatId: chatIdInner, exception.Message, cancellationToken: cancellationToken);
-        
-        Result<string> text = await _telegramCommandFactory.StartCommand(HelpCommand, chatIdInner);
-        await bot.SendTextMessageAsync(chatId: chatIdInner, text.Value, cancellationToken: cancellationToken);
+        await bot.SendTextMessageAsync(chatId: chatIdInner, exception.Message, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
     }
     
     private Task HandleError(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
@@ -84,5 +82,21 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         Console.WriteLine(errorMessage);
 
         return Task.CompletedTask;
+    }
+    
+    private void HandleCallbackQuery(ITelegramBotClient bot, CallbackQuery callbackQuery)
+    {
+        if (callbackQuery.Data?.First() != '/') return;
+        
+        if (callbackQuery.Message is null) return;
+        
+        HandleUpdateAsync(bot, new Update
+        {
+            Message = new Message
+            {
+                Text = callbackQuery.Data,
+                Chat = callbackQuery.Message.Chat
+            },
+        }, CancellationToken.None);
     }
 }

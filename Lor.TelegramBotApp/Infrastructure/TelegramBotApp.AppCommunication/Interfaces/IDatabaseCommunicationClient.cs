@@ -4,6 +4,8 @@ namespace TelegramBotApp.AppCommunication.Interfaces;
 
 public interface IDatabaseCommunicationClient : ICommunicationClient
 {
+    Task<Result> IsUserInGroup(long userId); 
+    
     Task<Result<Dictionary<int, string>>> GetAvailableGroups();
     Task<Result<Dictionary<int, string>>> GetAvailableLabClasses(long userId);
     

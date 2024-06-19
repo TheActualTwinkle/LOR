@@ -19,6 +19,6 @@ public class TelegramBotInitializer : ITelegramBotInitializer
 #pragma warning restore CA1822
         new()
         {
-            AllowedUpdates = [UpdateType.Message]
+            AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery]
         };
 }

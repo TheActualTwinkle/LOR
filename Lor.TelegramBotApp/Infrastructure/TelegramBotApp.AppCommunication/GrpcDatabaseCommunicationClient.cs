@@ -17,6 +17,13 @@ public class GrpcDatabaseCommunicationClient(string serviceUrl) : IDatabaseCommu
             
         return Task.CompletedTask;
     }
+    
+    public async Task<Result> IsUserInGroup(long userId)
+    {
+        IsUserInGroupReply reply = await _client!.IsUserInGroupAsync(new IsUserInGroupRequest { UserId = userId });
+        
+        return reply.IsUserInGroup ? Result.Ok() : Result.Fail("Вы не состоите в группе");
+    }
 
     public async Task<Result<Dictionary<int, string>>> GetAvailableGroups()
     {
@@ -28,6 +35,9 @@ public class GrpcDatabaseCommunicationClient(string serviceUrl) : IDatabaseCommu
     public async Task<Result<Dictionary<int, string>>> GetAvailableLabClasses(long userId)
     {
         GetAvailableLabClassesReply reply = await _client!.GetAvailableLabClassesAsync(new GetAvailableLabClassesRequest { UserId = userId });
+        
+        if (reply.IsFailed) return Result.Fail<Dictionary<int, string>>(reply.ErrorMessage);
+        
         Dictionary<int, string> classes = reply.IdClassMap.ToDictionary(pair => pair.Key, pair => pair.Value);
         return Result.Ok(classes);
     }
@@ -36,13 +46,13 @@ public class GrpcDatabaseCommunicationClient(string serviceUrl) : IDatabaseCommu
     {
         TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupName = groupName });
         
-        return string.IsNullOrEmpty(reply.ErrorMessage) ? Result.Ok("Успешно установлена группа") : Result.Fail(reply.ErrorMessage);
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok("Успешно установлена группа");
     }
 
     public async Task<Result<IEnumerable<string>>> EnqueueInClass(int cassId, long userId)
     {
         TryEnqueueInClassReply reply = await _client!.TryEnqueueInClassAsync(new TryEnqueueInClassRequest { UserId = userId, ClassId = cassId });
         
-        return string.IsNullOrEmpty(reply.ErrorMessage) ? Result.Ok<IEnumerable<string>>(reply.StudentsQueue) : Result.Fail<IEnumerable<string>>(reply.ErrorMessage);
+        return reply.IsFailed ? Result.Fail<IEnumerable<string>>(reply.ErrorMessage) : Result.Ok<IEnumerable<string>>(reply.StudentsQueue);
     }
 }

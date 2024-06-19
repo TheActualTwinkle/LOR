@@ -3,6 +3,7 @@ using System.Composition.Hosting;
 using System.Reflection;
 using FluentResults;
 using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
 
@@ -43,13 +44,13 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
         container.SatisfyImports(s_info);   
     }
     
-    public async Task<Result<string>> StartCommand(string commandString, long chatId)
+    public async Task<ExecutionResult> StartCommand(string commandString, long chatId)
     {
         ITelegramCommand? command = GetCommand(commandString.Split(' ').FirstOrDefault()!);
         
         if (command == null)
         {
-            return Result.Fail("Команда не найдена");
+            return new ExecutionResult(Result.Fail("Команда не найдена\nДля получения списка команд введите /help"));
         }
 
         return await command.Execute(chatId, this, GetArguments(commandString), settings.Token);

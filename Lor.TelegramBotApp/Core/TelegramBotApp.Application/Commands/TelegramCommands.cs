@@ -1,6 +1,7 @@
 ﻿using System.Composition;
 using System.Text;
 using FluentResults;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
@@ -17,9 +18,10 @@ public class StartTelegramCommand : ITelegramCommand
     public string Command => "/start";
     public string Description => "- выводит приветственное сообщение";
     
-    public Task<Result<string>> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
-        return Task.FromResult(Result.Ok("Привет! Данный бот служит для записи на лабораторные работы. Для получения справки введите /help"));
+        const string message = "Привет! Данный бот служит для записи на лабораторные работы. Для получения справки введите /help";
+        return Task.FromResult(new ExecutionResult(Result.Ok(message)));
     }
 }
 
@@ -31,7 +33,7 @@ public class HelpTelegramCommand : ITelegramCommand
     public string Command => "/help";
     public string Description => "- выводит это сообщение справки";
     
-    public Task<Result<string>> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         StringBuilder message = new();
 
@@ -39,8 +41,8 @@ public class HelpTelegramCommand : ITelegramCommand
         {
             message.AppendLine(command);
         }
-
-        return Task.FromResult(Result.Ok(message.ToString()));
+        
+        return Task.FromResult(new ExecutionResult(Result.Ok(message.ToString())));
     }
 }
 
@@ -52,39 +54,40 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => "/groups";
     public string Description => "- выводит поддерживаемые группы";
     
-    public async Task<Result<string>> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableGroups();
         
         if (result.IsFailed)
         {
-            return Result.Fail(result.Errors.First());
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new();
+        StringBuilder message = new("Доступные группы:\n");
         foreach (KeyValuePair<int,string> idGroupPair in result.Value)
         {
             message.AppendLine(idGroupPair.Value);
         }
 
-        return Result.Ok(message.ToString());
+        return new ExecutionResult(Result.Ok(message.ToString()));
     }
 }
 
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), "/setgroup")]
-[ExportMetadata(nameof(Description), "<группа> - устанавливает группу")]
+[ExportMetadata(nameof(Description), "- устанавливает группу")]
 public class SetGroupTelegramCommand : ITelegramCommand
 {
     public string Command => "/setgroup";
-    public string Description => "<группа> - устанавливает группу";
+    public string Description => "- устанавливает группу";
     
-    public async Task<Result<string>> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         if (arguments.Count == 0)
         {
-            return Result.Fail("Не указана группа");
+            IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(telegramCommandFactory);
+            return new ExecutionResult(Result.Fail("Выберете свою группу"), replyMarkup);
         }
         
         string groupName = arguments.First();
@@ -93,7 +96,27 @@ public class SetGroupTelegramCommand : ITelegramCommand
 
         Result<string> result = await databaseCommunicator.TrySetGroup(chatId, groupName);
 
-        return result.IsFailed ? result : Result.Ok($"Группа {groupName} установлена");
+        return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok($"Группа {groupName} установлена"));
+    }
+    
+    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(TelegramCommandFactory telegramCommandFactory)
+    {
+        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
+        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableGroups();
+        
+        if (result.IsFailed)
+        {
+            return new ReplyKeyboardRemove();
+        }
+        
+        List<InlineKeyboardButton[]> buttons = [];
+        foreach (KeyValuePair<int,string> idGroupPair in result.Value)
+        {
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData(idGroupPair.Value, $"/setgroup {idGroupPair.Value}");
+            buttons.Add([button]);
+        }
+
+        return new InlineKeyboardMarkup(buttons);
     }
 }
 
@@ -105,44 +128,50 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
     public string Command => "/labs";
     public string Description => "- выводит доступные лабораторные работы для выбранной группы";
     
-    public async Task<Result<string>> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(chatId);
         
         if (result.IsFailed)
         {
-            return Result.Fail(result.Errors.First());
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new();
+        StringBuilder message = new("Доступные лабораторные работы:\n");
         foreach (KeyValuePair<int,string> idClassPair in result.Value)
         {
             message.AppendLine(idClassPair.Value);
         }
 
-        return Result.Ok(message.ToString());
+        return new ExecutionResult(Result.Ok(message.ToString()));
     }
 }
 
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), "/hop")]
-[ExportMetadata(nameof(Description), "<номер пары> - записывает на лабораторную работу")]
+[ExportMetadata(nameof(Description), "записывает на лабораторную работу")]
 public class EnqueueInClassTelegramCommand : ITelegramCommand
 {
     public string Command => "/hop";
-    public string Description => "<номер пары> - записывает на лабораторную работу";
+    public string Description => "- записывает на лабораторную работу";
     
-    public async Task<Result<string>> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         if (arguments.Count == 0)
         {
-            return Result.Fail("Не указан номер пары");
+            if (telegramCommandFactory.DatabaseCommunicator.IsUserInGroup(chatId).Result.IsFailed)
+            {
+                return new ExecutionResult(Result.Fail("Вы не состоите ни в одной группе. Установите группу командой /setgroup"));
+            }
+
+            IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(telegramCommandFactory, chatId);
+            return new ExecutionResult(Result.Fail("Выберите пару"), replyMarkup);
         }
         
         if (int.TryParse(arguments.First(), out int classId) == false)
         {
-            return Result.Fail("Номер пары должен быть числом");
+            return new ExecutionResult(Result.Fail("Номер пары должен быть числом"));
         }
         
         IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
@@ -150,15 +179,35 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         
         if (result.IsFailed)
         {
-            return Result.Fail(result.Errors.First());
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new();
+        StringBuilder message = new("Вы успешно записаны!\nОчередь:");
         foreach (string labClass in result.Value)
         {
             message.AppendLine(labClass);
         }
 
-        return Result.Ok(message.ToString());
+        return new ExecutionResult(Result.Ok(message.ToString()));
+    }
+    
+    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(TelegramCommandFactory telegramCommandFactory, long userId)
+    {
+        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
+        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(userId);
+        
+        if (result.IsFailed)
+        {
+            return new ReplyKeyboardRemove();
+        }
+        
+        List<InlineKeyboardButton[]> buttons = [];
+        foreach (KeyValuePair<int,string> idClassPair in result.Value)
+        {
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData(idClassPair.Value, $"/hop {idClassPair.Key}");
+            buttons.Add([button]);
+        }
+
+        return new InlineKeyboardMarkup(buttons);
     }
 }
