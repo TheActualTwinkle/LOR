@@ -20,7 +20,6 @@ services:
 
   redis:
     image: redis:latest
-    restart: always
     ports:
       - "31409:31409"
     healthcheck:

@@ -182,7 +182,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new("Вы успешно записаны!\nОчередь:");
+        StringBuilder message = new("Вы успешно записаны!\nОчередь:\n");
         foreach (string labClass in result.Value)
         {
             message.AppendLine(labClass);

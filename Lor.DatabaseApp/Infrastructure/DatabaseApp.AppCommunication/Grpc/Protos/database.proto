@@ -4,7 +4,7 @@ option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
 
 import "google/protobuf/empty.proto";
 
-service DatabaseCommunication {  
+service Database {  
   rpc IsUserInGroup (IsUserInGroupRequest) returns (IsUserInGroupReply);
   
   rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);

@@ -1,9 +1,7 @@
-﻿using FluentResults;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
@@ -29,7 +27,14 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
     
     private Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
     {
-        if (update.CallbackQuery is not null) HandleCallbackQuery(bot, update.CallbackQuery);
+        if (update.CallbackQuery is not null)
+        {
+            Task.Run(async () =>
+            {
+                await HandleCallbackQuery(bot, update.CallbackQuery);
+                return Task.CompletedTask;
+            }, cancellationToken);
+        }
         
         if (update.Message is not { } message) return Task.CompletedTask;
         if (message.Text is not { } userMessageText) return Task.CompletedTask;
@@ -84,13 +89,13 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         return Task.CompletedTask;
     }
     
-    private void HandleCallbackQuery(ITelegramBotClient bot, CallbackQuery callbackQuery)
+    private async Task HandleCallbackQuery(ITelegramBotClient bot, CallbackQuery callbackQuery)
     {
         if (callbackQuery.Data?.First() != '/') return;
         
         if (callbackQuery.Message is null) return;
         
-        HandleUpdateAsync(bot, new Update
+        await HandleUpdateAsync(bot, new Update
         {
             Message = new Message
             {
@@ -98,5 +103,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
                 Chat = callbackQuery.Message.Chat
             },
         }, CancellationToken.None);
+        
+        await bot.AnswerCallbackQueryAsync(callbackQuery.Id);
     }
 }

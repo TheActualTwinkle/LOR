@@ -6,14 +6,14 @@ using TelegramBotApp.AppCommunication.Interfaces;
 
 namespace TelegramBotApp.AppCommunication;
 
-public class GrpcDatabaseCommunicationClient(string serviceUrl) : IDatabaseCommunicationClient
+public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClient
 {
-    private DatabaseCommunication.DatabaseCommunicationClient? _client;
+    private Database.DatabaseClient? _client;
     
     public Task Start()
     {
         GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
-        _client = new DatabaseCommunication.DatabaseCommunicationClient(channel);
+        _client = new Database.DatabaseClient(channel);
             
         return Task.CompletedTask;
     }

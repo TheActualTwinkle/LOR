@@ -3,7 +3,7 @@ using Grpc.Core;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseCommunicationService : DatabaseCommunication.DatabaseCommunicationBase
+public class GrpcDatabaseService : Database.DatabaseBase
 {
     private static bool _isUserInGroup;
 
@@ -23,7 +23,7 @@ public class GrpcDatabaseCommunicationService : DatabaseCommunication.DatabaseCo
     {
         if (_isUserInGroup == false)
         {
-            return Task.FromResult(new GetAvailableLabClassesReply { IsFailed = true, ErrorMessage = "Сначала установите группу" });
+            return Task.FromResult(new GetAvailableLabClassesReply { IsFailed = true, ErrorMessage = "Вы не состоите ни в одной группе. Установите группу командой /setgroup" });
         }
         
         GetAvailableLabClassesReply reply = new();
@@ -50,7 +50,7 @@ public class GrpcDatabaseCommunicationService : DatabaseCommunication.DatabaseCo
         // TODO: Узнавать есть ли группа из request.UserId в базе данных
         if (_isUserInGroup == false)
         {
-            return Task.FromResult(new TryEnqueueInClassReply { IsFailed = true, ErrorMessage = "Сначала установите группу" });
+            return Task.FromResult(new TryEnqueueInClassReply { IsFailed = true, ErrorMessage = "Вы не состоите ни в одной группе. Установите группу командой /setgroup" });
         }
         
         return Task.FromResult(new TryEnqueueInClassReply() { StudentsQueue = { "Кто-то", "Кто то", "Вы!" }});
