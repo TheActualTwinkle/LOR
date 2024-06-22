@@ -1,12 +1,4 @@
 services:
-  telegrambot:
-    build:
-      context: .
-      dockerfile: Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/Dockerfile
-    environment:
-      - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
-      - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
-
   database:
     build:
       context: .
@@ -18,12 +10,17 @@ services:
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
 
-  redis:
-    image: redis:latest
-    ports:
-      - "31409:31409"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 15s
-      timeout: 15s
-      retries: 3
+  telegrambot:
+    build:
+      context: .
+      dockerfile: Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/Dockerfile
+    environment:
+      - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
+      - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
+
+  groupschedule:
+    build:
+      context: .
+      dockerfile: Lor.GroupScheduleApp/Presentation/GroupScheduleApp.Api/Dockerfile
+    environment:
+      - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}

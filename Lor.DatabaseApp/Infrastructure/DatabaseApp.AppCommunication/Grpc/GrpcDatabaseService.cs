@@ -15,7 +15,12 @@ public class GrpcDatabaseService : Database.DatabaseBase
     public override Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
     {
         GetAvailableGroupsReply reply = new();
-        reply.IdGroupsMap.Add(0, "АВТ-218");
+
+        for (var i = 0; i < GrpcDatabaseUpdaterService.AvailableGroups.Count; i++)
+        {
+            reply.IdGroupsMap.Add(i, GrpcDatabaseUpdaterService.AvailableGroups[i]);
+        }
+
         return Task.FromResult(reply);
     }
 

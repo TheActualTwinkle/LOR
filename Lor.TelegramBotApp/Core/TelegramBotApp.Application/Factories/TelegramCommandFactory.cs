@@ -21,8 +21,6 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
     }
 
     #endregion
-
-    public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
     
     private static readonly ImportInfo s_info = new();
     
@@ -53,7 +51,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
             return new ExecutionResult(Result.Fail("Команда не найдена\nДля получения списка команд введите /help"));
         }
 
-        return await command.Execute(chatId, this, GetArguments(commandString), settings.Token);
+        return await command.Execute(chatId, databaseCommunicator, GetArguments(commandString), settings.Token);
     }
     
     public static IEnumerable<string> GetAllCommandsInfo()
