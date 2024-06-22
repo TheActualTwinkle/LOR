@@ -12,9 +12,6 @@ public class DefaultAppPipeline : IAppPipeline
             using IHost host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration(config =>
                     config.AddJsonFile("appsettings.json", false, true).AddEnvironmentVariables())
-                
-                // .ConfigureServices((builder, services) => services
-                //     .AddCommunicationService())
                 .Build();
             
             // DB где-то тут.
@@ -26,6 +23,7 @@ public class DefaultAppPipeline : IAppPipeline
             WebApplication app = builder.Build();
 
             app.MapGrpcService<GrpcDatabaseService>();
+            app.MapGrpcService<GrpcDatabaseUpdaterService>();
             app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
             await app.RunAsync();

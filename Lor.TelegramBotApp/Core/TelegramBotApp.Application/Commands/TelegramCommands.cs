@@ -18,7 +18,7 @@ public class StartTelegramCommand : ITelegramCommand
     public string Command => "/start";
     public string Description => "- выводит приветственное сообщение";
     
-    public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         const string message = "Привет! Данный бот служит для записи на лабораторные работы. Для получения справки введите /help";
         return Task.FromResult(new ExecutionResult(Result.Ok(message)));
@@ -33,7 +33,7 @@ public class HelpTelegramCommand : ITelegramCommand
     public string Command => "/help";
     public string Description => "- выводит это сообщение справки";
     
-    public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         StringBuilder message = new();
 
@@ -54,9 +54,8 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => "/groups";
     public string Description => "- выводит поддерживаемые группы";
     
-    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
-        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableGroups();
         
         if (result.IsFailed)
@@ -82,26 +81,23 @@ public class SetGroupTelegramCommand : ITelegramCommand
     public string Command => "/setgroup";
     public string Description => "- устанавливает группу";
     
-    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         if (arguments.Count == 0)
         {
-            IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(telegramCommandFactory);
+            IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(databaseCommunicator);
             return new ExecutionResult(Result.Fail("Выберете свою группу"), replyMarkup);
         }
         
         string groupName = arguments.First();
         
-        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
-
         Result<string> result = await databaseCommunicator.TrySetGroup(chatId, groupName);
 
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok($"Группа {groupName} установлена"));
     }
     
-    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(TelegramCommandFactory telegramCommandFactory)
+    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IDatabaseCommunicationClient databaseCommunicator)
     {
-        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableGroups();
         
         if (result.IsFailed)
@@ -128,9 +124,8 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
     public string Command => "/labs";
     public string Description => "- выводит доступные лабораторные работы для выбранной группы";
     
-    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
-        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(chatId);
         
         if (result.IsFailed)
@@ -156,16 +151,16 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     public string Command => "/hop";
     public string Description => "- записывает на лабораторную работу";
     
-    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory telegramCommandFactory, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IReadOnlyCollection<string> arguments, CancellationToken cancellationToken)
     {
         if (arguments.Count == 0)
         {
-            if (telegramCommandFactory.DatabaseCommunicator.IsUserInGroup(chatId).Result.IsFailed)
+            if (databaseCommunicator.IsUserInGroup(chatId).Result.IsFailed)
             {
                 return new ExecutionResult(Result.Fail("Вы не состоите ни в одной группе. Установите группу командой /setgroup"));
             }
 
-            IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(telegramCommandFactory, chatId);
+            IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(databaseCommunicator, chatId);
             return new ExecutionResult(Result.Fail("Выберите пару"), replyMarkup);
         }
         
@@ -174,7 +169,6 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Fail("Номер пары должен быть числом"));
         }
         
-        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<IEnumerable<string>> result = await databaseCommunicator.EnqueueInClass(classId, chatId);
         
         if (result.IsFailed)
@@ -191,9 +185,8 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         return new ExecutionResult(Result.Ok(message.ToString()));
     }
     
-    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(TelegramCommandFactory telegramCommandFactory, long userId)
+    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IDatabaseCommunicationClient databaseCommunicator, long userId)
     {
-        IDatabaseCommunicationClient databaseCommunicator = telegramCommandFactory.DatabaseCommunicator;
         Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(userId);
         
         if (result.IsFailed)

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection; 
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot.Types;
 using TelegramBotApp.Api.AppPipeline.Interfaces;
@@ -41,13 +41,7 @@ public class DefaultAppPipeline : IAppPipeline
             User me = await botClient.GetMeAsync();
             Console.WriteLine($"Start listening for @{me.Username}");
 
-            // strange loop for simulation ReadLine
-            while (cancellationToken.IsCancellationRequested == false)
-            {
-                await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken.Token);
-            }
-
-            await cancellationToken.CancelAsync();
+            await Task.Delay(Timeout.Infinite, cancellationToken.Token);
         }
         catch (Exception e)
         {

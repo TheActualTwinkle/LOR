@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>GroupScheduleApp.DatabaseUpdater</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\GroupScheduleApp.ScheduleProviding\GroupScheduleApp.ScheduleProviding.csproj" />
+    </ItemGroup>
+
+</Project>
