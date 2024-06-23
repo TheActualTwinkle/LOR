@@ -38,12 +38,13 @@ message GetAvailableLabClassesReply {
 
 message TrySetGroupRequest {
   int64 userId = 1;
-  string groupName = 2;
+  int32 groupId = 2;
 }
 
 message TrySetGroupReply {
   bool isFailed = 1;
   string errorMessage = 2;
+  string groupName = 3;
 }
 
 message TryEnqueueInClassRequest {

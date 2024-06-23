@@ -42,11 +42,11 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return Result.Ok(classes);
     }
 
-    public async Task<Result<string>> TrySetGroup(long userId, string groupName)
+    public async Task<Result<string>> TrySetGroup(long userId, int groupId)
     {
-        TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupName = groupName });
+        TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupId = groupId });
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok("Успешно установлена группа");
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"Группа {reply.GroupName} успешно установлена!");
     }
 
     public async Task<Result<IEnumerable<string>>> EnqueueInClass(int cassId, long userId)

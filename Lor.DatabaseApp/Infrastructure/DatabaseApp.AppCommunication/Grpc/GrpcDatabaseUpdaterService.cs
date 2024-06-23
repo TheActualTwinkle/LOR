@@ -5,7 +5,7 @@ namespace DatabaseApp.AppCommunication.Grpc;
 
 public class GrpcDatabaseUpdaterService : DatabaseUpdater.DatabaseUpdaterBase
 {
-    public static List<string> AvailableGroups = [];
+    public static List<string> AvailableGroups = ["АВТ-218"];
     
     public override Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {

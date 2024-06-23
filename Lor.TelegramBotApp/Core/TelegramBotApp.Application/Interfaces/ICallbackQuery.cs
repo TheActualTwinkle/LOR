@@ -3,12 +3,12 @@ using TelegramBotApp.Application.Commands;
 
 namespace TelegramBotApp.Application.Interfaces;
 
-public interface ITelegramCommand
+public interface ICallbackQuery
 {
-    string Command { get; }
-    string Description { get; }
-
+    string Query { get; }
+    
     Task<ExecutionResult> Execute(long chatId,
         IDatabaseCommunicationClient databaseCommunicator,
+        IEnumerable<string> arguments,
         CancellationToken cancellationToken);
 }

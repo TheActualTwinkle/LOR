@@ -51,7 +51,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
             return new ExecutionResult(Result.Fail("Команда не найдена\nДля получения списка команд введите /help"));
         }
 
-        return await command.Execute(chatId, databaseCommunicator, GetArguments(commandString), settings.Token);
+        return await command.Execute(chatId, databaseCommunicator, settings.Token);
     }
     
     public static IEnumerable<string> GetAllCommandsInfo()
@@ -62,10 +62,5 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
     private ITelegramCommand? GetCommand(string command)
     {
         return s_info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
-    }
-    
-    private string[] GetArguments(string commandString)
-    {
-        return commandString.Split(' ').Skip(1).ToArray();
     }
 }

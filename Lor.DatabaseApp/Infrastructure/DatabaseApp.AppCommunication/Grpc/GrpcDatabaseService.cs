@@ -39,13 +39,13 @@ public class GrpcDatabaseService : Database.DatabaseBase
 
     public override Task<TrySetGroupReply> TrySetGroup(TrySetGroupRequest request, ServerCallContext context)
     {
-        if (request.GroupName == "АВТ-218")
+        if (request.GroupId is 0 or 1)
         {
             _isUserInGroup = true;
-            return Task.FromResult(new TrySetGroupReply());
+            return Task.FromResult(new TrySetGroupReply() { GroupName = request.GroupId == 0 ? "АВТ-218" : "АВТ-214"});
         }
         
-        TrySetGroupReply reply = new() { IsFailed = true, ErrorMessage = "Группа не найдена или не поддерживается" };
+        TrySetGroupReply reply = new() { IsFailed = true, ErrorMessage = "Группа не найдена или не поддерживается"};
         
         return Task.FromResult(reply);
     }

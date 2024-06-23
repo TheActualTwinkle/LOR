@@ -15,10 +15,12 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
 {
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
+    private TelegramCommandQueryFactory _telegramCommandQueryFactory = null!;
 
     public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
     {
         _telegramCommandFactory = new TelegramCommandFactory(_settings, databaseCommunicator);
+        _telegramCommandQueryFactory = new TelegramCommandQueryFactory(_settings, databaseCommunicator);
 
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
@@ -31,8 +33,8 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         {
             Task.Run(async () =>
             {
-                await HandleCallbackQuery(bot, update.CallbackQuery);
-                return Task.CompletedTask;
+                using CancellationTokenSource cts = new(_settings.Timeout);
+                await HandleCallbackQuery(bot, update.CallbackQuery, cts.Token);
             }, cancellationToken);
         }
         
@@ -88,22 +90,29 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
 
         return Task.CompletedTask;
     }
-    
-    private async Task HandleCallbackQuery(ITelegramBotClient bot, CallbackQuery callbackQuery)
+
+    private async Task HandleCallbackQuery(ITelegramBotClient bot, CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
-        if (callbackQuery.Data?.First() != '/') return;
-        
-        if (callbackQuery.Message is null) return;
-        
-        await HandleUpdateAsync(bot, new Update
+        try
         {
-            Message = new Message
+            ExecutionResult result = await _telegramCommandQueryFactory.Handle(callbackQuery);
+
+            long chatId = callbackQuery.Message!.Chat.Id;
+            
+            if (result.Result.IsFailed)
             {
-                Text = callbackQuery.Data,
-                Chat = callbackQuery.Message.Chat
-            },
-        }, CancellationToken.None);
+                await SendErrorMessage(bot, chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
+            }
+            else
+            {
+                await bot.SendTextMessageAsync(chatId, result.Result.Value, replyMarkup: result.ReplyMarkup, cancellationToken: cancellationToken);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error: {e.Message}");
+        }
         
-        await bot.AnswerCallbackQueryAsync(callbackQuery.Id);
+        await bot.AnswerCallbackQueryAsync(callbackQuery.Id, cancellationToken: cancellationToken);
     }
 }
