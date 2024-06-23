@@ -1,20 +1,21 @@
 ﻿using GroupScheduleApp.ScheduleProviding.Interfaces;
 using GroupScheduleApp.Shared;
 using GroupScheduleApp.AppCommunication.Interfaces;
+using GroupScheduleApp.ScheduleUpdating.Settings;
 
 namespace GroupScheduleApp.ScheduleUpdating;
 
-public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient) : IScheduleSenderService
+public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient, ScheduleSendServiceSettings settings) : IScheduleSendService
 {
-    public async Task Run()
+    public Task Start()
     {
-        // TODO: Сделать нормальный цикл отправления данных
-        while (true)
+        // ReSharper disable once AsyncVoidLambda
+        new Timer(async _ =>
         {
             await SendAllDataAsync();
-            await Task.Delay(TimeSpan.FromDays(1));   
-        }
-        // ReSharper disable once FunctionNeverReturns
+        }, null, TimeSpan.Zero, settings.SendInterval);
+
+        return Task.CompletedTask;
     }
 
     private async Task SendAllDataAsync()

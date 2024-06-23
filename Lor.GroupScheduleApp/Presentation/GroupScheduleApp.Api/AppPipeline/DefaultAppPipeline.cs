@@ -27,13 +27,16 @@ public class DefaultAppPipeline : IAppPipeline
             .Build();
 
         IDatabaseUpdaterCommunicationClient communicationClient = host.Services.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
-        IScheduleSenderService senderService = host.Services.GetRequiredService<IScheduleSenderService>();
+        IScheduleSendService sendService = host.Services.GetRequiredService<IScheduleSendService>();
         
         await InitializeAppCommunicators([
             communicationClient
         ]);
         
-        await senderService.Run();
+        await sendService.Start();
+        
+        CancellationTokenSource cancellationToken = new();
+        await Task.Delay(Timeout.Infinite, cancellationToken.Token);
     }
     
     private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)

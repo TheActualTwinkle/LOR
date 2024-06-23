@@ -8,7 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Grpc.AspNetCore" Version="2.61.0"/>
+        <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.61.0" />
+        <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.63.0" />
     </ItemGroup>
 
     <ItemGroup>
