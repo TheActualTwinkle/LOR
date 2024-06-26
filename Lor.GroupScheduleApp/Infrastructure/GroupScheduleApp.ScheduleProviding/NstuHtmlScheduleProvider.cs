@@ -33,9 +33,9 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
         ChromeOptions options = new();
         options.AddArgument("--headless");
         options.AddArgument("start-maximized"); // open Browser in maximized mode
-        options.AddArgument("disable-infobars"); // disabling infobars
+        options.AddArgument("disable-infobars"); // disabling info bars
         options.AddArgument("--disable-extensions"); // disabling extensions
-        options.AddArgument("--disable-gpu"); // applicable to windows os only
+        options.AddArgument("--disable-gpu"); // applicable to Windows os only
         options.AddArgument("--disable-dev-shm-usage"); // overcome limited resource problems
         options.AddArgument("--no-sandbox"); // Bypass OS security model
         options.AddArgument("--log-level=3");
@@ -116,13 +116,15 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private string GetGroupName()
     {
-        return _chromeDriver.FindElement(By.ClassName(Constants.GroupName)).Text;
+        return _chromeDriver.FindElement(By.ClassName(Constants.GroupName)).Text.Split(' ').Last();
     }
     
     private int? GetWeekNumber(string text)
     {
+        text = "14 неделя";
+        
         const string pattern = @"\d+";
-        Match match = Regex.Match("14 неделя", pattern);
+        Match match = Regex.Match(text, pattern);
         
         return match.Success ? int.Parse(match.Value) : null;
     }

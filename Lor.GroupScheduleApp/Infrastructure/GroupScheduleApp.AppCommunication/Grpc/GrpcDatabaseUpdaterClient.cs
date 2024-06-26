@@ -10,12 +10,14 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
 {
     private DatabaseUpdater.DatabaseUpdaterClient? _client;
     
-    public Task Start()
+    public async Task Start()
     {
+        Console.WriteLine("Connecting to the Database...");
         GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
+        await channel.ConnectAsync();
+        Console.WriteLine("Successfully connected to the Database.");
+        
         _client = new DatabaseUpdater.DatabaseUpdaterClient(channel);
-            
-        return Task.CompletedTask;
     }
 
     public async Task SetAvailableGroups(IEnumerable<string> availableGroupNames)

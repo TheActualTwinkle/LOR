@@ -5,6 +5,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
+using TelegramBotApp.Authorization;
 
 // ReSharper disable UnusedType.Global
 
@@ -18,7 +19,7 @@ public class StartTelegramCommand : ITelegramCommand
     public string Command => "/start";
     public string Description => "- выводит приветственное сообщение";
     
-    public Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         const string message = "Привет! Данный бот служит для записи на лабораторные работы. Для получения справки введите /help";
         return Task.FromResult(new ExecutionResult(Result.Ok(message)));
@@ -33,7 +34,7 @@ public class HelpTelegramCommand : ITelegramCommand
     public string Command => "/help";
     public string Description => "- выводит это сообщение справки";
     
-    public Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         StringBuilder message = new();
 
@@ -54,9 +55,9 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => "/groups";
     public string Description => "- выводит поддерживаемые группы";
     
-    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableGroups();
+        Result<Dictionary<int,string>> result = await factory.DatabaseCommunicator.GetAvailableGroups();
         
         if (result.IsFailed)
         {
@@ -74,36 +75,32 @@ public class GroupsTelegramCommand : ITelegramCommand
 }
 
 [Export(typeof(ITelegramCommand))]
-[ExportMetadata(nameof(Command), "/setgroup")]
-[ExportMetadata(nameof(Description), "- устанавливает группу")]
+[ExportMetadata(nameof(Command), "/auth")]
+[ExportMetadata(nameof(Description), "<ФИО> - авторизует пользователя")]
 public class SetGroupTelegramCommand : ITelegramCommand
 {
-    public string Command => "/setgroup";
-    public string Description => "- устанавливает группу";
+    public string Command => "/auth";
+    public string Description => "<ФИО> - авторизует пользователя";
     
-    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(databaseCommunicator);
-        return new ExecutionResult(Result.Fail("Выберете свою группу"), replyMarkup);
-    }
-    
-    private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IDatabaseCommunicationClient databaseCommunicator)
-    {
-        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableGroups();
-        
-        if (result.IsFailed)
+        IEnumerable<string> argumentsList = arguments.ToList();
+        if (argumentsList.Count() != 3)
         {
-            return new ReplyKeyboardRemove();
+            return new ExecutionResult(Result.Fail("Неверное количество аргументов!\nПример использования: /auth Высоцкий Владимир Семёнович"));
         }
         
-        List<InlineKeyboardButton[]> buttons = [];
-        foreach (KeyValuePair<int,string> idGroupPair in result.Value)
+        string fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
+        Result<AuthorizationReply> authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
+        
+        if (authorizeResult.IsFailed)
         {
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData(idGroupPair.Value, $"!setgroup {idGroupPair.Key}");
-            buttons.Add([button]);
+            return new ExecutionResult(Result.Fail(authorizeResult.Errors.First()));
         }
 
-        return new InlineKeyboardMarkup(buttons);
+        Result<string> setGroupResult = await factory.DatabaseCommunicator.TrySetGroup(chatId, authorizeResult.Value.Group);
+
+        return setGroupResult.IsFailed ? new ExecutionResult(Result.Fail(setGroupResult.Errors.First())) : new ExecutionResult(Result.Ok(setGroupResult.Value));
     }
 }
 
@@ -115,9 +112,9 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
     public string Command => "/labs";
     public string Description => "- выводит доступные лабораторные работы для выбранной группы";
     
-    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(chatId);
+        Result<Dictionary<int,string>> result = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId);
         
         if (result.IsFailed)
         {
@@ -142,11 +139,12 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     public string Command => "/hop";
     public string Description => "- записывает на лабораторную работу";
     
-    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
+        IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
         if (databaseCommunicator.IsUserInGroup(chatId).Result.IsFailed)
         {
-            return new ExecutionResult(Result.Fail("Вы не состоите ни в одной группе. Установите группу командой /setgroup"));
+            return new ExecutionResult(Result.Fail("Вы не авторизованы. Для авторизации введите /auth <ФИО>"));
         }
 
         IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(databaseCommunicator, chatId);

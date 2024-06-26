@@ -6,10 +6,11 @@ using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
+using TelegramBotApp.Authorization.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseCommunicationClient databaseCommunicator)
+public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService)
 {
     #region ImportsInfo
 
@@ -21,6 +22,9 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
     }
 
     #endregion
+
+    public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
+    public IAuthorizationService AuthorizationService => authorizationService;
     
     private static readonly ImportInfo s_info = new();
     
@@ -34,7 +38,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
         }
         catch (Exception)
         {
-            Console.WriteLine("Failed to load AddressablesLoaderFactory");
+            Console.WriteLine("Failed to load TelegramCommandFactory");
             throw;
         }
         
@@ -51,7 +55,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
             return new ExecutionResult(Result.Fail("Команда не найдена\nДля получения списка команд введите /help"));
         }
 
-        return await command.Execute(chatId, databaseCommunicator, settings.Token);
+        return await command.Execute(chatId, this, GetArguments(commandString), settings.Token);
     }
     
     public static IEnumerable<string> GetAllCommandsInfo()
@@ -62,5 +66,10 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
     private ITelegramCommand? GetCommand(string command)
     {
         return s_info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
+    }
+    
+    private string[] GetArguments(string commandString)
+    {
+        return commandString.Split(' ').Skip(1).ToArray();
     }
 }

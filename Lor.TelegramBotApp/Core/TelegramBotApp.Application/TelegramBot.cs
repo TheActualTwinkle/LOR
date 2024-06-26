@@ -8,6 +8,7 @@ using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Application.Settings;
+using TelegramBotApp.Authorization.Interfaces;
 
 namespace TelegramBotApp.Application;
 
@@ -17,9 +18,9 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
     private TelegramCommandFactory _telegramCommandFactory = null!;
     private TelegramCommandQueryFactory _telegramCommandQueryFactory = null!;
 
-    public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, CancellationToken cancellationToken)
+    public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService, CancellationToken cancellationToken)
     {
-        _telegramCommandFactory = new TelegramCommandFactory(_settings, databaseCommunicator);
+        _telegramCommandFactory = new TelegramCommandFactory(_settings, databaseCommunicator, authorizationService);
         _telegramCommandQueryFactory = new TelegramCommandQueryFactory(_settings, databaseCommunicator);
 
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);

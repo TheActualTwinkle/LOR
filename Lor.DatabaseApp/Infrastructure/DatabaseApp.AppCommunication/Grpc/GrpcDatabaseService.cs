@@ -28,7 +28,7 @@ public class GrpcDatabaseService : Database.DatabaseBase
     {
         if (_isUserInGroup == false)
         {
-            return Task.FromResult(new GetAvailableLabClassesReply { IsFailed = true, ErrorMessage = "Вы не состоите ни в одной группе. Установите группу командой /setgroup" });
+            return Task.FromResult(new GetAvailableLabClassesReply { IsFailed = true, ErrorMessage = "Вы не авторизованы. Для авторизации введите /auth <ФИО>" });
         }
         
         GetAvailableLabClassesReply reply = new();
@@ -39,10 +39,10 @@ public class GrpcDatabaseService : Database.DatabaseBase
 
     public override Task<TrySetGroupReply> TrySetGroup(TrySetGroupRequest request, ServerCallContext context)
     {
-        if (request.GroupId is 0 or 1)
+        if (request.GroupString is "АВТ-218" or "АВТ-214")
         {
             _isUserInGroup = true;
-            return Task.FromResult(new TrySetGroupReply() { GroupName = request.GroupId == 0 ? "АВТ-218" : "АВТ-214"});
+            return Task.FromResult(new TrySetGroupReply { GroupName = request.GroupString });
         }
         
         TrySetGroupReply reply = new() { IsFailed = true, ErrorMessage = "Группа не найдена или не поддерживается"};
@@ -55,9 +55,9 @@ public class GrpcDatabaseService : Database.DatabaseBase
         // TODO: Узнавать есть ли группа из request.UserId в базе данных
         if (_isUserInGroup == false)
         {
-            return Task.FromResult(new TryEnqueueInClassReply { IsFailed = true, ErrorMessage = "Вы не состоите ни в одной группе. Установите группу командой /setgroup" });
+            return Task.FromResult(new TryEnqueueInClassReply { IsFailed = true, ErrorMessage = "Вы не авторизованы. Для авторизации введите /auth <ФИО>" });
         }
         
-        return Task.FromResult(new TryEnqueueInClassReply() { StudentsQueue = { "Кто-то", "Кто то", "Вы!" }});
+        return Task.FromResult(new TryEnqueueInClassReply { StudentsQueue = { "Кто-то", "Кто то", "Вы!" }});
     }
 }
