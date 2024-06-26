@@ -38,7 +38,7 @@ message GetAvailableLabClassesReply {
 
 message TrySetGroupRequest {
   int64 userId = 1;
-  int32 groupId = 2;
+  string groupString = 2;
 }
 
 message TrySetGroupReply {

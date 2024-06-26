@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroupScheduleApp.Shared", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroupScheduleApp.AppCommunication", "Lor.GroupScheduleApp\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj", "{57B0EAC5-D2FB-4E8A-AFAA-5A84E71ECB67}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBotApp.Authorization", "Lor.TelegramBotApp\Infrastructure\TelegramBotApp.Authorization\TelegramBotApp.Authorization.csproj", "{ABBB1936-ECB6-40BB-A907-607EAF6FC606}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,7 @@ Global
 		{E386354E-8571-48C6-9B9B-87948334F78F} = {7DC6CCB9-7F04-4C84-B7B8-5B7E252862DA}
 		{630AD3D1-B1D0-4BDF-845F-C00D19BED492} = {7DC6CCB9-7F04-4C84-B7B8-5B7E252862DA}
 		{57B0EAC5-D2FB-4E8A-AFAA-5A84E71ECB67} = {80A8D05F-CE35-4401-92D4-9944A639DB66}
+		{ABBB1936-ECB6-40BB-A907-607EAF6FC606} = {268D70AF-65B1-48A5-B197-5E645D6BF7DC}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C3D4568A-A822-4003-BD64-A01BC16F69F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -111,5 +114,9 @@ Global
 		{57B0EAC5-D2FB-4E8A-AFAA-5A84E71ECB67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57B0EAC5-D2FB-4E8A-AFAA-5A84E71ECB67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57B0EAC5-D2FB-4E8A-AFAA-5A84E71ECB67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABBB1936-ECB6-40BB-A907-607EAF6FC606}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABBB1936-ECB6-40BB-A907-607EAF6FC606}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABBB1936-ECB6-40BB-A907-607EAF6FC606}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABBB1936-ECB6-40BB-A907-607EAF6FC606}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,6 @@
 ﻿using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
+using TelegramBotApp.Application.Factories;
 
 namespace TelegramBotApp.Application.Interfaces;
 
@@ -9,6 +10,7 @@ public interface ITelegramCommand
     string Description { get; }
 
     Task<ExecutionResult> Execute(long chatId,
-        IDatabaseCommunicationClient databaseCommunicator,
+        TelegramCommandFactory factory,
+        IEnumerable<string> arguments,
         CancellationToken cancellationToken);
 }

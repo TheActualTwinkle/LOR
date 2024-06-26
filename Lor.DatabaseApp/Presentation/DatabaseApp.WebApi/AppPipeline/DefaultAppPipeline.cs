@@ -1,6 +1,5 @@
 ﻿using DatabaseApp.AppCommunication.Grpc;
 using DatabaseApp.WebApi.AppPipeline.Interfaces;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace DatabaseApp.WebApi.AppPipeline;
 

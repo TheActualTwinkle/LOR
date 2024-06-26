@@ -10,30 +10,6 @@ using TelegramBotApp.Application.Interfaces;
 namespace TelegramBotApp.Application.CallbackQueries;
 
 [Export(typeof(ICallbackQuery))]
-[ExportMetadata(nameof(Query), "!setgroup")]
-public class SetGroupCallbackQuery : ICallbackQuery
-{
-    public string Query => "!setgroup";
-    
-    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IEnumerable<string> arguments,  CancellationToken cancellationToken)
-    {
-        List<string> argumentsList = arguments.ToList();
-        if (argumentsList.Count != 1)
-        {
-            throw new ArgumentException("SetGroupCallbackQuery: Неверное количество аргументов");
-        }
-        
-        if (int.TryParse(argumentsList.First(), out int groupId) == false)
-        {
-            throw new ArgumentException($"SetGroupCallbackQuery: Неверный формат аргумента (должен быть {groupId.GetType})");
-        }
-        
-        Result<string> result = await databaseCommunicator.TrySetGroup(chatId, groupId);
-        return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(result);
-    }
-}
-
-[Export(typeof(ICallbackQuery))]
 [ExportMetadata(nameof(Query), "!hop")]
 public class EnqueueCallbackQuery : ICallbackQuery
 {
