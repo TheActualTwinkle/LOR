@@ -16,6 +16,7 @@
       <ProjectReference Include="..\..\Core\TelegramBotApp.Application\TelegramBotApp.Application.csproj" />
       <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
       <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.Authorization\TelegramBotApp.Authorization.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.Caching\TelegramBotApp.Caching.csproj" />
     </ItemGroup>
 
     <ItemGroup>

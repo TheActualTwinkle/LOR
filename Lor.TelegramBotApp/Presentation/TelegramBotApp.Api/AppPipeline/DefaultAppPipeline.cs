@@ -9,6 +9,7 @@ using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Authorization;
 using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Caching;
 
 namespace TelegramBotApp.Api.AppPipeline;
 
@@ -24,11 +25,11 @@ public class DefaultAppPipeline : IAppPipeline
                 .ConfigureAppConfiguration(config => 
                     config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true).AddEnvironmentVariables())
                 
-                
                 .ConfigureServices((builder, services) => services
                     .AddApplication(builder.Configuration)
                     .AddCommunicators(builder.Configuration)
-                    .AddAuthorization())
+                    .AddAuthorization()
+                    .AddCaching(builder.Configuration))
                 .Build();
             
             ITelegramBot botClient = host.Services.GetRequiredService<ITelegramBot>();
