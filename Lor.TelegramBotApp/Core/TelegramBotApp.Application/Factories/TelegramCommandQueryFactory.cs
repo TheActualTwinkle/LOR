@@ -7,10 +7,11 @@ using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
+using TelegramBotApp.Caching.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public class TelegramCommandQueryFactory(ITelegramBotSettings settings, IDatabaseCommunicationClient databaseCommunicator)
+public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCommunicator)
 {
     #region ImportsInfo
 
@@ -22,6 +23,8 @@ public class TelegramCommandQueryFactory(ITelegramBotSettings settings, IDatabas
     }
 
     #endregion
+
+    public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
     
     private static readonly ImportInfo s_info = new();
     
@@ -43,7 +46,7 @@ public class TelegramCommandQueryFactory(ITelegramBotSettings settings, IDatabas
         container.SatisfyImports(s_info);   
     }
     
-    public async Task<ExecutionResult> Handle(CallbackQuery callbackQuery)
+    public async Task<ExecutionResult> Handle(CallbackQuery callbackQuery, CancellationToken cancellationToken = default)
     {
         if (callbackQuery.Data?.First() != '!') throw new ArgumentException("CallbackQuery: Неверный формат запроса");
         
@@ -59,7 +62,7 @@ public class TelegramCommandQueryFactory(ITelegramBotSettings settings, IDatabas
             throw new ArgumentException($"CallbackQuery: {queryString} - не найден");
         }
 
-        return await query.Execute(chatId, databaseCommunicator, GetArguments(queryString), settings.Token);
+        return await query.Execute(chatId, this, GetArguments(queryString), cancellationToken);
     }
     
     private ICallbackQuery? GetQuery(string queryString)

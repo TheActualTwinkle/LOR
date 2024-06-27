@@ -9,6 +9,7 @@ using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Application.Settings;
 using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Caching.Interfaces;
 
 namespace TelegramBotApp.Application;
 
@@ -18,10 +19,10 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
     private TelegramCommandFactory _telegramCommandFactory = null!;
     private TelegramCommandQueryFactory _telegramCommandQueryFactory = null!;
 
-    public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService, CancellationToken cancellationToken)
+    public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService, ICacheService cacheService, CancellationToken cancellationToken)
     {
-        _telegramCommandFactory = new TelegramCommandFactory(_settings, databaseCommunicator, authorizationService);
-        _telegramCommandQueryFactory = new TelegramCommandQueryFactory(_settings, databaseCommunicator);
+        _telegramCommandFactory = new TelegramCommandFactory(databaseCommunicator, authorizationService, cacheService);
+        _telegramCommandQueryFactory = new TelegramCommandQueryFactory(databaseCommunicator);
 
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
@@ -50,7 +51,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
             
             try
             {
-                ExecutionResult executionResult = await _telegramCommandFactory.StartCommand(userMessageText, chatId);
+                ExecutionResult executionResult = await _telegramCommandFactory.StartCommand(userMessageText, chatId, cts.Token);
 
                 if (executionResult.Result.IsFailed)
                 {
@@ -64,9 +65,9 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
             {
                 await SendErrorMessage(bot, chatId, new Exception("Время запроса истекло"), new ReplyKeyboardRemove(), cts.Token);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                await SendErrorMessage(bot, chatId, new Exception("Внутрення ошибка"), new ReplyKeyboardRemove(), cts.Token);
+                await SendErrorMessage(bot, chatId, new Exception($"Внутрення ошибка. {e}"), new ReplyKeyboardRemove(), cts.Token);
             }
         }, cancellationToken);
         
@@ -96,7 +97,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
     {
         try
         {
-            ExecutionResult result = await _telegramCommandQueryFactory.Handle(callbackQuery);
+            ExecutionResult result = await _telegramCommandQueryFactory.Handle(callbackQuery, cancellationToken);
 
             long chatId = callbackQuery.Message!.Chat.Id;
             

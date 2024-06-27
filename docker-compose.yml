@@ -6,7 +6,6 @@ services:
     ports:
       - "31401:31401"
     environment:
-      - ConnectionStrings:Redis=redis:31409
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
 
@@ -17,6 +16,10 @@ services:
     environment:
       - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
       - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
+      - ConnectionStrings:Redis=redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
 
   groupschedule:
     build:
@@ -28,7 +31,7 @@ services:
   redis:
     image: redis:latest
     ports:
-      - "31409:31409"
+      - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 15s

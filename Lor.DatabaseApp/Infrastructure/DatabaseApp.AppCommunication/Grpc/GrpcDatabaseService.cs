@@ -5,11 +5,17 @@ namespace DatabaseApp.AppCommunication.Grpc;
 
 public class GrpcDatabaseService : Database.DatabaseBase
 {
-    private static bool _isUserInGroup;
+    private static string _userGroup = string.Empty;
 
-    public override Task<IsUserInGroupReply> IsUserInGroup(IsUserInGroupRequest request, ServerCallContext context)
+    public override Task<GetUserGroupReply> GetUserGroup(GetUserGroupRequest request, ServerCallContext context)
     {
-        return Task.FromResult(new IsUserInGroupReply { IsUserInGroup = _isUserInGroup });
+        GetUserGroupReply reply = new()
+        {
+            GroupName = _userGroup,
+            IsFailed = string.IsNullOrEmpty(_userGroup),
+            ErrorMessage = string.IsNullOrEmpty(_userGroup) ? "Вы не авторизованы. Для авторизации введите /auth <ФИО>" : string.Empty
+        };
+        return Task.FromResult(reply);
     }
 
     public override Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
@@ -26,7 +32,7 @@ public class GrpcDatabaseService : Database.DatabaseBase
 
     public override Task<GetAvailableLabClassesReply> GetAvailableLabClasses(GetAvailableLabClassesRequest request, ServerCallContext context)
     {
-        if (_isUserInGroup == false)
+        if (string.IsNullOrEmpty(_userGroup))
         {
             return Task.FromResult(new GetAvailableLabClassesReply { IsFailed = true, ErrorMessage = "Вы не авторизованы. Для авторизации введите /auth <ФИО>" });
         }
@@ -39,10 +45,10 @@ public class GrpcDatabaseService : Database.DatabaseBase
 
     public override Task<TrySetGroupReply> TrySetGroup(TrySetGroupRequest request, ServerCallContext context)
     {
-        if (request.GroupString is "АВТ-218" or "АВТ-214")
+        if (request.GroupName is "АВТ-218" or "АВТ-214")
         {
-            _isUserInGroup = true;
-            return Task.FromResult(new TrySetGroupReply { GroupName = request.GroupString });
+            _userGroup = request.GroupName;
+            return Task.FromResult(new TrySetGroupReply { GroupName = request.GroupName });
         }
         
         TrySetGroupReply reply = new() { IsFailed = true, ErrorMessage = "Группа не найдена или не поддерживается"};
@@ -53,7 +59,7 @@ public class GrpcDatabaseService : Database.DatabaseBase
     public override Task<TryEnqueueInClassReply> TryEnqueueInClass(TryEnqueueInClassRequest request, ServerCallContext context)
     {
         // TODO: Узнавать есть ли группа из request.UserId в базе данных
-        if (_isUserInGroup == false)
+        if (string.IsNullOrEmpty(_userGroup))
         {
             return Task.FromResult(new TryEnqueueInClassReply { IsFailed = true, ErrorMessage = "Вы не авторизованы. Для авторизации введите /auth <ФИО>" });
         }

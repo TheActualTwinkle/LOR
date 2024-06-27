@@ -10,7 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddStackExchangeRedisCache(options =>
-                options.Configuration = configuration.GetConnectionString("Redis"))
+                options.Configuration = configuration.GetConnectionString("Redis") ?? throw new NullReferenceException("Can`t find Redis connection string in configuration"))
             .AddSingleton<ICacheService, CacheService>();
 
         return services;

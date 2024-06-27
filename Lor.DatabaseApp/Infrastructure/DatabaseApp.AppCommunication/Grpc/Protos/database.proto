@@ -5,7 +5,7 @@ option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
 import "google/protobuf/empty.proto";
 
 service Database {  
-  rpc IsUserInGroup (IsUserInGroupRequest) returns (IsUserInGroupReply);
+  rpc GetUserGroup (GetUserGroupRequest) returns (GetUserGroupReply);
   
   rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
   rpc GetAvailableLabClasses (GetAvailableLabClassesRequest) returns (GetAvailableLabClassesReply);
@@ -14,12 +14,14 @@ service Database {
   rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
 }
 
-message IsUserInGroupRequest {
+message GetUserGroupRequest {
   int64 userId = 1;
 }
 
-message IsUserInGroupReply {
-  bool isUserInGroup = 1;
+message GetUserGroupReply {
+  string groupName = 1;
+  bool isFailed = 2;
+  string errorMessage = 3;
 }
 
 message GetAvailableGroupsReply {
@@ -38,13 +40,13 @@ message GetAvailableLabClassesReply {
 
 message TrySetGroupRequest {
   int64 userId = 1;
-  string groupString = 2;
+  string groupName = 2;
 }
 
 message TrySetGroupReply {
-  bool isFailed = 1;
-  string errorMessage = 2;
-  string groupName = 3;
+  string groupName = 1;
+  bool isFailed = 2;
+  string errorMessage = 3;
 }
 
 message TryEnqueueInClassRequest {

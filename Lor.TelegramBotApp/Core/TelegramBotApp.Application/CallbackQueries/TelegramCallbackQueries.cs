@@ -3,6 +3,7 @@ using System.Text;
 using FluentResults;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
+using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 
 // ReSharper disable UnusedType.Global
@@ -15,7 +16,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
 {
     public string Query => "!hop";
     
-    public async Task<ExecutionResult> Execute(long chatId, IDatabaseCommunicationClient databaseCommunicator, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {        
         List<string> argumentsList = arguments.ToList();
         if (argumentsList.Count != 1)
@@ -28,7 +29,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
             throw new ArgumentException($"EnqueueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
         }
         
-        Result<IEnumerable<string>> result = await databaseCommunicator.EnqueueInClass(classId, chatId);
+        Result<IEnumerable<string>> result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
         {

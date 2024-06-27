@@ -7,10 +7,11 @@ using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Caching.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService)
+public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService, ICacheService cacheService)
 {
     #region ImportsInfo
 
@@ -25,6 +26,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
 
     public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
     public IAuthorizationService AuthorizationService => authorizationService;
+    public ICacheService CacheService => cacheService;
     
     private static readonly ImportInfo s_info = new();
     
@@ -46,7 +48,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
         container.SatisfyImports(s_info);   
     }
     
-    public async Task<ExecutionResult> StartCommand(string commandString, long chatId)
+    public async Task<ExecutionResult> StartCommand(string commandString, long chatId, CancellationToken token)
     {
         ITelegramCommand? command = GetCommand(commandString.Split(' ').FirstOrDefault()!);
         
@@ -55,7 +57,7 @@ public class TelegramCommandFactory(ITelegramBotSettings settings, IDatabaseComm
             return new ExecutionResult(Result.Fail("Команда не найдена\nДля получения списка команд введите /help"));
         }
 
-        return await command.Execute(chatId, this, GetArguments(commandString), settings.Token);
+        return await command.Execute(chatId, this, GetArguments(commandString), token);
     }
     
     public static IEnumerable<string> GetAllCommandsInfo()
