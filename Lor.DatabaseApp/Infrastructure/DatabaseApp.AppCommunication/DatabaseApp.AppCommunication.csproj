@@ -7,13 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentResults" Version="3.15.2" />
-        <PackageReference Include="Grpc.AspNetCore" Version="2.61.0" />
+        <PackageReference Include="FluentResults" Version="3.15.2"/>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.61.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Grpc\Protos\database.proto" GrpcServices="Server" />
-        <Protobuf Include="Grpc\Protos\databaseUpdater.proto" GrpcServices="Server" />
+        <Protobuf Include="Grpc\Protos\database.proto" GrpcServices="Server"/>
+        <Protobuf Include="Grpc\Protos\databaseUpdater.proto" GrpcServices="Server"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\DatabaseApp.Application\DatabaseApp.Application.csproj"/>
     </ItemGroup>
 
 </Project>

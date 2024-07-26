@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\DatabaseApp.Persistence\DatabaseApp.Persistence.csproj" />
     </ItemGroup>
 
     <ItemGroup>
