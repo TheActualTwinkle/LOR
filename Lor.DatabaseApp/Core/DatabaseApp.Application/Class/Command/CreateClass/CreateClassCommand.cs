@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DatabaseApp.Application.Class.Command.CreateClass;
 
-public class CreateClassCommand : IRequest<Result>
+public struct CreateClassCommand : IRequest<Result>
 {
     public string GroupName { get; init; }
 

@@ -18,11 +18,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .ValueGeneratedNever()
             .HasColumnName("id");
         builder.Property(e => e.FullName)
-            .HasDefaultValueSql("0")
             .HasColumnType("character varying")
             .HasColumnName("full_name");
         builder.Property(e => e.TelegramId)
-            .HasDefaultValue(0L)
             .HasColumnName("telegram_id");
     }
 }

@@ -20,8 +20,7 @@ public class QueueConfiguration : IEntityTypeConfiguration<Queue>
         builder.Property(e => e.QueueNum)
             .HasColumnName("queue_num");
         builder.Property(e => e.TelegramId)
-            .HasDefaultValue(0L)
-            .HasColumnName("telegramm_id");
+            .HasColumnName("telegram_id");
 
         builder.HasOne(d => d.Class).WithMany(p => p.QueueClasses)
             .HasPrincipalKey(p => p.Id)

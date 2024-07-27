@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DatabaseApp.Application.User.Command.CreateUser;
 
-public class CreateUserCommand : IRequest<Result>
+public struct CreateUserCommand : IRequest<Result>
 {
     public long TelegramId { get; init; }
     

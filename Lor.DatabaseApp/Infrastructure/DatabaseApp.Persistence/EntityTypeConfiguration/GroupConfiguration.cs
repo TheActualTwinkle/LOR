@@ -13,7 +13,6 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
         builder.Property(e => e.Id)
             .UseIdentityAlwaysColumn()
             .HasColumnName("id");
-        // builder.Property(e => e.GroupId).HasColumnName("group_id");
         builder.Property(e => e.GroupName)
             .HasColumnType("character varying")
             .HasColumnName("group_name");
