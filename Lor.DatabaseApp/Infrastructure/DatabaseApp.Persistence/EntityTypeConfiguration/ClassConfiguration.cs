@@ -9,9 +9,7 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
     public void Configure(EntityTypeBuilder<Class> builder)
     {
         builder.HasKey(e => e.Id).HasName("Classes_pkey");
-
-        builder.HasIndex(e => e.GroupId, "Group_check").IsUnique();
-
+        
         builder.Property(e => e.Id)
             .UseIdentityAlwaysColumn()
             .HasColumnName("id");

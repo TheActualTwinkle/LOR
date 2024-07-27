@@ -1,6 +1,5 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.UnitOfWorkContext;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DatabaseApp.AppCommunication;

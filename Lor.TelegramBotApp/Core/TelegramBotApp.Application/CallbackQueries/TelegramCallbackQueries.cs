@@ -1,7 +1,6 @@
 ﻿using System.Composition;
 using System.Text;
 using FluentResults;
-using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;

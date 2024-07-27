@@ -10,9 +10,17 @@ public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUp
     public Task Start()
     {
         // ReSharper disable once AsyncVoidLambda
+        // ReSharper disable once ObjectCreationAsStatement
         new Timer(async _ =>
         {
-            await SendAllDataAsync();
+            try
+            {
+                await SendAllDataAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }, null, TimeSpan.Zero, settings.SendInterval);
 
         return Task.CompletedTask;

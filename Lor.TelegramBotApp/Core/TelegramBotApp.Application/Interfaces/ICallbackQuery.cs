@@ -1,5 +1,4 @@
-﻿using TelegramBotApp.AppCommunication.Interfaces;
-using TelegramBotApp.Application.Commands;
+﻿using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 
 namespace TelegramBotApp.Application.Interfaces;

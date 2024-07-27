@@ -23,6 +23,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("full_name");
         builder.Property(e => e.TelegramId)
             .HasDefaultValue(0L)
-            .HasColumnName("telegramm_id");
+            .HasColumnName("telegram_id");
     }
 }

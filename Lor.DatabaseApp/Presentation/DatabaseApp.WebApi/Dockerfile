@@ -1,11 +1,16 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
+EXPOSE 31400
 EXPOSE 31401
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/DatabaseApp.WebApi.csproj", "Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/"]
+COPY ["Lor.DatabaseApp/Core/DatabaseApp.Domain/DatabaseApp.Domain.csproj", "Lor.DatabaseApp/Core/DatabaseApp.Domain/"]
+COPY ["Lor.DatabaseApp/Core/DatabaseApp.Application/DatabaseApp.Application.csproj", "Lor.DatabaseApp/Core/DatabaseApp.Application/"]
+COPY ["Lor.DatabaseApp/Infrastructure/DatabaseApp.Persistence/DatabaseApp.Persistence.csproj", "Lor.DatabaseApp/Infrastructure/DatabaseApp.Persistence/"]
 COPY ["Lor.DatabaseApp/Infrastructure/DatabaseApp.AppCommunication/DatabaseApp.AppCommunication.csproj", "Lor.DatabaseApp/Infrastructure/DatabaseApp.AppCommunication/"]
 RUN dotnet restore "Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/DatabaseApp.WebApi.csproj"
 COPY . .

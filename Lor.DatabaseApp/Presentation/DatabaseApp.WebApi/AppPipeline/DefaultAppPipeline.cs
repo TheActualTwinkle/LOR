@@ -1,7 +1,9 @@
 ﻿using DatabaseApp.AppCommunication;
 using DatabaseApp.AppCommunication.Grpc;
 using DatabaseApp.Persistence;
+using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi.AppPipeline.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.WebApi.AppPipeline;
 
@@ -23,6 +25,17 @@ public class DefaultAppPipeline : IAppPipeline
         builder.Services.AddPersistence(builder.Configuration); // DI persistence
 
         WebApplication app = builder.Build();
+        
+        try
+        {
+            using IServiceScope scope = app.Services.CreateScope();
+            IDatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<IDatabaseContext>();
+            await databaseContext.Db.MigrateAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error: {e.Message}");
+        }
 
         app.MapGrpcService<GrpcDatabaseService>();
         app.MapGrpcService<GrpcDatabaseUpdaterService>();
