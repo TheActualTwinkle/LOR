@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test4 : Migration
+    public partial class Test7 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,8 +51,8 @@ namespace DatabaseApp.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
-                    full_name = table.Column<string>(type: "character varying", nullable: false),
-                    telegram_id = table.Column<long>(type: "bigint", nullable: false),
+                    full_name = table.Column<string>(type: "character varying", nullable: false, defaultValueSql: "0"),
+                    telegram_id = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
                     GroupId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -76,7 +76,7 @@ namespace DatabaseApp.Persistence.Migrations
                     queue_num = table.Column<long>(type: "bigint", nullable: false),
                     group_id = table.Column<int>(type: "integer", nullable: false),
                     class_id = table.Column<int>(type: "integer", nullable: false),
-                    telegram_id = table.Column<long>(type: "bigint", nullable: false)
+                    telegram_id = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L)
                 },
                 constraints: table =>
                 {

@@ -107,7 +107,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
 
             foreach (string className in classNames)
             {
-                classesData.Add(new ClassData(className, date));
+                classesData.Add(new ClassData(className, new DateTime(2024, 8, 3))); // TODO: Testing
             }
         }
 
@@ -121,7 +121,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        text = "14 неделя";
+        text = "14 неделя"; // TODO: Testing
         
         const string pattern = @"\d+";
         Match match = Regex.Match(text, pattern);
@@ -131,7 +131,6 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private DateTime Today()
     {
-        return new DateTime(2024, 5, 8);
-        // return DateTime.Now.Date; TODO: Testing
+        return DateTime.Now.Date;
     }
 }
