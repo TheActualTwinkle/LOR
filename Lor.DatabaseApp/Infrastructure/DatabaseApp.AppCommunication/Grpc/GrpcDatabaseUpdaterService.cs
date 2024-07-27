@@ -9,16 +9,14 @@ using Grpc.Core;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdater.DatabaseUpdaterBase
 {
-    private IUnitOfWork _unitOfWork;
-
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
         foreach (var groupName in request.GroupNames.ToList())
         {
             CreateGroupCommand createGroupCommand = new() { GroupName = groupName };
-            CreateGroupCommandHandler createGroupCommandHandler = new CreateGroupCommandHandler(_unitOfWork);
+            CreateGroupCommandHandler createGroupCommandHandler = new CreateGroupCommandHandler(unitOfWork);
 
             await createGroupCommandHandler.Handle(createGroupCommand,
                 new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -33,26 +31,26 @@ public class GrpcDatabaseUpdaterService : DatabaseUpdater.DatabaseUpdaterBase
         foreach (var className in request.ClassNames.ToList())
         {
             CreateClassCommand createClassCommand = new() { GroupName = request.GroupName, ClassName = className /*Date = request.*/ }; //TODO: добавить в реквест дату лабы
-            CreateClassCommandHandler createClassCommandHandler = new CreateClassCommandHandler(_unitOfWork);
+            CreateClassCommandHandler createClassCommandHandler = new CreateClassCommandHandler(unitOfWork);
 
             await createClassCommandHandler.Handle(createClassCommand,
                 new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         }
 
         List<Class>? classList =
-            await _unitOfWork.ClassRepository.GetOutdatedClasses(new CancellationTokenSource(TimeSpan.FromSeconds(10))
+            await unitOfWork.ClassRepository.GetOutdatedClasses(new CancellationTokenSource(TimeSpan.FromSeconds(10))
                 .Token);
         
         if (classList is null) return new Empty();
 
         DeleteClassCommand deleteClassCommand = new() { OutdatedClassList = classList };
-        DeleteClassCommandHandler deleteClassCommandHandler = new DeleteClassCommandHandler(_unitOfWork);
+        DeleteClassCommandHandler deleteClassCommandHandler = new DeleteClassCommandHandler(unitOfWork);
 
         await deleteClassCommandHandler.Handle(deleteClassCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
         DeleteQueueCommand deleteQueueCommand = new() { OutdatedClaasList = classList };
-        DeleteQueueCommandHandler deleteQueueCommandHandler = new DeleteQueueCommandHandler(_unitOfWork);
+        DeleteQueueCommandHandler deleteQueueCommandHandler = new DeleteQueueCommandHandler(unitOfWork);
 
         await deleteQueueCommandHandler.Handle(deleteQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);

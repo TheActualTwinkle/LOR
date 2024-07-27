@@ -16,39 +16,33 @@ using Grpc.Core;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseService : Database.DatabaseBase
+public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 {
-    private IUnitOfWork _unitOfWork;
-    private ClassDto _classDto;
-    private GroupDto _groupDto;
-    private QueueDto _queueDto;
-    private UserDto _userDto;
-
     public override async Task<GetUserGroupReply> GetUserGroup(GetUserGroupRequest request, ServerCallContext context)
     {
         GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
-        GetUserGroupQueryHandler getUserGroupQueryHandler = new GetUserGroupQueryHandler(_unitOfWork, _userDto);
+        GetUserGroupQueryHandler getUserGroupQueryHandler = new GetUserGroupQueryHandler(unitOfWork);
 
-        Result response = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
+        Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-        if (response.IsFailed)
+        if (userDto.IsFailed)
             return await Task.FromResult(new GetUserGroupReply
-                { IsFailed = true, ErrorMessage = response.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = userDto.Errors.ToString() });
 
-        return await Task.FromResult(new GetUserGroupReply { GroupName = _userDto.GroupName });
+        return await Task.FromResult(new GetUserGroupReply { GroupName = userDto.Value.GroupName });
     }
 
     public override async Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
     {
-        GetGroupsQueryHandler getGroupsQueryHandler = new GetGroupsQueryHandler(_unitOfWork, _groupDto);
+        GetGroupsQueryHandler getGroupsQueryHandler = new GetGroupsQueryHandler(unitOfWork);
 
-        await getGroupsQueryHandler.Handle(new EmptyRequest(),
+        Result<GroupDto> groupDto = await getGroupsQueryHandler.Handle(new EmptyRequest(),
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
         GetAvailableGroupsReply reply = new();
-
-        await reply.IdGroupsMap.FromDictionary(_groupDto.GroupList);
+        
+        await reply.IdGroupsMap.FromDictionary(groupDto.Value.GroupList);
 
         return await Task.FromResult(reply);
     }
@@ -57,18 +51,18 @@ public class GrpcDatabaseService : Database.DatabaseBase
         GetAvailableLabClassesRequest request, ServerCallContext context)
     {
         GetClassesQuery getClassesQuery = new GetClassesQuery { TelegramId = request.UserId };
-        GetClassesQueryHandler getClassesQueryHandler = new GetClassesQueryHandler(_unitOfWork, _classDto);
+        GetClassesQueryHandler getClassesQueryHandler = new GetClassesQueryHandler(unitOfWork);
 
-        Result response = await getClassesQueryHandler.Handle(getClassesQuery,
+        Result<ClassDto> classDto = await getClassesQueryHandler.Handle(getClassesQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-        if (response.IsFailed)
+        if (classDto.IsFailed)
             return await Task.FromResult(new GetAvailableLabClassesReply
-                { IsFailed = true, ErrorMessage = response.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = classDto.Errors.ToString() });
 
         GetAvailableLabClassesReply reply = new();
 
-        await reply.IdClassMap.FromDictionary(_classDto.ClassList);
+        await reply.IdClassMap.FromDictionary(classDto.Value.ClassList);
 
         return await Task.FromResult(reply);
     }
@@ -78,45 +72,45 @@ public class GrpcDatabaseService : Database.DatabaseBase
         CreateUserCommand
             createUserCommand = new()
                 { TelegramId = request.UserId, GroupName = request.GroupName }; //TODO: добавить в реквест фулнейм
-        CreateUserCommandHandler createUserCommandHandler = new CreateUserCommandHandler(_unitOfWork);
+        CreateUserCommandHandler createUserCommandHandler = new CreateUserCommandHandler(unitOfWork);
 
-        Result response = await createUserCommandHandler.Handle(createUserCommand,
+        Result result = await createUserCommandHandler.Handle(createUserCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-        if (response.IsFailed)
+        if (result.IsFailed)
             return await Task.FromResult(new TrySetGroupReply
-                { IsFailed = true, ErrorMessage = response.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = result.Errors.ToString() });
 
         GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
-        GetUserGroupQueryHandler getUserGroupQueryHandler = new GetUserGroupQueryHandler(_unitOfWork, _userDto);
+        GetUserGroupQueryHandler getUserGroupQueryHandler = new GetUserGroupQueryHandler(unitOfWork);
 
-        await getUserGroupQueryHandler.Handle(getUserGroupQuery,
+        Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-        return await Task.FromResult(new TrySetGroupReply { GroupName = _userDto.GroupName });
+        return await Task.FromResult(new TrySetGroupReply { GroupName = userDto.Value.GroupName });
     }
 
     public override async Task<TryEnqueueInClassReply> TryEnqueueInClass(TryEnqueueInClassRequest request,
         ServerCallContext context)
     {
         CreateQueueCommand createQueueCommand = new CreateQueueCommand { TelegramId = request.UserId, ClassId = request.ClassId };
-        CreateQueueCommandHandler createQueueCommandHandler = new CreateQueueCommandHandler(_unitOfWork);
+        CreateQueueCommandHandler createQueueCommandHandler = new CreateQueueCommandHandler(unitOfWork);
 
-        Result response = await createQueueCommandHandler.Handle(createQueueCommand,
+        Result result = await createQueueCommandHandler.Handle(createQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-        if (response.IsFailed)
+        if (result.IsFailed)
             return await Task.FromResult(new TryEnqueueInClassReply
-                { IsFailed = true, ErrorMessage = response.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = result.Errors.ToString() });
 
         GetQueueQuery getQueueQuery = new GetQueueQuery { TelegramId = request.UserId, ClassId = request.ClassId };
-        GetQueueQueryHandler getQueueQueryHandler = new GetQueueQueryHandler(_unitOfWork, _queueDto);
+        GetQueueQueryHandler getQueueQueryHandler = new GetQueueQueryHandler(unitOfWork);
 
-        await getQueueQueryHandler.Handle(getQueueQuery, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        Result<QueueDto> queueDto = await getQueueQueryHandler.Handle(getQueueQuery, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
         TryEnqueueInClassReply reply = new();
 
-        await reply.StudentsQueue.FromList(_queueDto.QueueList);
+        await reply.StudentsQueue.FromList(queueDto.Value.QueueList);
 
         return await Task.FromResult(reply);
     }

@@ -1,4 +1,5 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
+﻿using DatabaseApp.AppCommunication;
+using DatabaseApp.AppCommunication.Grpc;
 using DatabaseApp.Persistence;
 using DatabaseApp.WebApi.AppPipeline.Interfaces;
 
@@ -18,7 +19,8 @@ public class DefaultAppPipeline : IAppPipeline
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
         builder.Services.AddGrpc();
-        builder.Services.AddPersistence(builder.Configuration); // DI persitence
+        builder.Services.AddCommunication();
+        builder.Services.AddPersistence(builder.Configuration); // DI persistence
 
         WebApplication app = builder.Build();
 
