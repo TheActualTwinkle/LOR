@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test3 : Migration
+    public partial class Test4 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,8 +51,8 @@ namespace DatabaseApp.Persistence.Migrations
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
-                    full_name = table.Column<string>(type: "character varying", nullable: false, defaultValueSql: "0"),
-                    telegram_id = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
+                    full_name = table.Column<string>(type: "character varying", nullable: false),
+                    telegram_id = table.Column<long>(type: "bigint", nullable: false),
                     GroupId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -76,7 +76,7 @@ namespace DatabaseApp.Persistence.Migrations
                     queue_num = table.Column<long>(type: "bigint", nullable: false),
                     group_id = table.Column<int>(type: "integer", nullable: false),
                     class_id = table.Column<int>(type: "integer", nullable: false),
-                    telegramm_id = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L)
+                    telegram_id = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,7 +93,7 @@ namespace DatabaseApp.Persistence.Migrations
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "Queue_tg_id_fkey",
-                        column: x => x.telegramm_id,
+                        column: x => x.telegram_id,
                         principalTable: "Users",
                         principalColumn: "telegram_id");
                 });
@@ -114,9 +114,9 @@ namespace DatabaseApp.Persistence.Migrations
                 column: "group_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Queue_telegramm_id",
+                name: "IX_Queue_telegram_id",
                 table: "Queue",
-                column: "telegramm_id");
+                column: "telegram_id");
 
             migrationBuilder.CreateIndex(
                 name: "full_name_check",

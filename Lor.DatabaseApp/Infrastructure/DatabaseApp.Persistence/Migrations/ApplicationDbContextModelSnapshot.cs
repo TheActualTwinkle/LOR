@@ -94,10 +94,8 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnName("queue_num");
 
                     b.Property<long>("TelegramId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
-                        .HasColumnName("telegramm_id");
+                        .HasColumnName("telegram_id");
 
                     b.HasKey("Id")
                         .HasName("Queue_pkey");
@@ -119,18 +117,14 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("character varying")
-                        .HasColumnName("full_name")
-                        .HasDefaultValueSql("0");
+                        .HasColumnName("full_name");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("integer");
 
                     b.Property<long>("TelegramId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
                         .HasColumnName("telegram_id");
 
                     b.HasKey("Id")

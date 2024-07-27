@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240727150511_Test3")]
-    partial class Test3
+    [Migration("20240727164957_Test4")]
+    partial class Test4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,10 +97,8 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnName("queue_num");
 
                     b.Property<long>("TelegramId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
-                        .HasColumnName("telegramm_id");
+                        .HasColumnName("telegram_id");
 
                     b.HasKey("Id")
                         .HasName("Queue_pkey");
@@ -122,18 +120,14 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("character varying")
-                        .HasColumnName("full_name")
-                        .HasDefaultValueSql("0");
+                        .HasColumnName("full_name");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("integer");
 
                     b.Property<long>("TelegramId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
                         .HasColumnName("telegram_id");
 
                     b.HasKey("Id")

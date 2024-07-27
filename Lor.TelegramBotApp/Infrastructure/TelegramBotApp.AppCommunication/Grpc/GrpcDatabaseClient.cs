@@ -42,9 +42,9 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return Result.Ok(classes);
     }
 
-    public async Task<Result<string>> TrySetGroup(long userId, string groupName, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> TrySetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
     {
-        TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupName = groupName }, cancellationToken: cancellationToken);
+        TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"Группа {reply.GroupName} успешно установлена!");
     }
