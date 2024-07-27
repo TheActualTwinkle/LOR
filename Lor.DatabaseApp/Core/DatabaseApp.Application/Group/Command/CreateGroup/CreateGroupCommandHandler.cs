@@ -13,7 +13,7 @@ public class CreateGroupCommandHandler(IUnitOfWork unitOfWork)
 
         if (groupName is not null) return Result.Fail("Группа уже существует.");
 
-        Domain.Models.Group group = new Domain.Models.Group
+        Domain.Models.Group group = new()
         {
             GroupName = request.GroupName
         };

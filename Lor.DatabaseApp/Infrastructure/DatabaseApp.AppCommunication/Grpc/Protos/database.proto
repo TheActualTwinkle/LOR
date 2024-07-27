@@ -41,6 +41,7 @@ message GetAvailableLabClassesReply {
 message TrySetGroupRequest {
   int64 userId = 1;
   string groupName = 2;
+  string fullName = 3;
 }
 
 message TrySetGroupReply {

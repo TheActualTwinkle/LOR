@@ -9,7 +9,7 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.OutdatedClassList)
+        foreach (Domain.Models.Class? item in request.OutdatedClassList)
         {
             unitOfWork.ClassRepository.Delete(item);
 

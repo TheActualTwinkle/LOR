@@ -17,7 +17,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork)
 
         if (group is null) return Result.Fail("Группа не найдена.");
 
-        Domain.Models.User user = new Domain.Models.User
+        Domain.Models.User user = new()
         {
             FullName = request.FullName,
             TelegramId = request.TelegramId,

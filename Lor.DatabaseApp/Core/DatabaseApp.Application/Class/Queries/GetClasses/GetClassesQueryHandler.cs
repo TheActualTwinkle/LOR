@@ -21,7 +21,7 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork)
 
         if (classes is null) return Result.Fail("Пары не найдены.");
 
-        ClassDto classDto = new ClassDto() { ClassList = classes };
+        ClassDto classDto = new() { ClassList = classes };
         
         return Result.Ok(classDto);
     }

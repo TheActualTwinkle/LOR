@@ -17,7 +17,7 @@ public class GetUserGroupQueryHandler(IUnitOfWork unitOfWork)
 
         if (userGroup is null) return Result.Fail("Группа не найдена.");
 
-        UserDto userDto = new UserDto() { GroupName = userGroup.GroupName };
+        UserDto userDto = new() { GroupName = userGroup.GroupName };
 
         return Result.Ok(userDto);
     }

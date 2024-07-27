@@ -1,5 +1,6 @@
 ﻿using DatabaseApp.AppCommunication.Grpc;
 using Google.Protobuf.Collections;
+using Google.Protobuf.WellKnownTypes;
 using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.Shared;
 using Grpc.Net.Client;
@@ -27,11 +28,16 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
 
     public async Task SetAvailableLabClasses(GroupClassesData groupClassesData)
     {
-        List<string> classNames = groupClassesData.Classes.Select(d => d.Name).ToList();
-        // ReSharper disable once UseCollectionExpression
-        RepeatedField<string> repeatedField = new() { classNames };
-
-
-        await _client!.SetAvailableLabClassesAsync(new SetAvailableLabClassesRequest { GroupName = groupClassesData.GroupName, ClassNames = { repeatedField }});
+        Dictionary<string, Timestamp> classes = new();
+        foreach (ClassData classData in groupClassesData.Classes)
+        {
+            classes.Add(classData.Name, Timestamp.FromDateTime(DateTime.SpecifyKind(classData.Date, DateTimeKind.Utc)));
+        }
+        
+        await _client!.SetAvailableLabClassesAsync(new SetAvailableLabClassesRequest
+        {
+            GroupName = groupClassesData.GroupName,
+            Classes = { classes }
+        });
     }
 }

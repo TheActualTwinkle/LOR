@@ -21,7 +21,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
     public override async Task<GetUserGroupReply> GetUserGroup(GetUserGroupRequest request, ServerCallContext context)
     {
         GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
-        GetUserGroupQueryHandler getUserGroupQueryHandler = new GetUserGroupQueryHandler(unitOfWork);
+        GetUserGroupQueryHandler getUserGroupQueryHandler = new(unitOfWork);
 
         Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -35,7 +35,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 
     public override async Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
     {
-        GetGroupsQueryHandler getGroupsQueryHandler = new GetGroupsQueryHandler(unitOfWork);
+        GetGroupsQueryHandler getGroupsQueryHandler = new(unitOfWork);
 
         Result<GroupDto> groupDto = await getGroupsQueryHandler.Handle(new EmptyRequest(),
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -50,8 +50,8 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
     public override async Task<GetAvailableLabClassesReply> GetAvailableLabClasses(
         GetAvailableLabClassesRequest request, ServerCallContext context)
     {
-        GetClassesQuery getClassesQuery = new GetClassesQuery { TelegramId = request.UserId };
-        GetClassesQueryHandler getClassesQueryHandler = new GetClassesQueryHandler(unitOfWork);
+        GetClassesQuery getClassesQuery = new() { TelegramId = request.UserId };
+        GetClassesQueryHandler getClassesQueryHandler = new(unitOfWork);
 
         Result<ClassDto> classDto = await getClassesQueryHandler.Handle(getClassesQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -71,8 +71,8 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
     {
         CreateUserCommand
             createUserCommand = new()
-                { TelegramId = request.UserId, GroupName = request.GroupName }; //TODO: добавить в реквест фулнейм
-        CreateUserCommandHandler createUserCommandHandler = new CreateUserCommandHandler(unitOfWork);
+                { TelegramId = request.UserId, GroupName = request.GroupName, FullName = request.FullName};
+        CreateUserCommandHandler createUserCommandHandler = new(unitOfWork);
 
         Result result = await createUserCommandHandler.Handle(createUserCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -82,7 +82,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
                 { IsFailed = true, ErrorMessage = result.Errors.ToString() });
 
         GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
-        GetUserGroupQueryHandler getUserGroupQueryHandler = new GetUserGroupQueryHandler(unitOfWork);
+        GetUserGroupQueryHandler getUserGroupQueryHandler = new(unitOfWork);
 
         Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -93,8 +93,8 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
     public override async Task<TryEnqueueInClassReply> TryEnqueueInClass(TryEnqueueInClassRequest request,
         ServerCallContext context)
     {
-        CreateQueueCommand createQueueCommand = new CreateQueueCommand { TelegramId = request.UserId, ClassId = request.ClassId };
-        CreateQueueCommandHandler createQueueCommandHandler = new CreateQueueCommandHandler(unitOfWork);
+        CreateQueueCommand createQueueCommand = new() { TelegramId = request.UserId, ClassId = request.ClassId };
+        CreateQueueCommandHandler createQueueCommandHandler = new(unitOfWork);
 
         Result result = await createQueueCommandHandler.Handle(createQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -103,8 +103,8 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
             return await Task.FromResult(new TryEnqueueInClassReply
                 { IsFailed = true, ErrorMessage = result.Errors.ToString() });
 
-        GetQueueQuery getQueueQuery = new GetQueueQuery { TelegramId = request.UserId, ClassId = request.ClassId };
-        GetQueueQueryHandler getQueueQueryHandler = new GetQueueQueryHandler(unitOfWork);
+        GetQueueQuery getQueueQuery = new() { TelegramId = request.UserId, ClassId = request.ClassId };
+        GetQueueQueryHandler getQueueQueryHandler = new(unitOfWork);
 
         Result<QueueDto> queueDto = await getQueueQueryHandler.Handle(getQueueQuery, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 

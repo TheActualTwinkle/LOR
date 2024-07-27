@@ -13,10 +13,10 @@ public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdate
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
-        foreach (var groupName in request.GroupNames.ToList())
+        foreach (string? groupName in request.GroupNames.ToList())
         {
             CreateGroupCommand createGroupCommand = new() { GroupName = groupName };
-            CreateGroupCommandHandler createGroupCommandHandler = new CreateGroupCommandHandler(unitOfWork);
+            CreateGroupCommandHandler createGroupCommandHandler = new(unitOfWork);
 
             await createGroupCommandHandler.Handle(createGroupCommand,
                 new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -28,10 +28,22 @@ public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdate
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
         ServerCallContext context)
     {
-        foreach (var className in request.ClassNames.ToList())
+        foreach (KeyValuePair<string, Timestamp> classObject in request.Classes)
         {
-            CreateClassCommand createClassCommand = new() { GroupName = request.GroupName, ClassName = className /*Date = request.*/ }; //TODO: добавить в реквест дату лабы
-            CreateClassCommandHandler createClassCommandHandler = new CreateClassCommandHandler(unitOfWork);
+            DateOnly date;
+            try
+            {
+                DateTime dateTime = classObject.Value.ToDateTime();
+                date = new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                continue;
+            }
+            
+            CreateClassCommand createClassCommand = new() { GroupName = request.GroupName, ClassName = classObject.Key, Date = date };
+            CreateClassCommandHandler createClassCommandHandler = new(unitOfWork);
 
             await createClassCommandHandler.Handle(createClassCommand,
                 new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -44,13 +56,13 @@ public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdate
         if (classList is null) return new Empty();
 
         DeleteClassCommand deleteClassCommand = new() { OutdatedClassList = classList };
-        DeleteClassCommandHandler deleteClassCommandHandler = new DeleteClassCommandHandler(unitOfWork);
+        DeleteClassCommandHandler deleteClassCommandHandler = new(unitOfWork);
 
         await deleteClassCommandHandler.Handle(deleteClassCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
         DeleteQueueCommand deleteQueueCommand = new() { OutdatedClaasList = classList };
-        DeleteQueueCommandHandler deleteQueueCommandHandler = new DeleteQueueCommandHandler(unitOfWork);
+        DeleteQueueCommandHandler deleteQueueCommandHandler = new(unitOfWork);
 
         await deleteQueueCommandHandler.Handle(deleteQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);

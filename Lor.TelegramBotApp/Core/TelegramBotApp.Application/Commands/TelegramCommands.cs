@@ -101,6 +101,12 @@ public class SetGroupTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
+        Result<string> result = await factory.DatabaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        if (result.IsSuccess == true)
+        {
+            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value}"));
+        }
+        
         IEnumerable<string> argumentsList = arguments.ToList();
         if (argumentsList.Count() != 3)
         {

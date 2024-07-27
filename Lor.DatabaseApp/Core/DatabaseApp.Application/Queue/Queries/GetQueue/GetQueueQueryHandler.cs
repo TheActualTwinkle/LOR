@@ -23,7 +23,7 @@ public class GetQueueQueryHandler(IUnitOfWork unitOfWork)
 
         if (queueList is null) return Result.Fail("Очередь не найдена.");
 
-        QueueDto queueDto = new QueueDto() { QueueList = queueList };
+        QueueDto queueDto = new() { QueueList = queueList };
 
         return Result.Ok(queueDto);
     }

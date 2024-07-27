@@ -25,7 +25,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         int queueNum =
             await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken);
 
-        var queue = new Domain.Models.Queue
+        Domain.Models.Queue? queue = new()
         {
             QueueNum = Convert.ToUInt32(queueNum) + 1,
             GroupId = user.GroupId,

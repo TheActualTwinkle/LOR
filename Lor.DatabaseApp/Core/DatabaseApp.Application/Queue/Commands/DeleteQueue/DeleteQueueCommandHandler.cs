@@ -9,13 +9,13 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteQueueCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.OutdatedClaasList)
+        foreach (Domain.Models.Class? item in request.OutdatedClaasList)
         {
             List<Domain.Models.Queue>? listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(item.Id, cancellationToken);
 
             if (listQueue is null) return Result.Fail("");
             
-            foreach (var queue in listQueue)
+            foreach (Domain.Models.Queue? queue in listQueue)
             {
                 unitOfWork.QueueRepository.Delete(queue);
 

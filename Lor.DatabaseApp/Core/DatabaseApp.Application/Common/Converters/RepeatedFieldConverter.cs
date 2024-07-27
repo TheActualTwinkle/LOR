@@ -6,7 +6,7 @@ public static class RepeatedFieldConverter
 {
     public static Task FromList(this RepeatedField<string> reply, List<string> queueList)
     {
-        foreach (var item in queueList) reply.Add(item);
+        foreach (string? item in queueList) reply.Add(item);
 
         return Task.CompletedTask;
     }

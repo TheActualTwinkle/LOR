@@ -13,7 +13,7 @@ public class GetGroupsQueryHandler(IUnitOfWork unitOfWork)
 
         if (groups is null) return Result.Fail("Группы не найдены.");
 
-        GroupDto groupDto = new GroupDto() { GroupList = groups };
+        GroupDto groupDto = new() { GroupList = groups };
 
         return Result.Ok(groupDto);
     }
