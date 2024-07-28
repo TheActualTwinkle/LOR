@@ -13,7 +13,7 @@ public class CreateClassCommandHandler(IUnitOfWork unitOfWork)
 
         if (group is null) return Result.Fail("Группа не найдена.");
 
-        Domain.Models.Class? className = new()
+        Domain.Models.Class className = new()
         {
             GroupId = group.Id,
             ClassName = request.ClassName,

@@ -14,7 +14,7 @@ public class GetQueueQueryHandler(IUnitOfWork unitOfWork)
 
         if (user is null) return Result.Fail("Пользователь не найден.");
 
-        uint queueNum = await unitOfWork.QueueRepository.GetUserQueueNum(request.TelegramId, user.GroupId,
+        uint queueNum = await unitOfWork.QueueRepository.GetUserQueueNum(user.Id, user.GroupId,
             request.ClassId, cancellationToken);
 
         List<string>? queueList =

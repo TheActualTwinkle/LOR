@@ -25,14 +25,19 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         int queueNum =
             await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken);
 
-        Domain.Models.Queue? queue = new()
+        bool queueExist =
+            await unitOfWork.QueueRepository.CheckQueue(user.Id, user.GroupId, request.ClassId, cancellationToken);
+
+        if (queueExist is true) return Result.Fail("Запись уже создана.");
+            
+        Domain.Models.Queue queue = new()
         {
-            QueueNum = Convert.ToUInt32(queueNum) + 1,
+            UserId = user.Id,
             GroupId = user.GroupId,
             ClassId = request.ClassId,
-            TelegramId = request.TelegramId
+            QueueNum = Convert.ToUInt32(queueNum) + 1
         };
-
+        
         await unitOfWork.QueueRepository.AddAsync(queue, cancellationToken);
 
         await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);

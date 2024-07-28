@@ -1,6 +1,7 @@
 ﻿using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
@@ -8,6 +9,10 @@ namespace DatabaseApp.Persistence.Repositories;
 public class QueueRepository(IDatabaseContext context)
     : RepositoryBase<Queue>(context), IQueueRepository
 {
+    public async Task<bool> CheckQueue(int userId, int groupId, int classId, CancellationToken cancellationToken) =>
+        await Task.FromResult(_context.Queues
+            .Any(q => q.UserId == userId && q.GroupId == groupId && q.ClassId == classId));
+
     public async Task<int> GetCurrentQueueNum(int groupId, int classId, CancellationToken cancellationToken) =>
         await Task.FromResult(_context.Queues
             .Count(q => q.GroupId == groupId && q.ClassId == classId));
@@ -25,9 +30,9 @@ public class QueueRepository(IDatabaseContext context)
             .Where(q => q.ClassId == classId)
             .ToListAsync(cancellationToken);
 
-    public Task<uint> GetUserQueueNum(long telegramId, int groupId, int classId, CancellationToken cancellationToken) =>
+    public Task<uint> GetUserQueueNum(int userId, int groupId, int classId, CancellationToken cancellationToken) =>
         _context.Queues
-            .Where(q => q.TelegramId == telegramId && q.GroupId == groupId && q.ClassId == classId)
+            .Where(q => q.UserId == userId && q.GroupId == groupId && q.ClassId == classId)
             .Select(q => q.QueueNum)
             .FirstOrDefaultAsync(cancellationToken);
 }

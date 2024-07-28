@@ -15,7 +15,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(e => e.TelegramId, "tg_id_check").IsUnique();
 
         builder.Property(e => e.Id)
-            .ValueGeneratedNever()
+            .UseIdentityAlwaysColumn()
             .HasColumnName("id");
         builder.Property(e => e.FullName)
             .HasColumnType("character varying")

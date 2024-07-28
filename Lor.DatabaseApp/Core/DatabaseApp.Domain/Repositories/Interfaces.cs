@@ -1,4 +1,5 @@
 ﻿using DatabaseApp.Domain.Models;
+using FluentResults;
 
 namespace DatabaseApp.Domain.Repositories;
 
@@ -39,6 +40,8 @@ public interface IGroupRepository : IRepository
 public interface IQueueRepository : IRepository
 {
     public Task AddAsync(Queue queue, CancellationToken cancellationToken);
+
+    public Task<bool> CheckQueue(int userId, int groupId, int classId, CancellationToken cancellationToken);
     
     public void Delete(Queue queue);
 
@@ -49,7 +52,7 @@ public interface IQueueRepository : IRepository
 
     public Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);
     
-    public Task<uint> GetUserQueueNum(long telegramId, int groupId, int classId, CancellationToken cancellationToken);
+    public Task<uint> GetUserQueueNum(int userId, int groupId, int classId, CancellationToken cancellationToken);
 }
 
 public interface IUserRepository : IRepository

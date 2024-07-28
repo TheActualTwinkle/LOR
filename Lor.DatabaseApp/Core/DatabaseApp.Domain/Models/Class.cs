@@ -7,5 +7,5 @@ public class Class : IEntity
     public string ClassName { get; init; }
     public DateOnly Date { get; init; }
     public Group Group { get; init; }
-    public ICollection<Queue> QueueClasses { get; init; }
+    public ICollection<Queue> Queues { get; init; }
 }
