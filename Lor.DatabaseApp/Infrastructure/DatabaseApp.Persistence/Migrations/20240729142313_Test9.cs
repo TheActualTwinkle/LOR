@@ -7,13 +7,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test8 : Migration
+    public partial class Test9 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Groups",
+                name: "GROUPS",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -26,7 +26,7 @@ namespace DatabaseApp.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Classes",
+                name: "CLASSES",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -39,15 +39,15 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     table.PrimaryKey("Classes_pkey", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Classes_Groups_group_id",
+                        name: "FK_CLASSES_GROUPS_group_id",
                         column: x => x.group_id,
-                        principalTable: "Groups",
+                        principalTable: "GROUPS",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "USERS",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -60,15 +60,15 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     table.PrimaryKey("Users_pkey", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Users_Groups_GroupId",
+                        name: "FK_USERS_GROUPS_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Groups",
+                        principalTable: "GROUPS",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Queue",
+                name: "QUEUES",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -82,56 +82,56 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     table.PrimaryKey("Queue_pkey", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Queue_Groups_GroupId",
+                        name: "FK_QUEUES_GROUPS_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Groups",
+                        principalTable: "GROUPS",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "Queue_classes_id_fkey",
                         column: x => x.class_id,
-                        principalTable: "Classes",
+                        principalTable: "CLASSES",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "Queue_user_id_fkey",
                         column: x => x.user_id,
-                        principalTable: "Users",
+                        principalTable: "USERS",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Classes_group_id",
-                table: "Classes",
+                name: "IX_CLASSES_group_id",
+                table: "CLASSES",
                 column: "group_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Queue_class_id",
-                table: "Queue",
+                name: "IX_QUEUES_class_id",
+                table: "QUEUES",
                 column: "class_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Queue_GroupId",
-                table: "Queue",
+                name: "IX_QUEUES_GroupId",
+                table: "QUEUES",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Queue_user_id",
-                table: "Queue",
+                name: "IX_QUEUES_user_id",
+                table: "QUEUES",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "full_name_check",
-                table: "Users",
+                table: "USERS",
                 column: "full_name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_GroupId",
-                table: "Users",
+                name: "IX_USERS_GroupId",
+                table: "USERS",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "tg_id_check",
-                table: "Users",
+                table: "USERS",
                 column: "telegram_id",
                 unique: true);
         }
@@ -140,16 +140,16 @@ namespace DatabaseApp.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Queue");
+                name: "QUEUES");
 
             migrationBuilder.DropTable(
-                name: "Classes");
+                name: "CLASSES");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "USERS");
 
             migrationBuilder.DropTable(
-                name: "Groups");
+                name: "GROUPS");
         }
     }
 }
