@@ -28,7 +28,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 
         if (userDto.IsFailed)
             return await Task.FromResult(new GetUserGroupReply
-                { IsFailed = true, ErrorMessage = userDto.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = userDto.Errors.First().Message });
 
         return await Task.FromResult(new GetUserGroupReply { GroupName = userDto.Value.GroupName });
     }
@@ -58,7 +58,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 
         if (classDto.IsFailed)
             return await Task.FromResult(new GetAvailableLabClassesReply
-                { IsFailed = true, ErrorMessage = classDto.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = classDto.Errors.First().Message });
 
         GetAvailableLabClassesReply reply = new();
 
@@ -79,7 +79,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 
         if (result.IsFailed)
             return await Task.FromResult(new TrySetGroupReply
-                { IsFailed = true, ErrorMessage = result.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message });
 
         GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
         GetUserGroupQueryHandler getUserGroupQueryHandler = new(unitOfWork);
@@ -101,7 +101,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 
         if (result.IsFailed)
             return await Task.FromResult(new TryEnqueueInClassReply
-                { IsFailed = true, ErrorMessage = result.Errors.ToString() });
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message });
 
         GetQueueQuery getQueueQuery = new() { TelegramId = request.UserId, ClassId = request.ClassId };
         GetQueueQueryHandler getQueueQueryHandler = new(unitOfWork);

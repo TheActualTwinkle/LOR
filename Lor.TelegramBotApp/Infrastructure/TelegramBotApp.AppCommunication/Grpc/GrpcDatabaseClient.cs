@@ -53,6 +53,6 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
     {
         TryEnqueueInClassReply reply = await _client!.TryEnqueueInClassAsync(new TryEnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail<IEnumerable<string>>(reply.ErrorMessage) : Result.Ok<IEnumerable<string>>(reply.StudentsQueue);
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok<IEnumerable<string>>(reply.StudentsQueue);
     }
 }

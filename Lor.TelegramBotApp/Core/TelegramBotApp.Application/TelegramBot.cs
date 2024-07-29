@@ -55,7 +55,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
 
                 if (executionResult.Result.IsFailed)
                 {
-                    await SendErrorMessage(bot, chatId, new Exception(executionResult.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), executionResult.ReplyMarkup, cts.Token);
+                    await SendErrorMessage(bot, chatId, new Exception(executionResult.Result.Errors.First()?.Message ?? "Неизвестная ошибка"), executionResult.ReplyMarkup, cts.Token);
                     return;
                 }
 

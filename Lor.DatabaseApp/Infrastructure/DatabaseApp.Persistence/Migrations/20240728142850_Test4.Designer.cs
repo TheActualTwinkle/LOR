@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240727170226_Test7")]
-    partial class Test7
+    [Migration("20240728142850_Test4")]
+    partial class Test4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -96,11 +96,9 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("queue_num");
 
-                    b.Property<long>("TelegramId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
-                        .HasColumnName("telegram_id");
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("Queue_pkey");
@@ -109,7 +107,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex("TelegramId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Queue", (string)null);
                 });
@@ -117,23 +115,22 @@ namespace DatabaseApp.Persistence.Migrations
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
+
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("character varying")
-                        .HasColumnName("full_name")
-                        .HasDefaultValueSql("0");
+                        .HasColumnName("full_name");
 
                     b.Property<int>("GroupId")
                         .HasColumnType("integer");
 
                     b.Property<long>("TelegramId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
                         .HasColumnName("telegram_id");
 
                     b.HasKey("Id")
@@ -164,7 +161,7 @@ namespace DatabaseApp.Persistence.Migrations
             modelBuilder.Entity("DatabaseApp.Domain.Models.Queue", b =>
                 {
                     b.HasOne("DatabaseApp.Domain.Models.Class", "Class")
-                        .WithMany("QueueClasses")
+                        .WithMany("Queues")
                         .HasForeignKey("ClassId")
                         .IsRequired()
                         .HasConstraintName("Queue_classes_id_fkey");
@@ -177,10 +174,9 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasOne("DatabaseApp.Domain.Models.User", "User")
                         .WithMany("Queues")
-                        .HasForeignKey("TelegramId")
-                        .HasPrincipalKey("TelegramId")
+                        .HasForeignKey("UserId")
                         .IsRequired()
-                        .HasConstraintName("Queue_tg_id_fkey");
+                        .HasConstraintName("Queue_user_id_fkey");
 
                     b.Navigation("Class");
 
@@ -202,7 +198,7 @@ namespace DatabaseApp.Persistence.Migrations
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Class", b =>
                 {
-                    b.Navigation("QueueClasses");
+                    b.Navigation("Queues");
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Group", b =>
