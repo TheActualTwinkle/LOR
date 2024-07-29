@@ -49,10 +49,10 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"Группа {reply.GroupName} успешно установлена!");
     }
 
-    public async Task<Result<IEnumerable<string>>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
     {
         TryEnqueueInClassReply reply = await _client!.TryEnqueueInClassAsync(new TryEnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok<IEnumerable<string>>(reply.StudentsQueue);
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult(reply.StudentsQueue, reply.ClassName));
     }
 }

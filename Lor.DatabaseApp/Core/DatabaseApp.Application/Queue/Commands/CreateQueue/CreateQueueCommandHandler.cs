@@ -12,7 +12,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
     public async Task<Result> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
     {
         await _semaphoreSlim.WaitAsync(cancellationToken);
-
+        
         Domain.Models.User? user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
@@ -20,7 +20,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
 
         Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
-        if (group is null) return Result.Fail("Группа не найдена.");
+        if (group is null) return Result.Fail("Группа не поддерживается.");
 
         int queueNum =
             await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken);
@@ -28,7 +28,12 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         bool queueExist =
             await unitOfWork.QueueRepository.CheckQueue(user.Id, user.GroupId, request.ClassId, cancellationToken);
 
-        if (queueExist) return Result.Fail("Запись уже создана.");
+        if (queueExist)
+        {
+            // TODO: Cache it.
+            string className = await unitOfWork.ClassRepository.GetClassNameById(request.ClassId, cancellationToken) ?? "эту пару";
+            return Result.Fail($"Запись на {className} уже создана.");
+        }
             
         Domain.Models.Queue queue = new()
         {

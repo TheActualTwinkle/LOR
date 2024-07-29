@@ -1,6 +1,7 @@
 ﻿using System.Composition;
 using System.Text;
 using FluentResults;
+using TelegramBotApp.AppCommunication;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
@@ -28,17 +29,17 @@ public class EnqueueCallbackQuery : ICallbackQuery
             throw new ArgumentException($"EnqueueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
         }
         
-        Result<IEnumerable<string>> result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
+        Result<EnqueueInClassResult> result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new("Вы успешно записаны!\nОчередь:\n");
-        for (var i = 0; i < result.Value.Count(); i++)
+        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName}\nОчередь:\n");
+        for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
-            string labClass = result.Value.ElementAt(i);
+            string labClass = result.Value.StudentsQueue.ElementAt(i);
             message.AppendLine($"{i+1}. {labClass}");
         }
         
