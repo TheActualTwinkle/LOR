@@ -13,10 +13,11 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
         builder.Property(e => e.Id)
             .UseIdentityAlwaysColumn()
             .HasColumnName("id");
+        builder.Property(e => e.GroupId)
+            .HasColumnName("group_id");
         builder.Property(e => e.ClassName)
-            .HasColumnType("character varying")
             .HasColumnName("class_name");
-        builder.Property(e => e.Date).HasColumnName("date");
-        builder.Property(e => e.GroupId).HasColumnName("group_id");
+        builder.Property(e => e.Date)
+            .HasColumnName("date");
     }
 }

@@ -29,12 +29,12 @@ public interface IClassRepository : IRepository
 public interface IGroupRepository : IRepository
 {
     public Task AddAsync(Group group, CancellationToken cancellationToken);
-
-    public Task<Group?> GetGroupByGroupName(string groupName, CancellationToken cancellationToken);
+    
+    public Task<Dictionary<int, string>?> GetGroups(CancellationToken cancellationToken);
 
     public Task<Group?> GetGroupByGroupId(int groupId, CancellationToken cancellationToken);
 
-    public Task<Dictionary<int, string>?> GetGroups(CancellationToken cancellationToken);
+    public Task<Group?> GetGroupByGroupName(string groupName, CancellationToken cancellationToken);
 }
 
 public interface IQueueRepository : IRepository

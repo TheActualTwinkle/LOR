@@ -18,7 +18,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .UseIdentityAlwaysColumn()
             .HasColumnName("id");
         builder.Property(e => e.FullName)
-            .HasColumnType("character varying")
             .HasColumnName("full_name");
         builder.Property(e => e.TelegramId)
             .HasColumnName("telegram_id");

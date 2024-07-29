@@ -11,17 +11,17 @@ public class QueueRepository(IDatabaseContext context)
 {
     public async Task<bool> CheckQueue(int userId, int groupId, int classId, CancellationToken cancellationToken) =>
         await Task.FromResult(_context.Queues
-            .Any(q => q.UserId == userId && q.GroupId == groupId && q.ClassId == classId));
+            .Any(q => q.UserId == userId && q.Class.GroupId == groupId && q.ClassId == classId));
 
     public async Task<int> GetCurrentQueueNum(int groupId, int classId, CancellationToken cancellationToken) =>
         await Task.FromResult(_context.Queues
-            .Count(q => q.GroupId == groupId && q.ClassId == classId));
+            .Count(q => q.Class.GroupId == groupId && q.ClassId == classId));
 
     public async Task<List<string>?> GetQueueList(uint queueNum, int groupId, int classId,
         CancellationToken cancellationToken) =>
         await _context.Queues
             .Include(q => q.User)
-            .Where(q => q.QueueNum < queueNum && q.GroupId == groupId && q.ClassId == classId)
+            .Where(q => q.QueueNum <= queueNum && q.Class.GroupId == groupId && q.ClassId == classId)
             .Select(q => q.User.FullName)
             .ToListAsync(cancellationToken);
 
@@ -32,7 +32,7 @@ public class QueueRepository(IDatabaseContext context)
 
     public Task<uint> GetUserQueueNum(int userId, int groupId, int classId, CancellationToken cancellationToken) =>
         _context.Queues
-            .Where(q => q.UserId == userId && q.GroupId == groupId && q.ClassId == classId)
+            .Where(q => q.UserId == userId && q.Class.GroupId == groupId && q.ClassId == classId)
             .Select(q => q.QueueNum)
             .FirstOrDefaultAsync(cancellationToken);
 }

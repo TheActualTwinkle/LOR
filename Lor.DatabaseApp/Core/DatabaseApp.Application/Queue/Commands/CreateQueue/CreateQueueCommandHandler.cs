@@ -28,12 +28,11 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         bool queueExist =
             await unitOfWork.QueueRepository.CheckQueue(user.Id, user.GroupId, request.ClassId, cancellationToken);
 
-        if (queueExist is true) return Result.Fail("Запись уже создана.");
+        if (queueExist) return Result.Fail("Запись уже создана.");
             
         Domain.Models.Queue queue = new()
         {
             UserId = user.Id,
-            GroupId = user.GroupId,
             ClassId = request.ClassId,
             QueueNum = Convert.ToUInt32(queueNum) + 1
         };

@@ -14,7 +14,6 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
             .UseIdentityAlwaysColumn()
             .HasColumnName("id");
         builder.Property(e => e.GroupName)
-            .HasColumnType("character varying")
             .HasColumnName("group_name");
     }
 }
