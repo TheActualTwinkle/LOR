@@ -20,6 +20,8 @@ public interface IClassRepository : IRepository
     public Task AddAsync(Class someClass, CancellationToken cancellationToken);
 
     public void Delete(Class someClass);
+
+    public Task<string?> GetClassNameById(int classId, CancellationToken cancellationToken);
     
     public Task<Dictionary<int, string>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 

@@ -8,6 +8,11 @@ namespace DatabaseApp.Persistence.Repositories;
 public class ClassRepository(IDatabaseContext context)
     : RepositoryBase<Class>(context), IClassRepository
 {
+    public async Task<string?> GetClassNameById(int classId, CancellationToken cancellationToken) =>
+        await Task.FromResult(_context.Classes
+            .Where(c => c.Id == classId)
+            .Select(c => c.ClassName).ToString());
+
     public async Task<Dictionary<int, string>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken) =>
         await _context.Classes
             .Include(c => c.Group)
