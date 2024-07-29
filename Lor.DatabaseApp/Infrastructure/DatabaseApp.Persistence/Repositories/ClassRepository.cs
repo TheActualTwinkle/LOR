@@ -11,7 +11,7 @@ public class ClassRepository(IDatabaseContext context)
     public async Task<string?> GetClassNameById(int classId, CancellationToken cancellationToken) =>
         await Task.FromResult(_context.Classes
             .Where(c => c.Id == classId)
-            .Select(c => c.ClassName).ToString());
+            .Select(c => c.ClassName).FirstOrDefault()?.ToString());
 
     public async Task<Dictionary<int, string>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken) =>
         await _context.Classes
