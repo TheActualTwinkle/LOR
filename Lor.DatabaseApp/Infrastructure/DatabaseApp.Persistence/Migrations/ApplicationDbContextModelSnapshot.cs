@@ -33,7 +33,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.Property<string>("ClassName")
                         .IsRequired()
-                        .HasColumnType("character varying")
+                        .HasColumnType("text")
                         .HasColumnName("class_name");
 
                     b.Property<DateOnly>("Date")
@@ -63,7 +63,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.Property<string>("GroupName")
                         .IsRequired()
-                        .HasColumnType("character varying")
+                        .HasColumnType("text")
                         .HasColumnName("group_name");
 
                     b.HasKey("Id")
@@ -85,9 +85,8 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("class_id");
 
-                    b.Property<int>("GroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("group_id");
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("integer");
 
                     b.Property<long>("QueueNum")
                         .HasColumnType("bigint")
@@ -120,7 +119,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("character varying")
+                        .HasColumnType("text")
                         .HasColumnName("full_name");
 
                     b.Property<int>("GroupId")
@@ -163,11 +162,9 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("Queue_classes_id_fkey");
 
-                    b.HasOne("DatabaseApp.Domain.Models.Group", "Group")
+                    b.HasOne("DatabaseApp.Domain.Models.Group", null)
                         .WithMany("Queues")
-                        .HasForeignKey("GroupId")
-                        .IsRequired()
-                        .HasConstraintName("Queue_group_id_fkey");
+                        .HasForeignKey("GroupId");
 
                     b.HasOne("DatabaseApp.Domain.Models.User", "User")
                         .WithMany("Queues")
@@ -176,8 +173,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasConstraintName("Queue_user_id_fkey");
 
                     b.Navigation("Class");
-
-                    b.Navigation("Group");
 
                     b.Navigation("User");
                 });

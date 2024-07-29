@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test4 : Migration
+    public partial class Test8 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    group_name = table.Column<string>(type: "character varying", nullable: false)
+                    group_name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,7 +32,7 @@ namespace DatabaseApp.Persistence.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     group_id = table.Column<int>(type: "integer", nullable: false),
-                    class_name = table.Column<string>(type: "character varying", nullable: false),
+                    class_name = table.Column<string>(type: "text", nullable: false),
                     date = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
@@ -52,7 +52,7 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    full_name = table.Column<string>(type: "character varying", nullable: false),
+                    full_name = table.Column<string>(type: "text", nullable: false),
                     telegram_id = table.Column<long>(type: "bigint", nullable: false),
                     GroupId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -73,23 +73,23 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    queue_num = table.Column<long>(type: "bigint", nullable: false),
-                    group_id = table.Column<int>(type: "integer", nullable: false),
                     class_id = table.Column<int>(type: "integer", nullable: false),
-                    user_id = table.Column<int>(type: "integer", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false),
+                    queue_num = table.Column<long>(type: "bigint", nullable: false),
+                    GroupId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("Queue_pkey", x => x.id);
                     table.ForeignKey(
+                        name: "FK_Queue_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
+                        principalColumn: "id");
+                    table.ForeignKey(
                         name: "Queue_classes_id_fkey",
                         column: x => x.class_id,
                         principalTable: "Classes",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "Queue_group_id_fkey",
-                        column: x => x.group_id,
-                        principalTable: "Groups",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "Queue_user_id_fkey",
@@ -109,9 +109,9 @@ namespace DatabaseApp.Persistence.Migrations
                 column: "class_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Queue_group_id",
+                name: "IX_Queue_GroupId",
                 table: "Queue",
-                column: "group_id");
+                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Queue_user_id",

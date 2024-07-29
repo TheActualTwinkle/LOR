@@ -57,6 +57,7 @@ message TryEnqueueInClassRequest {
 
 message TryEnqueueInClassReply {
   repeated string studentsQueue = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
+  string className = 2;
+  bool isFailed = 3;
+  string errorMessage = 4;
 }

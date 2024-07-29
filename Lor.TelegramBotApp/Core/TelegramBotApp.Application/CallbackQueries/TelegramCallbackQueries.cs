@@ -36,9 +36,10 @@ public class EnqueueCallbackQuery : ICallbackQuery
         }
         
         StringBuilder message = new("Вы успешно записаны!\nОчередь:\n");
-        foreach (string labClass in result.Value)
+        for (var i = 0; i < result.Value.Count(); i++)
         {
-            message.AppendLine(labClass);
+            string labClass = result.Value.ElementAt(i);
+            message.AppendLine($"{i+1}. {labClass}");
         }
         
         return new ExecutionResult(Result.Ok(message.ToString()));
