@@ -8,6 +8,8 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
 {
     public void Configure(EntityTypeBuilder<Class> builder)
     {
+        builder.ToTable("CLASSES");
+        
         builder.HasKey(e => e.Id).HasName("Classes_pkey");
         
         builder.Property(e => e.Id)

@@ -8,9 +8,9 @@ public class QueueConfiguration : IEntityTypeConfiguration<Queue>
 {
     public void Configure(EntityTypeBuilder<Queue> builder)
     {
+        builder.ToTable("QUEUES");
+        
         builder.HasKey(e => e.Id).HasName("Queue_pkey");
-
-        builder.ToTable("Queue");
 
         builder.Property(e => e.Id)
             .UseIdentityAlwaysColumn()

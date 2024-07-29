@@ -8,6 +8,8 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
 {
     public void Configure(EntityTypeBuilder<Group> builder)
     {
+        builder.ToTable("GROUPS");
+        
         builder.HasKey(e => e.Id).HasName("Groups_pkey");
 
         builder.Property(e => e.Id)
