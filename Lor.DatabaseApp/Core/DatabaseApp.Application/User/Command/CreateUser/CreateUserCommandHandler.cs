@@ -1,4 +1,5 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Application.Common.Converters;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MediatR;
 
@@ -19,7 +20,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork)
 
         Domain.Models.User user = new()
         {
-            FullName = request.FullName,
+            FullName = await request.FullName.FormatFio(),
             TelegramId = request.TelegramId,
             GroupId = group.Id
         };
