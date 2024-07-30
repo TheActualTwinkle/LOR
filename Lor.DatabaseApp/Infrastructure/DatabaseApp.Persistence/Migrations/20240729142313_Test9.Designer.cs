@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240729120435_Test8")]
-    partial class Test8
+    [Migration("20240729142313_Test9")]
+    partial class Test9
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,7 +52,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("Classes");
+                    b.ToTable("CLASSES", (string)null);
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Group", b =>
@@ -72,7 +72,7 @@ namespace DatabaseApp.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("Groups_pkey");
 
-                    b.ToTable("Groups");
+                    b.ToTable("GROUPS", (string)null);
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Queue", b =>
@@ -108,7 +108,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Queue", (string)null);
+                    b.ToTable("QUEUES", (string)null);
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
@@ -143,7 +143,7 @@ namespace DatabaseApp.Persistence.Migrations
                     b.HasIndex(new[] { "TelegramId" }, "tg_id_check")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("USERS", (string)null);
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Class", b =>
