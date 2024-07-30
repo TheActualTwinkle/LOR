@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-using Newtonsoft.Json;
-using TelegramBotApp.Authorization.Interfaces;
-
-namespace TelegramBotApp.Authorization;
+﻿namespace TelegramBotApp.Authorization;
 
 public readonly struct AuthorizationRequest(string fullName, DateTime? dateOfBirth = default)
 {

@@ -13,7 +13,7 @@ public static class DependencyInjection
 
         services.AddSingleton<ITelegramBot>(s =>
         {
-            var botInitializer = s.GetRequiredService<ITelegramBotInitializer>();
+            ITelegramBotInitializer? botInitializer = s.GetRequiredService<ITelegramBotInitializer>();
             return botInitializer.CreateBot(configuration.GetSection("TelegramSettings:BotToken").Value ??
                                             throw new InvalidOperationException("Bot token is not set."),
                 botInitializer.CreateReceiverOptions());

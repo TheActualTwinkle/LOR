@@ -41,6 +41,7 @@ message GetAvailableLabClassesReply {
 message TrySetGroupRequest {
   int64 userId = 1;
   string groupName = 2;
+  string fullName = 3;
 }
 
 message TrySetGroupReply {
@@ -56,6 +57,7 @@ message TryEnqueueInClassRequest {
 
 message TryEnqueueInClassReply {
   repeated string studentsQueue = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
+  string className = 2;
+  bool isFailed = 3;
+  string errorMessage = 4;
 }

@@ -7,7 +7,6 @@ using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
-using TelegramBotApp.Caching.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 

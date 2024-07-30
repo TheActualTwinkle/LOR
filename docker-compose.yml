@@ -1,5 +1,18 @@
 services:
   database:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGPORT=31400
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "31400:31400"
+
+  databaseapp:
     build:
       context: .
       dockerfile: Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/Dockerfile
@@ -8,6 +21,7 @@ services:
     environment:
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings:DefaultConnection=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
 
   telegrambot:
     build:
