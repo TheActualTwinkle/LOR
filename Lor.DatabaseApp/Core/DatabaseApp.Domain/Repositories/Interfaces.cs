@@ -60,6 +60,8 @@ public interface IQueueRepository : IRepository
 public interface IUserRepository : IRepository
 {
     public Task AddAsync(User user, CancellationToken cancellationToken);
+    
+    public Task<User?> CheckUser(long telegramId, string fullName, CancellationToken cancellationToken);
 
     public Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken);
 }

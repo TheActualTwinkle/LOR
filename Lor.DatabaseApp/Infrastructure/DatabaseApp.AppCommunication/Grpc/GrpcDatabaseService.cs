@@ -69,8 +69,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 
     public override async Task<TrySetGroupReply> TrySetGroup(TrySetGroupRequest request, ServerCallContext context)
     {
-        CreateUserCommand
-            createUserCommand = new()
+        CreateUserCommand createUserCommand = new()
                 { TelegramId = request.UserId, GroupName = request.GroupName, FullName = request.FullName};
         CreateUserCommandHandler createUserCommandHandler = new(unitOfWork);
 
