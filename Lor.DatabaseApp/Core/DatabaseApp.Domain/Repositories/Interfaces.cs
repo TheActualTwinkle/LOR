@@ -23,7 +23,7 @@ public interface IClassRepository : IRepository
 
     public void Delete(Class someClass);
 
-    public Task<string?> GetClassNameById(int classId, CancellationToken cancellationToken);
+    public Task<Class?> GetClassById(int classId, CancellationToken cancellationToken);
     
     public Task<Dictionary<int, string>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 

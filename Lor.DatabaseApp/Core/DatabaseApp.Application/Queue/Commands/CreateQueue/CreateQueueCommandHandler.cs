@@ -5,11 +5,11 @@ using MediatR;
 namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
 
 public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateQueueCommand, Result>
+    : IRequestHandler<CreateQueueCommand, Result<string>>
 {
     private readonly SemaphoreSlim _semaphoreSlim = new(1);
 
-    public async Task<Result> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
     {
         await _semaphoreSlim.WaitAsync(cancellationToken);
         
@@ -22,6 +22,10 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
 
         if (group is null) return Result.Fail("Группа не поддерживается.");
 
+        Domain.Models.Class? someClass = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        
+        if (someClass is null) return Result.Fail("Пара не найдена.");
+
         int queueNum =
             await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken);
 
@@ -31,8 +35,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         if (queueExist)
         {
             // TODO: Cache it.
-            string className = await unitOfWork.ClassRepository.GetClassNameById(request.ClassId, cancellationToken) ?? "эту пару";
-            return Result.Fail($"Запись на {className} уже создана.");
+            return Result.Fail($"Запись на {someClass.ClassName} уже создана.");
         }
             
         Domain.Models.Queue queue = new()
@@ -48,6 +51,6 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
 
         _semaphoreSlim.Release();
 
-        return Result.Ok();
+        return await Task.FromResult(someClass.ClassName);
     }
 }
