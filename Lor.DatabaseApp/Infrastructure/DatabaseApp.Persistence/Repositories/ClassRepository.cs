@@ -8,6 +8,10 @@ namespace DatabaseApp.Persistence.Repositories;
 public class ClassRepository(IDatabaseContext context)
     : RepositoryBase<Class>(context), IClassRepository
 {
+    public async Task<bool> CheckClass(string className, DateOnly date, CancellationToken cancellationToken) =>
+        await _context.Classes
+            .AnyAsync(c => c.ClassName == className && c.Date == date, cancellationToken);
+
     public async Task<string?> GetClassNameById(int classId, CancellationToken cancellationToken) =>
         await Task.FromResult(_context.Classes
             .Where(c => c.Id == classId)

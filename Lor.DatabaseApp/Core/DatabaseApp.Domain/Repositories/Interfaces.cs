@@ -19,6 +19,8 @@ public interface IClassRepository : IRepository
 {
     public Task AddAsync(Class someClass, CancellationToken cancellationToken);
 
+    public Task<bool> CheckClass(string className, DateOnly date, CancellationToken cancellationToken);
+
     public void Delete(Class someClass);
 
     public Task<string?> GetClassNameById(int classId, CancellationToken cancellationToken);
