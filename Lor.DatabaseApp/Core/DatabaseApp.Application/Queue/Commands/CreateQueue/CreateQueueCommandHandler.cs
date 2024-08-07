@@ -35,7 +35,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         if (queueExist)
         {
             // TODO: Cache it.
-            return Result.Fail($"Запись на {someClass.ClassName} уже создана.");
+            return Result.Fail($"Запись на пару \"{someClass.ClassName}\" уже создана.");
         }
             
         Domain.Models.Queue queue = new()
