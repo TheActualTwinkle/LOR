@@ -8,11 +8,11 @@ namespace DatabaseApp.Persistence.Repositories;
 public class UserRepository(IDatabaseContext context)
     : RepositoryBase<User>(context), IUserRepository
 {
-    public Task<User?> CheckUser(long telegramId, string fullName, CancellationToken cancellationToken) =>
-        _context.Users
+    public async Task<User?> CheckUser(long telegramId, string fullName, CancellationToken cancellationToken) =>
+        await _context.Users
             .FirstOrDefaultAsync(u => u.TelegramId == telegramId || u.FullName == fullName, cancellationToken);
 
-    public Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken) =>
-        _context.Users
+    public async Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken) =>
+        await _context.Users
             .FirstOrDefaultAsync(u => u.TelegramId == telegramId, cancellationToken);
 }

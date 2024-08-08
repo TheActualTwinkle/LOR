@@ -95,18 +95,12 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         CreateQueueCommand createQueueCommand = new() { TelegramId = request.UserId, ClassId = request.ClassId };
         CreateQueueCommandHandler createQueueCommandHandler = new(unitOfWork);
 
-        Result result = await createQueueCommandHandler.Handle(createQueueCommand,
+        Result<string> result = await createQueueCommandHandler.Handle(createQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-
-        string? className = await unitOfWork.ClassRepository.GetClassNameById(request.ClassId,
-            new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-
-        if (className is null)
-            return await Task.FromResult(new TryEnqueueInClassReply { IsFailed = true, ErrorMessage = "Пара не найдена." });
         
         if (result.IsFailed)
             return await Task.FromResult(new TryEnqueueInClassReply
-                { ClassName = className, IsFailed = true, ErrorMessage = result.Errors.First().Message });
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message });
 
         GetQueueQuery getQueueQuery = new() { TelegramId = request.UserId, ClassId = request.ClassId };
         GetQueueQueryHandler getQueueQueryHandler = new(unitOfWork);
@@ -116,7 +110,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         TryEnqueueInClassReply reply = new();
         
         await reply.StudentsQueue.FromList(queueDto.Value.QueueList);
-        reply.ClassName = className;
+        reply.ClassName = result.Value;
         
         return await Task.FromResult(reply);
     }
