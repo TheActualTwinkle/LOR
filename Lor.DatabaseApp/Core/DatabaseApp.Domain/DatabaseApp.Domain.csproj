@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\Lor.GroupScheduleApp\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj"/>
+        <ProjectReference Include="..\..\..\Lor.TelegramBotApp\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
     </ItemGroup>
 
 </Project>

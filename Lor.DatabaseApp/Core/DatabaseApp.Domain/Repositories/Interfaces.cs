@@ -1,5 +1,4 @@
 ﻿using DatabaseApp.Domain.Models;
-using FluentResults;
 
 namespace DatabaseApp.Domain.Repositories;
 
@@ -25,7 +24,7 @@ public interface IClassRepository : IRepository
 
     public Task<Class?> GetClassById(int classId, CancellationToken cancellationToken);
     
-    public Task<Dictionary<int, string>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
+    public Task<List<AppCommunication.Grpc.ClassInformation>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 
     public Task<List<Class>?> GetOutdatedClasses(CancellationToken cancellationToken);
 }

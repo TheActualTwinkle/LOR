@@ -5,11 +5,11 @@ using MediatR;
 namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
 
 public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateQueueCommand, Result<string>>
+    : IRequestHandler<CreateQueueCommand, Result<Domain.Models.Class>>
 {
     private readonly SemaphoreSlim _semaphoreSlim = new(1);
 
-    public async Task<Result<string>> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Domain.Models.Class>> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
     {
         await _semaphoreSlim.WaitAsync(cancellationToken);
         
@@ -35,7 +35,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         if (queueExist)
         {
             // TODO: Cache it.
-            return Result.Fail($"Запись на пару \"{someClass.ClassName}\" уже создана.");
+            return Result.Fail($"Запись на пару \"{someClass.ClassName} - {someClass.Date}\" уже создана.");
         }
             
         Domain.Models.Queue queue = new()
@@ -51,6 +51,6 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
 
         _semaphoreSlim.Release();
 
-        return await Task.FromResult(someClass.ClassName);
+        return await Task.FromResult(someClass);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.Converters;
+using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue;
@@ -9,6 +10,7 @@ using DatabaseApp.Application.Queue.Queries.GetQueue;
 using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserGroup;
+using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
@@ -59,11 +61,11 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         if (classDto.IsFailed)
             return await Task.FromResult(new GetAvailableLabClassesReply
                 { IsFailed = true, ErrorMessage = classDto.Errors.First().Message });
-
+        
         GetAvailableLabClassesReply reply = new();
 
-        await reply.IdClassMap.FromDictionary(classDto.Value.ClassList);
-
+        await reply.ClassInformation.ToRepeatedFieldAsync();
+        
         return await Task.FromResult(reply);
     }
 
@@ -86,7 +88,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-        return await Task.FromResult(new TrySetGroupReply { GroupName = userDto.Value.GroupName });
+        return await Task.FromResult(new TrySetGroupReply { FullName = await request.FullName.FormatFio(), GroupName = userDto.Value.GroupName });
     }
 
     public override async Task<TryEnqueueInClassReply> TryEnqueueInClass(TryEnqueueInClassRequest request,
@@ -95,7 +97,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         CreateQueueCommand createQueueCommand = new() { TelegramId = request.UserId, ClassId = request.ClassId };
         CreateQueueCommandHandler createQueueCommandHandler = new(unitOfWork);
 
-        Result<string> result = await createQueueCommandHandler.Handle(createQueueCommand,
+        Result<Class> result = await createQueueCommandHandler.Handle(createQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         if (result.IsFailed)
@@ -110,7 +112,8 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         TryEnqueueInClassReply reply = new();
         
         await reply.StudentsQueue.FromList(queueDto.Value.QueueList);
-        reply.ClassName = result.Value;
+        reply.ClassName = result.Value.ClassName;
+        reply.ClassDate = result.Value.Date;
         
         return await Task.FromResult(reply);
     }

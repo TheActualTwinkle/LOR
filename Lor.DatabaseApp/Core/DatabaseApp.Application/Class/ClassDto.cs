@@ -2,5 +2,5 @@
 
 public struct ClassDto
 {
-    public required Dictionary<int, string> ClassList { get; set; }
+    public required List<AppCommunication.Grpc.ClassInformation> ClassList { get; set; }
 }
