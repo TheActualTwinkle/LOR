@@ -6,7 +6,7 @@ namespace TelegramBotApp.AppCommunication.Interfaces;
 
 public interface IDatabaseCommunicationClient : ICommunicationClient
 {
-    Task<Result<string>> GetUserGroup(long userId, CancellationToken cancellationToken = default); 
+    Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default); 
     
     Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default);

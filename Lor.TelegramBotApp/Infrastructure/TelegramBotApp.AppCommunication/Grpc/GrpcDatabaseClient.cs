@@ -19,11 +19,11 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return Task.CompletedTask;
     }
     
-    public async Task<Result<string>> GetUserGroup(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)
     {
-        GetUserGroupReply reply = await _client!.GetUserGroupAsync(new GetUserGroupRequest { UserId = userId }, cancellationToken: cancellationToken);
+        GetUserInfoReply reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth <ФИО>") : Result.Ok(reply.GroupName);
+        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth <ФИО>") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
     }
 
     public async Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default)

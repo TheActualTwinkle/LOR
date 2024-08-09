@@ -3,6 +3,7 @@ using System.Text;
 using DatabaseApp.AppCommunication.Grpc;
 using FluentResults;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
@@ -102,10 +103,10 @@ public class SetGroupTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<string> result = await factory.DatabaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsSuccess == true)
         {
-            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value}"));
+            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value.GroupName} как {result.Value.FullName}"));
         }
         
         IEnumerable<string> argumentsList = arguments.ToList();
@@ -140,7 +141,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<string> getUserGroupResult = await factory.DatabaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        Result<UserInfo> getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (getUserGroupResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getUserGroupResult.Errors.First()));
@@ -188,7 +189,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
-        Result<string> result = await databaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        Result<UserInfo> result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));

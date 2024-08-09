@@ -31,7 +31,8 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
         Dictionary<string, long> classes = new();
         foreach (ClassData classData in groupClassesData.Classes)
         {
-            classes.Add(classData.Name, ((DateTimeOffset)classData.Date).ToUnixTimeSeconds());
+            DateTimeOffset dateTimeOffset = DateTime.SpecifyKind(classData.Date, DateTimeKind.Utc);
+            classes.Add(classData.Name, dateTimeOffset.ToUnixTimeSeconds());
         }
         
         await _client!.SetAvailableLabClassesAsync(new SetAvailableLabClassesRequest
