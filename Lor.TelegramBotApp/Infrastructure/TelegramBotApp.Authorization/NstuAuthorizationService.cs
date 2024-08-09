@@ -17,9 +17,9 @@ public class NstuAuthorizationService : IAuthorizationService
             Result<string> result = await GetUserGroup(fullName, dateOfBirth);
             return result.IsSuccess ? Result.Ok(new AuthorizationReply(fullName, result.Value)) : Result.Fail(result.Errors.First());
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result.Fail("Невозможно преобразовать параметр");
+            return Result.Fail($"Error: {e.Message}");
         }
     }
     

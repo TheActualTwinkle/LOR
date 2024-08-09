@@ -28,10 +28,10 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
 
     public async Task SetAvailableLabClasses(GroupClassesData groupClassesData)
     {
-        Dictionary<string, Timestamp> classes = new();
+        Dictionary<string, long> classes = new();
         foreach (ClassData classData in groupClassesData.Classes)
         {
-            classes.Add(classData.Name, Timestamp.FromDateTime(DateTime.SpecifyKind(classData.Date, DateTimeKind.Utc)));
+            classes.Add(classData.Name, ((DateTimeOffset)classData.Date).ToUnixTimeSeconds());
         }
         
         await _client!.SetAvailableLabClassesAsync(new SetAvailableLabClassesRequest

@@ -1,5 +1,6 @@
 ﻿using System.Composition;
 using System.Text;
+using DatabaseApp.AppCommunication.Grpc;
 using FluentResults;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
@@ -158,16 +159,17 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Ok(message.ToString() + "\n (кэш)"));
         }
 
-        Result<Dictionary<int,string>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        Result<IEnumerable<ClassInformation>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
         
         if (getAvailableLabClassesResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getAvailableLabClassesResult.Errors.First()));
         }
         
-        foreach (KeyValuePair<int,string> idClassPair in getAvailableLabClassesResult.Value)
+        foreach (ClassInformation classInformation in getAvailableLabClassesResult.Value)
         {
-            message.AppendLine(idClassPair.Value);
+            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            message.AppendLine($"{classInformation.ClassName} {dateTime:d/M}");
         }
 
         await factory.CacheService.SetAsync($"{Constants.AvailableClassesHeader}{getUserGroupResult.Value}", getAvailableLabClassesResult.Value, CacheExpirationTime, cancellationToken);
@@ -198,7 +200,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     
     private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(long userId, IDatabaseCommunicationClient databaseCommunicator)
     {
-        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(userId);
+        Result<IEnumerable<ClassInformation>> result = await databaseCommunicator.GetAvailableLabClasses(userId);
         
         if (result.IsFailed)
         {
@@ -206,9 +208,10 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         }
         
         List<InlineKeyboardButton[]> buttons = [];
-        foreach (KeyValuePair<int,string> idClassPair in result.Value)
+        foreach (ClassInformation classInformation in result.Value)
         {
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData(idClassPair.Value, $"!hop {idClassPair.Key}");
+            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:d/M}", $"!hop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 

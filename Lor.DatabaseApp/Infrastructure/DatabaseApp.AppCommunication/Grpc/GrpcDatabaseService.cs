@@ -113,7 +113,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         
         await reply.StudentsQueue.FromList(queueDto.Value.QueueList);
         reply.ClassName = result.Value.ClassName;
-        reply.ClassDate = Timestamp.FromDateTime(result.Value.Date.ToDateTime(TimeOnly.MinValue));
+        reply.ClassDateUnixTimestamp = ((DateTimeOffset)result.Value.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds();
         
         return await Task.FromResult(reply);
     }

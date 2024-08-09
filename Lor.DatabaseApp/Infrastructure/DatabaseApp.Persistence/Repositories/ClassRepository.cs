@@ -25,7 +25,7 @@ public class ClassRepository(IDatabaseContext context)
             {
                 ClassId = c.Id,
                 ClassName = c.ClassName,
-                ClassDate = Timestamp.FromDateTime(c.Date.ToDateTime(TimeOnly.MinValue))
+                ClassDateUnixTimestamp = ((DateTimeOffset)c.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds()
             })
             .ToListAsync(cancellationToken);
     

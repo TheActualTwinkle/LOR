@@ -28,12 +28,12 @@ public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdate
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
         ServerCallContext context)
     {
-        foreach (KeyValuePair<string, Timestamp> classObject in request.Classes)
+        foreach (KeyValuePair<string, long> classObject in request.Classes)
         {
             DateOnly date;
             try
             {
-                DateTime dateTime = classObject.Value.ToDateTime();
+                DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classObject.Value).DateTime;
                 date = new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
             }
             catch (Exception e)

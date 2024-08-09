@@ -3,7 +3,6 @@ syntax = "proto3";
 option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
 
 import "google/protobuf/empty.proto";
-import "google/protobuf/timestamp.proto";
 
 service Database {  
   rpc GetUserGroup (GetUserGroupRequest) returns (GetUserGroupReply);
@@ -35,7 +34,7 @@ message GetAvailableLabClassesRequest {
 message ClassInformation {
   int32 classId = 1;
   string className = 2;
-  google.protobuf.Timestamp classDate = 3;
+  int64 classDateUnixTimestamp = 3;
 }
 message GetAvailableLabClassesReply {
   repeated ClassInformation classInformation = 1;
@@ -64,7 +63,7 @@ message TryEnqueueInClassRequest {
 message TryEnqueueInClassReply {
   repeated string studentsQueue = 1;
   string className = 2;
-  google.protobuf.Timestamp classDate = 3;
+  int64 classDateUnixTimestamp = 3;
   bool isFailed = 4;
   string errorMessage = 5;
 }
