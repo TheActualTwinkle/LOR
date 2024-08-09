@@ -1,11 +1,10 @@
-﻿using Google.Protobuf;
-using Google.Protobuf.Collections;
+﻿using Google.Protobuf.Collections;
 
 namespace DatabaseApp.Application.Common.ExtensionsMethods;
 
-public static class MapFieldFromDictionaryConverterAsync
+public static class MapFieldFromDictionaryConverter
 {
-    public static async Task<MapField<TKey, TValue>> FromDictionary<TKey, TValue>(this MapField<TKey, TValue> mapField, 
+    public static async Task FromDictionary<TKey, TValue>(this MapField<TKey, TValue> mapField,
         IDictionary<TKey, TValue> dictionary)  
     {
         foreach (var (key, value) in dictionary)
@@ -13,6 +12,6 @@ public static class MapFieldFromDictionaryConverterAsync
             mapField[key] = value;
         }
 
-        return await Task.FromResult(mapField);
+        await Task.FromResult(mapField);
     } 
 }

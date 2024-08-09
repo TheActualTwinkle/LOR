@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DatabaseApp.Application.Common.Converters;
+namespace DatabaseApp.Application.Common.ExtensionsMethods;
 
 public static class FioFormatter
 {
