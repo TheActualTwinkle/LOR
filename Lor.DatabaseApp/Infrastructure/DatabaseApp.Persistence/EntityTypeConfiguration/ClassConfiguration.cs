@@ -21,5 +21,11 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
             .HasColumnName("class_name");
         builder.Property(e => e.Date)
             .HasColumnName("date");
+        
+        builder.HasOne(c => c.Group).WithMany(g => g.Classes)
+            .HasPrincipalKey(g => g.Id)
+            .HasForeignKey(c => c.GroupId)
+            .OnDelete(DeleteBehavior.ClientSetNull)
+            .HasConstraintName("Class_group_id_fkey");
     }
 }
