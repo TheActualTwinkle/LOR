@@ -1,7 +1,6 @@
 ﻿using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
-using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;

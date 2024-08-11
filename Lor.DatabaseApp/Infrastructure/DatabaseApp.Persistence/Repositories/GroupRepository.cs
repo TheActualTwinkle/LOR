@@ -14,7 +14,7 @@ public class GroupRepository(IDatabaseContext context)
 
     public async Task<Group?> GetGroupByGroupId(int groupId, CancellationToken cancellationToken) => 
         await _context.Groups
-            .FirstOrDefaultAsync(u => u.Id == groupId, cancellationToken);
+            .FirstOrDefaultAsync(g => g.Id == groupId, cancellationToken);
 
     public async Task<Dictionary<int, string>?> GetGroups(CancellationToken cancellationToken) => 
         await _context.Groups

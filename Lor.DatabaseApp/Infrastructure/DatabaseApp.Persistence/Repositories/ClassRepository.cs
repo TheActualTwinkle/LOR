@@ -1,8 +1,7 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
+﻿using DatabaseApp.AppCommunication.Class;
 using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
@@ -18,14 +17,14 @@ public class ClassRepository(IDatabaseContext context)
         await _context.Classes
             .FirstOrDefaultAsync(c => c.Id == classId, cancellationToken);
 
-    public async Task<List<ClassInformation>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken) =>
+    public async Task<List<ClassInfoDto>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken) =>
         await _context.Classes
-            .Where(c => c.Group.Id == groupId)
-            .Select(c => new ClassInformation
+            .Where(c => c.GroupId == groupId)
+            .Select(c => new ClassInfoDto
             {
                 ClassId = c.Id,
                 ClassName = c.ClassName,
-                ClassDateUnixTimestamp = ((DateTimeOffset)c.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds()
+                ClassDate = ((DateTimeOffset)c.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds()
             })
             .ToListAsync(cancellationToken);
     

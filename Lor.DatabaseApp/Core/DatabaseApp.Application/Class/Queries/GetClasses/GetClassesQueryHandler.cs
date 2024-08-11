@@ -1,4 +1,4 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
+﻿using DatabaseApp.AppCommunication.Class;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MediatR;
@@ -18,7 +18,7 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork)
 
         if (group is null) return Result.Fail("Группа не найдена.");
 
-        List<ClassInformation>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
+        List<ClassInfoDto>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
 
         if (classes is null) return Result.Fail("Пары не найдены.");
 

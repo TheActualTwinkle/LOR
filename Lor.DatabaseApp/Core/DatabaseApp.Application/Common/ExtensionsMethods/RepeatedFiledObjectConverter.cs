@@ -1,6 +1,4 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
-using DatabaseApp.Domain.Dto;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Google.Protobuf.Collections;
 
 namespace DatabaseApp.Application.Common.ExtensionsMethods;

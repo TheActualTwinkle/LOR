@@ -1,6 +1,5 @@
 ﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Queries.GetClasses;
-using DatabaseApp.Application.Common.Converters;
 using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Queries.GetGroups;
@@ -9,8 +8,7 @@ using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
 using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
-using DatabaseApp.Application.User.Queries.GetUserGroup;
-using DatabaseApp.Domain.Models;
+using DatabaseApp.Application.User.Queries.GetUserInfo;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
@@ -20,19 +18,19 @@ namespace DatabaseApp.AppCommunication.Grpc;
 
 public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
 {
-    public override async Task<GetUserGroupReply> GetUserGroup(GetUserGroupRequest request, ServerCallContext context)
+    public override async Task<GetUserInfoReply> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
     {
-        GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
-        GetUserGroupQueryHandler getUserGroupQueryHandler = new(unitOfWork);
+        GetUserInfoQuery getUserGroupQuery = new() { TelegramId = request.UserId };
+        GetUserInfoQueryHandler getUserGroupQueryHandler = new(unitOfWork);
 
         Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
         if (userDto.IsFailed)
-            return await Task.FromResult(new GetUserGroupReply
+            return await Task.FromResult(new GetUserInfoReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message });
 
-        return await Task.FromResult(new GetUserGroupReply { GroupName = userDto.Value.GroupName });
+        return await Task.FromResult(new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName });
     }
 
     public override async Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
@@ -64,8 +62,13 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         
         GetAvailableLabClassesReply reply = new();
 
-        await reply.ClassInformation.ToRepeatedFieldAsync();
-        
+        await reply.ClassInformation.FromList(classDto.Value.ClassList, dto => new ClassInformation()
+        {
+            ClassId = dto.ClassId,
+            ClassName = dto.ClassName,
+            ClassDateUnixTimestamp = dto.ClassDate
+        });
+
         return await Task.FromResult(reply);
     }
 
@@ -82,8 +85,8 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
             return await Task.FromResult(new TrySetGroupReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message });
 
-        GetUserGroupQuery getUserGroupQuery = new() { TelegramId = request.UserId };
-        GetUserGroupQueryHandler getUserGroupQueryHandler = new(unitOfWork);
+        GetUserInfoQuery getUserGroupQuery = new() { TelegramId = request.UserId };
+        GetUserInfoQueryHandler getUserGroupQueryHandler = new(unitOfWork);
 
         Result<UserDto> userDto = await getUserGroupQueryHandler.Handle(getUserGroupQuery,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -97,7 +100,7 @@ public class GrpcDatabaseService(IUnitOfWork unitOfWork) : Database.DatabaseBase
         CreateQueueCommand createQueueCommand = new() { TelegramId = request.UserId, ClassId = request.ClassId };
         CreateQueueCommandHandler createQueueCommandHandler = new(unitOfWork);
 
-        Result<Class> result = await createQueueCommandHandler.Handle(createQueueCommand,
+        Result<Domain.Models.Class> result = await createQueueCommandHandler.Handle(createQueueCommand,
             new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         if (result.IsFailed)

@@ -1,4 +1,5 @@
-﻿using DatabaseApp.Domain.Models;
+﻿using DatabaseApp.AppCommunication.Class;
+using DatabaseApp.Domain.Models;
 
 namespace DatabaseApp.Domain.Repositories;
 
@@ -23,8 +24,8 @@ public interface IClassRepository : IRepository
     public void Delete(Class someClass);
 
     public Task<Class?> GetClassById(int classId, CancellationToken cancellationToken);
-    
-    public Task<List<AppCommunication.Grpc.ClassInformation>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
+
+    public Task<List<ClassInfoDto>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 
     public Task<List<Class>?> GetOutdatedClasses(CancellationToken cancellationToken);
 }

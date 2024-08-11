@@ -2,5 +2,6 @@
 
 public struct UserDto
 {
-    public required string? GroupName { get; set; }
+    public required string FullName { get; set; }
+    public required string GroupName { get; set; }
 }

@@ -2,7 +2,6 @@
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
-using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -49,7 +48,7 @@ public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdate
                 new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         }
 
-        List<Class>? classList =
+        List<Domain.Models.Class>? classList =
             await unitOfWork.ClassRepository.GetOutdatedClasses(new CancellationTokenSource(TimeSpan.FromSeconds(10))
                 .Token);
         

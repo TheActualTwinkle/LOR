@@ -14,7 +14,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Lor.GroupScheduleApp\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj"/>
         <ProjectReference Include="..\DatabaseApp.Domain\DatabaseApp.Domain.csproj"/>
         <ProjectReference Include="..\..\Infrastructure\DatabaseApp.Persistence\DatabaseApp.Persistence.csproj"/>
     </ItemGroup>
