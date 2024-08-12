@@ -58,6 +58,7 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => "/groups";
     public string Description => "- выводит поддерживаемые группы";
     
+    //
     // TODO: DI? Config?
     private TimeSpan CacheExpirationTime => TimeSpan.FromMinutes(1);
     
@@ -212,7 +213,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         foreach (ClassInformation classInformation in result.Value)
         {
             DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:d/M}", $"!hop {classInformation.ClassId}");
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd/MM}", $"!hop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 
