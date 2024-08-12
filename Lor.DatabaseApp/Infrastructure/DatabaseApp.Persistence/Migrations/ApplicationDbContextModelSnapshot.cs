@@ -31,11 +31,6 @@ namespace DatabaseApp.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("class_name");
-
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date")
                         .HasColumnName("date");
@@ -43,6 +38,11 @@ namespace DatabaseApp.Persistence.Migrations
                     b.Property<int>("GroupId")
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.HasKey("Id")
                         .HasName("Classes_pkey");
@@ -61,10 +61,10 @@ namespace DatabaseApp.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("GroupName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("group_name");
+                        .HasColumnName("name");
 
                     b.HasKey("Id")
                         .HasName("Groups_pkey");
@@ -183,6 +183,7 @@ namespace DatabaseApp.Persistence.Migrations
                     b.HasOne("DatabaseApp.Domain.Models.Group", "Group")
                         .WithMany("Users")
                         .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("User_group_id_fkey");
 

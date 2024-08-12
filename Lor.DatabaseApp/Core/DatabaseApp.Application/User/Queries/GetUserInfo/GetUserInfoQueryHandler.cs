@@ -1,10 +1,11 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.User.Queries.GetUserInfo;
 
-public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork)
+public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<GetUserInfoQuery, Result<UserDto>>
 {
     public async Task<Result<UserDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
@@ -13,12 +14,12 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork)
 
         if (user is null) return Result.Fail("Пользователь не найден. Для авторизации введите /auth <ФИО>");
 
-        Domain.Models.Group? userGroup = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
-        if (userGroup is null) return Result.Fail("Группа не найдена.");
+        if (group is null) return Result.Fail("Группа не найдена.");
 
-        UserDto userDto = new() { FullName = user.FullName, GroupName = userGroup.GroupName };
-
+        UserDto userDto = mapper.Map<UserDto>(new UserDto{ FullName = user.FullName, GroupName = group.Name });
+        
         return Result.Ok(userDto);
     }
 }

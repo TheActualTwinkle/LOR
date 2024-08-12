@@ -17,8 +17,8 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
             .HasColumnName("id");
         builder.Property(e => e.GroupId)
             .HasColumnName("group_id");
-        builder.Property(e => e.ClassName)
-            .HasColumnName("class_name");
+        builder.Property(e => e.Name)
+            .HasColumnName("name");
         builder.Property(e => e.Date)
             .HasColumnName("date");
         
