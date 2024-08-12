@@ -1,5 +1,4 @@
-﻿using DatabaseApp.AppCommunication.Class;
-using DatabaseApp.Domain.Models;
+﻿using DatabaseApp.Domain.Models;
 
 namespace DatabaseApp.Domain.Repositories;
 
@@ -25,7 +24,7 @@ public interface IClassRepository : IRepository
 
     public Task<Class?> GetClassById(int classId, CancellationToken cancellationToken);
 
-    public Task<List<ClassInfoDto>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
+    public Task<List<Class>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 
     public Task<List<Class>?> GetOutdatedClasses(CancellationToken cancellationToken);
 }
@@ -34,7 +33,7 @@ public interface IGroupRepository : IRepository
 {
     public Task AddAsync(Group group, CancellationToken cancellationToken);
     
-    public Task<Dictionary<int, string>?> GetGroups(CancellationToken cancellationToken);
+    public Task<List<Group>?> GetGroups(CancellationToken cancellationToken);
 
     public Task<Group?> GetGroupByGroupId(int groupId, CancellationToken cancellationToken);
 
@@ -51,7 +50,7 @@ public interface IQueueRepository : IRepository
 
     public Task<int> GetCurrentQueueNum(int groupId, int classId, CancellationToken cancellationToken);
 
-    public Task<List<string>?> GetQueueList(uint queueNum, int groupId, int classId,
+    public Task<List<Queue>?> GetQueueList(uint queueNum, int groupId, int classId,
         CancellationToken cancellationToken);
 
     public Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);

@@ -1,20 +1,19 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Group.Queries.GetGroups;
 
-public class GetGroupsQueryHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<EmptyRequest, Result<GroupDto>>
+public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    : IRequestHandler<GetGroupsQuery, Result<List<GroupDto>>>
 {
-    public async Task<Result<GroupDto>> Handle(EmptyRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GroupDto>>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
     {
-        Dictionary<int, string>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        List<Domain.Models.Group>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
 
-        if (groups is null) return Result.Fail("Группы не найдены.");
-
-        GroupDto groupDto = new() { GroupList = groups };
-
-        return Result.Ok(groupDto);
+        if (groups is null || groups.Count == 0) return Result.Fail("Группы не найдены.");
+        
+        return Result.Ok(mapper.From(groups).AdaptToType<List<GroupDto>>());
     }
 }

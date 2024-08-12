@@ -1,5 +1,6 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Class.Command.DeleteClass;
@@ -9,7 +10,9 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
     {
-        foreach (Domain.Models.Class? item in request.OutdatedClassList)
+        List<Domain.Models.Class> classes = request.OutdatedClassList.Adapt<List<Domain.Models.Class>>();
+
+        foreach (Domain.Models.Class item in classes)
         {
             unitOfWork.ClassRepository.Delete(item);
 

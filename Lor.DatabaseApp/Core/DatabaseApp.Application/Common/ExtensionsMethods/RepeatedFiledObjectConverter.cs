@@ -10,7 +10,6 @@ public static class RepeatedFiledObjectConverter
         Func<TSource, T> mapper) 
         where T : IMessage
     {
-        // repeatedField.Clear();
         foreach (var sourceItem in sourceList)
         {
             var targetItem = mapper(sourceItem);

@@ -10,13 +10,13 @@ public class GroupRepository(IDatabaseContext context)
 {
     public async Task<Group?> GetGroupByGroupName(string groupName, CancellationToken cancellationToken) =>
         await _context.Groups
-            .FirstOrDefaultAsync(u => u.GroupName == groupName, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Name == groupName, cancellationToken);
 
     public async Task<Group?> GetGroupByGroupId(int groupId, CancellationToken cancellationToken) => 
         await _context.Groups
             .FirstOrDefaultAsync(g => g.Id == groupId, cancellationToken);
 
-    public async Task<Dictionary<int, string>?> GetGroups(CancellationToken cancellationToken) => 
+    public async Task<List<Group>?> GetGroups(CancellationToken cancellationToken) => 
         await _context.Groups
-            .ToDictionaryAsync(g => g.Id, g => g.GroupName, cancellationToken);
+            .ToListAsync(cancellationToken);
 }

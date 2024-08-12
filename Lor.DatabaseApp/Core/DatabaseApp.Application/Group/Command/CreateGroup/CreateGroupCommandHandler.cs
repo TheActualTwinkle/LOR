@@ -15,7 +15,7 @@ public class CreateGroupCommandHandler(IUnitOfWork unitOfWork)
 
         Domain.Models.Group group = new()
         {
-            GroupName = request.GroupName
+            Name = request.GroupName
         };
 
         await unitOfWork.GroupRepository.AddAsync(group, cancellationToken);

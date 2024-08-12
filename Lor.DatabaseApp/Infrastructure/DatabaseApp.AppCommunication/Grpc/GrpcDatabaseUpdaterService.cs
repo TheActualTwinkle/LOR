@@ -1,26 +1,28 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClass;
+﻿using DatabaseApp.Application.Class;
+using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
+using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
-using DatabaseApp.Domain.Repositories;
+using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using MediatR;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
         foreach (string? groupName in request.GroupNames.ToList())
         {
-            CreateGroupCommand createGroupCommand = new() { GroupName = groupName };
-            CreateGroupCommandHandler createGroupCommandHandler = new(unitOfWork);
-
-            await createGroupCommandHandler.Handle(createGroupCommand,
-                new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+            await mediator.Send(new CreateGroupCommand
+            {
+                GroupName = groupName
+            });
         }
-
+        
         return await Task.FromResult(new Empty());
     }
 
@@ -40,31 +42,28 @@ public class GrpcDatabaseUpdaterService(IUnitOfWork unitOfWork) : DatabaseUpdate
                 Console.WriteLine(e);
                 continue;
             }
-            
-            CreateClassCommand createClassCommand = new() { GroupName = request.GroupName, ClassName = classObject.Key, Date = date };
-            CreateClassCommandHandler createClassCommandHandler = new(unitOfWork);
 
-            await createClassCommandHandler.Handle(createClassCommand,
-                new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+            await mediator.Send(new CreateClassCommand
+            {
+                GroupName = request.GroupName,
+                ClassName = classObject.Key,
+                Date = date
+            });
         }
 
-        List<Domain.Models.Class>? classList =
-            await unitOfWork.ClassRepository.GetOutdatedClasses(new CancellationTokenSource(TimeSpan.FromSeconds(10))
-                .Token);
-        
-        if (classList is null) return new Empty();
+        Result<List<ClassDto>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        DeleteClassCommand deleteClassCommand = new() { OutdatedClassList = classList };
-        DeleteClassCommandHandler deleteClassCommandHandler = new(unitOfWork);
+        if (outdatedClassList.IsFailed) return await Task.FromResult(new Empty());
 
-        await deleteClassCommandHandler.Handle(deleteClassCommand,
-            new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        await mediator.Send(new DeleteClassCommand
+        {
+            OutdatedClassList = outdatedClassList.Value
+        });
 
-        DeleteQueueCommand deleteQueueCommand = new() { OutdatedClaasList = classList };
-        DeleteQueueCommandHandler deleteQueueCommandHandler = new(unitOfWork);
-
-        await deleteQueueCommandHandler.Handle(deleteQueueCommand,
-            new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        await mediator.Send(new DeleteQueueCommand
+        {
+            OutdatedClassList = outdatedClassList.Value
+        });
 
         return await Task.FromResult(new Empty());
     }

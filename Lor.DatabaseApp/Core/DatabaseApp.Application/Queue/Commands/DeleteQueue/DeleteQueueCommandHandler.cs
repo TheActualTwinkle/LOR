@@ -1,5 +1,6 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Queue.Commands.DeleteQueue;
@@ -9,13 +10,15 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteQueueCommand request, CancellationToken cancellationToken)
     {
-        foreach (Domain.Models.Class? item in request.OutdatedClaasList)
+        List<Domain.Models.Class> classes = request.OutdatedClassList.Adapt<List<Domain.Models.Class>>();
+        
+        foreach (Domain.Models.Class item in classes)
         {
             List<Domain.Models.Queue>? listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(item.Id, cancellationToken);
 
-            if (listQueue is null) return Result.Fail("");
+            if (listQueue is null) return Result.Fail("Очередь не найдена");
             
-            foreach (Domain.Models.Queue? queue in listQueue)
+            foreach (Domain.Models.Queue queue in listQueue)
             {
                 unitOfWork.QueueRepository.Delete(queue);
 

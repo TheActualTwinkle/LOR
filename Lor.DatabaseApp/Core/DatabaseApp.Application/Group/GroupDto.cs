@@ -2,5 +2,6 @@
 
 public struct GroupDto
 {
-    public required Dictionary<int, string> GroupList { get; set; }
+    public int Id { get; set; } //TODO: подумать переделать как сделать без id
+    public required string GroupName { get; set; }
 }

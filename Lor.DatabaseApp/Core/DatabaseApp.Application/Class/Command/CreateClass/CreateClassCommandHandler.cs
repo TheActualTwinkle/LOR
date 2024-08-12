@@ -20,11 +20,9 @@ public class CreateClassCommandHandler(IUnitOfWork unitOfWork)
         Domain.Models.Class className = new()
         {
             GroupId = group.Id,
-            ClassName = request.ClassName,
+            Name = request.ClassName,
             Date = request.Date
         };
-
-        //TODO: прописать проверку на существование такой пары
 
         await unitOfWork.ClassRepository.AddAsync(className, cancellationToken);
 

@@ -1,8 +1,9 @@
-﻿using DatabaseApp.AppCommunication.Class;
-
-namespace DatabaseApp.Application.Class;
+﻿namespace DatabaseApp.Application.Class;
 
 public struct ClassDto
 {
-    public required List<ClassInfoDto> ClassList { get; set; }
+    public required int Id { get; set; }
+    public required string ClassName { get; set; }
+    public required DateOnly Date { get; set; }
+    public required int GroupId { get; set; }
 }

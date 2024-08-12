@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
 
-public struct CreateQueueCommand : IRequest<Result<Domain.Models.Class>>
+public struct CreateQueueCommand : IRequest<Result>
 {
     public long TelegramId { get; init; }
 

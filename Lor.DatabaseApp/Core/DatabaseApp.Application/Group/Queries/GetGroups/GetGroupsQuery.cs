@@ -3,6 +3,4 @@ using MediatR;
 
 namespace DatabaseApp.Application.Group.Queries.GetGroups;
 
-public struct GetGroupsQuery : IRequest<Result<GroupDto>>
-{
-}
+public struct GetGroupsQuery : IRequest<Result<List<GroupDto>>>;
