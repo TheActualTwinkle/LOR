@@ -10,7 +10,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? someUser = await unitOfWork.UserRepository.CheckUser(request.TelegramId, request.FullName, cancellationToken);
+        Domain.Models.User? someUser = await unitOfWork.UserRepository.CheckUser(request.TelegramId, await request.FullName.FormatFio(), cancellationToken);
 
         if (someUser is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
 
