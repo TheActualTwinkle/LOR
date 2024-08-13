@@ -171,7 +171,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
         foreach (ClassInformation classInformation in getAvailableLabClassesResult.Value)
         {
             DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
-            message.AppendLine($"{classInformation.ClassName} {dateTime:d/M}");
+            message.AppendLine($"{classInformation.ClassName} {dateTime:dd.MM}");
         }
 
         await factory.CacheService.SetAsync($"{Constants.AvailableClassesHeader}{getUserGroupResult.Value}", getAvailableLabClassesResult.Value, CacheExpirationTime, cancellationToken);
@@ -213,7 +213,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         foreach (ClassInformation classInformation in result.Value)
         {
             DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd/MM}", $"!hop {classInformation.ClassId}");
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"!hop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 

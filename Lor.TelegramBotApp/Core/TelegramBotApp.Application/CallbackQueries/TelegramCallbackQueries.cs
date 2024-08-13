@@ -37,7 +37,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName} {result.Value.ClassesDateTime:d/M}\nОчередь:\n");
+        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}\nОчередь:\n");
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             string labClass = result.Value.StudentsQueue.ElementAt(i);

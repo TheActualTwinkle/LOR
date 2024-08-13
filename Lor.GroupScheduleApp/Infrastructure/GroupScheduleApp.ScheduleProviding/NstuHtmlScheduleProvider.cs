@@ -58,8 +58,12 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
 
     public async Task<IEnumerable<GroupClassesData>> GetGroupClassesDataAsync()
     {
-        List<GroupClassesData> groupClassesData = [];
-        
+        List<GroupClassesData> groupClassesData = [new GroupClassesData("АВТ-218", [
+            new ClassData("Вычмат", new DateTime(2024, 8, 13, 0, 0, 0)), 
+            new ClassData("ООП", new DateTime(2024, 8, 20, 0, 0, 0))
+        ])]; // [] TODO: Testing
+
+        return groupClassesData; // remove TODO: Testing
         foreach (string url in _urls)
         {
             List<ClassData> classesData = [];
