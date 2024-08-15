@@ -10,22 +10,20 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteQueueCommand request, CancellationToken cancellationToken)
     {
-        List<Domain.Models.Class> classes = request.OutdatedClassList.Adapt<List<Domain.Models.Class>>();
-        
-        foreach (Domain.Models.Class item in classes)
+        foreach (var item in request.OutdatedClassList)
         {
-            List<Domain.Models.Queue>? listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(item.Id, cancellationToken);
+            List<Domain.Models.Queue>? listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(item, cancellationToken);
 
             if (listQueue is null) return Result.Fail("Очередь не найдена");
             
             foreach (Domain.Models.Queue queue in listQueue)
             {
                 unitOfWork.QueueRepository.Delete(queue);
-
-                await unitOfWork.SaveDbChangesAsync(cancellationToken);
             }
         }
-
+        
+        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        
         return Result.Ok();
     }
 }

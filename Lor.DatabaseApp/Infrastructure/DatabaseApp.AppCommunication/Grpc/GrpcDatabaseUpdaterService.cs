@@ -4,6 +4,7 @@ using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
+using DatabaseApp.Domain.Models;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -23,7 +24,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
             });
         }
         
-        return await Task.FromResult(new Empty());
+        return new Empty();
     }
 
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
@@ -51,20 +52,22 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
             });
         }
 
-        Result<List<ClassDto>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
+        Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        if (outdatedClassList.IsFailed) return await Task.FromResult(new Empty());
-
+        if (outdatedClassList.IsFailed) return new Empty();
+        
+        if (outdatedClassList.Value.Count == 0) return new Empty();
+        
         await mediator.Send(new DeleteClassCommand
         {
             OutdatedClassList = outdatedClassList.Value
         });
-
+        
         await mediator.Send(new DeleteQueueCommand
         {
             OutdatedClassList = outdatedClassList.Value
         });
-
-        return await Task.FromResult(new Empty());
+        
+        return new Empty();
     }
 }

@@ -26,7 +26,7 @@ public interface IClassRepository : IRepository
 
     public Task<List<Class>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 
-    public Task<List<Class>?> GetOutdatedClasses(CancellationToken cancellationToken);
+    public Task<List<int>?> GetOutdatedClassesId(CancellationToken cancellationToken);
 }
 
 public interface IGroupRepository : IRepository

@@ -1,23 +1,22 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Class.Command.DeleteClass;
 
-public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
+public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<DeleteClassCommand, Result>
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
-    {
-        List<Domain.Models.Class> classes = request.OutdatedClassList.Adapt<List<Domain.Models.Class>>();
-
-        foreach (Domain.Models.Class item in classes)
+    { ;
+        foreach (var item in request.OutdatedClassList)
         {
-            unitOfWork.ClassRepository.Delete(item);
-
-            await unitOfWork.SaveDbChangesAsync(cancellationToken);
+            unitOfWork.ClassRepository.Delete((await unitOfWork.ClassRepository.GetClassById(item, cancellationToken))!);
         }
+        
+        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
         
         return Result.Ok();
     }
