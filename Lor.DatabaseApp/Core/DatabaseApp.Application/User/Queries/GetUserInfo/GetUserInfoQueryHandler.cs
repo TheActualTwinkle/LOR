@@ -16,10 +16,6 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 
         Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
-        if (group is null) return Result.Fail("Группа не найдена.");
-
-        UserDto userDto = mapper.Map<UserDto>(new UserDto{ FullName = user.FullName, GroupName = group.Name });
-        
-        return Result.Ok(userDto);
+        return group is null ? Result.Fail("Группа не найдена.") : Result.Ok(mapper.Map<UserDto>(new UserDto{ FullName = user.FullName, GroupName = group.Name }));
     }
 }

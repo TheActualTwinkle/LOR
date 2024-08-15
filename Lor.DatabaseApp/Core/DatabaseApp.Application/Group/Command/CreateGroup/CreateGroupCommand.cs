@@ -5,5 +5,5 @@ namespace DatabaseApp.Application.Group.Command.CreateGroup;
 
 public struct CreateGroupCommand : IRequest<Result>
 {
-    public string GroupName { get; init; }
+    public required string GroupName { get; init; }
 }

@@ -14,6 +14,6 @@ public class GetClassQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 
         if (someClass is null) return Result.Fail("Такой пары не существует.");
 
-        return await Task.FromResult(mapper.From(someClass).AdaptToType<ClassDto>());
+        return mapper.From(someClass).AdaptToType<ClassDto>();
     }
 }

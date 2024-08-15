@@ -6,14 +6,12 @@ using MediatR;
 namespace DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 
 public class GetOutdatedClassesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper) 
-    : IRequestHandler<GetOutdatedClassesQuery, Result<List<ClassDto>>>
+    : IRequestHandler<GetOutdatedClassesQuery, Result<List<int>>>
 {
-    public async Task<Result<List<ClassDto>>> Handle(GetOutdatedClassesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<int>>> Handle(GetOutdatedClassesQuery request, CancellationToken cancellationToken)
     {
-        List<Domain.Models.Class>? outdatedClasses = await unitOfWork.ClassRepository.GetOutdatedClasses(cancellationToken);
+        List<int>? outdatedClasses = await unitOfWork.ClassRepository.GetOutdatedClassesId(cancellationToken);
 
-        if (outdatedClasses is null || outdatedClasses.Count == 0) return Result.Fail("Нет устаревших пар");
-
-        return await Task.FromResult(mapper.Map<List<ClassDto>>(outdatedClasses));
+        return outdatedClasses is null ? Result.Fail("Нет устаревших пар") : outdatedClasses;
     }
 }

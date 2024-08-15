@@ -6,8 +6,8 @@ public class CreateClassCommandValidator : AbstractValidator<CreateClassCommand>
 {
     public CreateClassCommandValidator()
     {
-        RuleFor(x => x.GroupName).NotEmpty();
-        RuleFor(x => x.ClassName).NotEmpty();
-        RuleFor(x => x.Date).NotEmpty();
+        RuleFor(x => x.GroupName).NotEmpty().NotNull();
+        RuleFor(x => x.ClassName).NotEmpty().NotNull();
+        RuleFor(x => x.Date).NotEmpty().NotNull();
     }
 }

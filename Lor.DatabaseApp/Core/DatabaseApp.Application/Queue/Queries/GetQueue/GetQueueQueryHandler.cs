@@ -22,8 +22,6 @@ public class GetQueueQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
             await unitOfWork.QueueRepository.GetQueueList(queueNum, user.GroupId, request.ClassId,
                 cancellationToken);
 
-        if (queueList is null || queueList.Count == 0) return Result.Fail("Очередь не найдена.");
-        
-        return Result.Ok(mapper.From(queueList).AdaptToType<List<QueueDto>>());
+        return queueList is null ? Result.Fail("Очередь не найдена.") : Result.Ok(mapper.From(queueList).AdaptToType<List<QueueDto>>());
     }
 }

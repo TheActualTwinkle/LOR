@@ -6,6 +6,6 @@ public class Class : IEntity
     public string Name { get; init; }
     public DateOnly Date { get; init; }
     public int GroupId { get; init; }
-    public Group Group { get; init; } = null!;
+    public Group Group { get; init; }
     public ICollection<Queue> Queues { get; init; } = null!;
 }

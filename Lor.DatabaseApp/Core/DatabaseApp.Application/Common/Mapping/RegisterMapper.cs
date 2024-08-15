@@ -11,7 +11,7 @@ public class RegisterMapper : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<Domain.Models.Class, ClassDto>()
-            .Map(dest => dest.ClassName, src => src.Name)
+            .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.Date, src => src.Date)
             .Map(dest => dest.GroupId, src => src.GroupId);
         config.NewConfig<Domain.Models.Group, GroupDto>()

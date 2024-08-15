@@ -7,6 +7,6 @@ public class GetQueueQueryValidator : AbstractValidator<GetQueueQuery>
     public GetQueueQueryValidator()
     {
         RuleFor(x => x.TelegramId).GreaterThan(0);
-        RuleFor(x => x.ClassId).NotNull(); //TODO: переделать
+        RuleFor(x => x.ClassId).GreaterThan(0);
     }
 }

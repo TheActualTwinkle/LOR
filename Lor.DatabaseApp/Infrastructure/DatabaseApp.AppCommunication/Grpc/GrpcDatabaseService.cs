@@ -27,10 +27,10 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
 
         if (userDto.IsFailed)
-            return await Task.FromResult(new GetUserInfoReply
-                { IsFailed = true, ErrorMessage = userDto.Errors.First().Message });
+            return new GetUserInfoReply
+                { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        return await Task.FromResult(new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName });
+        return new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName };
     }
 
     public override async Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
@@ -46,7 +46,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             reply.IdGroupsMap.Add(item.Id, item.GroupName);
         }
 
-        return await Task.FromResult(reply);
+        return reply;
     }
 
     public override async Task<GetAvailableLabClassesReply> GetAvailableLabClasses(
@@ -58,19 +58,19 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
 
         if (classDto.IsFailed)
-            return await Task.FromResult(new GetAvailableLabClassesReply
-                { IsFailed = true, ErrorMessage = classDto.Errors.First().Message });
+            return new GetAvailableLabClassesReply
+                { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
 
         GetAvailableLabClassesReply reply = new();
 
         await reply.ClassInformation.FromList<ClassInformation, ClassDto>(classDto.Value, dto => new ClassInformation()
         {
             ClassId = dto.Id,
-            ClassName = dto.ClassName,
+            ClassName = dto.Name,
             ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds()
         });
 
-        return await Task.FromResult(reply);
+        return reply;
     }
 
     public override async Task<TrySetGroupReply> TrySetGroup(TrySetGroupRequest request, ServerCallContext context)
@@ -83,8 +83,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
 
         if (result.IsFailed)
-            return await Task.FromResult(new TrySetGroupReply
-                { IsFailed = true, ErrorMessage = result.Errors.First().Message });
+            return new TrySetGroupReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
 
         Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
         {
@@ -92,10 +92,10 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
 
         if (userDto.IsFailed)
-            return await Task.FromResult(new TrySetGroupReply
-                { IsFailed = true, ErrorMessage = userDto.Errors.First().Message });
+            return new TrySetGroupReply
+                { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        return await Task.FromResult(new TrySetGroupReply { FullName = await request.FullName.FormatFio(), GroupName = userDto.Value.GroupName });
+        return new TrySetGroupReply { FullName = await request.FullName.FormatFio(), GroupName = userDto.Value.GroupName };
     }
 
     public override async Task<TryEnqueueInClassReply> TryEnqueueInClass(TryEnqueueInClassRequest request,
@@ -107,8 +107,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
         
         if (classDto.IsFailed)
-            return await Task.FromResult(new TryEnqueueInClassReply
-                { IsFailed = true, ErrorMessage = classDto.Errors.First().Message });
+            return new TryEnqueueInClassReply
+                { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
         
         Result result = await mediator.Send(new CreateQueueCommand
         {
@@ -117,8 +117,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
         
         if (result.IsFailed)
-            return await Task.FromResult(new TryEnqueueInClassReply
-                { IsFailed = true, ErrorMessage = result.Errors.First().Message });
+            return new TryEnqueueInClassReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
 
         Result<List<QueueDto>> queueDto = await mediator.Send(new GetQueueQuery
         {
@@ -127,8 +127,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         });
 
         if (queueDto.IsFailed)
-            return await Task.FromResult(new TryEnqueueInClassReply
-                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message });
+            return new TryEnqueueInClassReply
+                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
         
         TryEnqueueInClassReply reply = new();
         
@@ -137,9 +137,9 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             reply.StudentsQueue.Add(item.FullName);
         }
         
-        reply.ClassName = classDto.Value.ClassName;
+        reply.ClassName = classDto.Value.Name;
         reply.ClassDateUnixTimestamp = ((DateTimeOffset)classDto.Value.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds();
         
-        return await Task.FromResult(reply);
+        return reply;
     }
 }

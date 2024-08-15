@@ -7,6 +7,6 @@ public class CreateQueueCommandValidator : AbstractValidator<CreateQueueCommand>
     public CreateQueueCommandValidator()
     {
         RuleFor(x => x.TelegramId).GreaterThan(0);
-        RuleFor(x => x.ClassId).NotEmpty();
+        RuleFor(x => x.ClassId).GreaterThan(0);
     }
 }

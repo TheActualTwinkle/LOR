@@ -20,8 +20,6 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 
         List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
 
-        if (classes is null || classes.Count == 0) return Result.Fail("Пары не найдены.");
-        
-        return Result.Ok(mapper.From(classes).AdaptToType<List<ClassDto>>());
+        return classes is null ? Result.Fail("Пары не найдены.") : Result.Ok(mapper.From(classes).AdaptToType<List<ClassDto>>());
     }
 }

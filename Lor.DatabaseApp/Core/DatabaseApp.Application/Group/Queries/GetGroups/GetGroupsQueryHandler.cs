@@ -12,8 +12,6 @@ public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         List<Domain.Models.Group>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
 
-        if (groups is null || groups.Count == 0) return Result.Fail("Группы не найдены.");
-        
-        return Result.Ok(mapper.From(groups).AdaptToType<List<GroupDto>>());
+        return groups is null ? Result.Fail("Группы не найдены.") : Result.Ok(mapper.From(groups).AdaptToType<List<GroupDto>>());
     }
 }

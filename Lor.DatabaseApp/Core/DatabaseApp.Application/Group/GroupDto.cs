@@ -2,6 +2,6 @@
 
 public struct GroupDto
 {
-    public int Id { get; set; } //TODO: подумать переделать как сделать без id
+    public required int Id { get; set; }
     public required string GroupName { get; set; }
 }

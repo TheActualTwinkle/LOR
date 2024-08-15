@@ -58,15 +58,17 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
         
         if (outdatedClassList.Value.Count == 0) return new Empty();
         
+        await mediator.Send(new DeleteQueueCommand
+        {
+            OutdatedClassList = outdatedClassList.Value
+        });
+        
         await mediator.Send(new DeleteClassCommand
         {
             OutdatedClassList = outdatedClassList.Value
         });
         
-        await mediator.Send(new DeleteQueueCommand
-        {
-            OutdatedClassList = outdatedClassList.Value
-        });
+       
         
         return new Empty();
     }
