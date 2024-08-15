@@ -17,9 +17,15 @@ public class ClassConfiguration : IEntityTypeConfiguration<Class>
             .HasColumnName("id");
         builder.Property(e => e.GroupId)
             .HasColumnName("group_id");
-        builder.Property(e => e.ClassName)
-            .HasColumnName("class_name");
+        builder.Property(e => e.Name)
+            .HasColumnName("name");
         builder.Property(e => e.Date)
             .HasColumnName("date");
+        
+        builder.HasOne(c => c.Group).WithMany(g => g.Classes)
+            .HasPrincipalKey(g => g.Id)
+            .HasForeignKey(c => c.GroupId)
+            .OnDelete(DeleteBehavior.ClientSetNull)
+            .HasConstraintName("Class_group_id_fkey");
     }
 }

@@ -2,6 +2,7 @@
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
+using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 
 namespace TelegramBotApp.AppCommunication;
@@ -18,11 +19,11 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return Task.CompletedTask;
     }
     
-    public async Task<Result<string>> GetUserGroup(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)
     {
-        GetUserGroupReply reply = await _client!.GetUserGroupAsync(new GetUserGroupRequest { UserId = userId }, cancellationToken: cancellationToken);
+        GetUserInfoReply reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth <ФИО>") : Result.Ok(reply.GroupName);
+        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth <ФИО>") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
     }
 
     public async Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default)
@@ -32,27 +33,26 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return Result.Ok(groups);
     }
 
-    public async Task<Result<Dictionary<int, string>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
     {
         GetAvailableLabClassesReply reply = await _client!.GetAvailableLabClassesAsync(new GetAvailableLabClassesRequest { UserId = userId }, cancellationToken: cancellationToken);
         
-        if (reply.IsFailed) return Result.Fail<Dictionary<int, string>>(reply.ErrorMessage);
-        
-        Dictionary<int, string> classes = reply.IdClassMap.ToDictionary(pair => pair.Key, pair => pair.Value);
-        return Result.Ok(classes);
+        if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
+
+        return reply.ClassInformation.ToList();
     }
 
     public async Task<Result<string>> TrySetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
     {
         TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"Группа {reply.GroupName} успешно установлена!");
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
     public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
     {
         TryEnqueueInClassReply reply = await _client!.TryEnqueueInClassAsync(new TryEnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult(reply.StudentsQueue, reply.ClassName));
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult(reply.StudentsQueue, reply.ClassName, DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime));
     }
 }

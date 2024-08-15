@@ -2,5 +2,7 @@
 
 public struct QueueDto
 {
-    public required List<string> QueueList { get; set; }
+    public required int ClassId { get; set; }
+    public required string FullName { get; set; }
+    public required uint QueueNum { get; set; }
 }

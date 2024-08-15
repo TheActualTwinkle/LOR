@@ -4,24 +4,25 @@ option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
 
 import "google/protobuf/empty.proto";
 
-service Database {  
-  rpc GetUserGroup (GetUserGroupRequest) returns (GetUserGroupReply);
-  
+service Database {
+  rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoReply);
+
   rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
   rpc GetAvailableLabClasses (GetAvailableLabClassesRequest) returns (GetAvailableLabClassesReply);
-  
+
   rpc TrySetGroup (TrySetGroupRequest) returns (TrySetGroupReply);
   rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
 }
 
-message GetUserGroupRequest {
+message GetUserInfoRequest {
   int64 userId = 1;
 }
 
-message GetUserGroupReply {
-  string groupName = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
+message GetUserInfoReply {
+  string fullName = 1;
+  string groupName = 2;
+  bool isFailed = 3;
+  string errorMessage = 4;
 }
 
 message GetAvailableGroupsReply {
@@ -31,9 +32,13 @@ message GetAvailableGroupsReply {
 message GetAvailableLabClassesRequest {
   int64 userId = 1;
 }
-
+message ClassInformation {
+  int32 classId = 1;
+  string className = 2;
+  int64 classDateUnixTimestamp = 3;
+}
 message GetAvailableLabClassesReply {
-  map<int32, string> idClassMap = 1;
+  repeated ClassInformation classInformation = 1;
   bool isFailed = 2;
   string errorMessage = 3;
 }
@@ -46,8 +51,9 @@ message TrySetGroupRequest {
 
 message TrySetGroupReply {
   string groupName = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
+  string fullName = 2;
+  bool isFailed = 3;
+  string errorMessage = 4;
 }
 
 message TryEnqueueInClassRequest {
@@ -58,6 +64,7 @@ message TryEnqueueInClassRequest {
 message TryEnqueueInClassReply {
   repeated string studentsQueue = 1;
   string className = 2;
-  bool isFailed = 3;
-  string errorMessage = 4;
+  int64 classDateUnixTimestamp = 3;
+  bool isFailed = 4;
+  string errorMessage = 5;
 }

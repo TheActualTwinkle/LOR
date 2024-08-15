@@ -22,15 +22,15 @@ public class QueueConfiguration : IEntityTypeConfiguration<Queue>
         builder.Property(e => e.QueueNum)
             .HasColumnName("queue_num");
 
-        builder.HasOne(d => d.Class).WithMany(p => p.Queues)
-            .HasPrincipalKey(p => p.Id)
-            .HasForeignKey(d => d.ClassId)
+        builder.HasOne(q => q.Class).WithMany(c => c.Queues)
+            .HasPrincipalKey(c => c.Id)
+            .HasForeignKey(q => q.ClassId)
             .OnDelete(DeleteBehavior.ClientSetNull)
             .HasConstraintName("Queue_classes_id_fkey");
 
-        builder.HasOne(d => d.User).WithMany(p => p.Queues)
-            .HasPrincipalKey(p => p.Id)
-            .HasForeignKey(d => d.UserId)
+        builder.HasOne(q => q.User).WithMany(u => u.Queues)
+            .HasPrincipalKey(u => u.Id)
+            .HasForeignKey(q => q.UserId)
             .OnDelete(DeleteBehavior.ClientSetNull)
             .HasConstraintName("Queue_user_id_fkey");
     }

@@ -6,6 +6,6 @@ public class User : IEntity
     public string FullName { get; init; }
     public long TelegramId { get; init; }
     public int GroupId { get; init; }
-    public Group? Group { get; init; }
-    public ICollection<Queue> Queues { get; init; }
+    public Group Group { get; init; } = null!;
+    public ICollection<Queue> Queues { get; init; } = null!;
 }

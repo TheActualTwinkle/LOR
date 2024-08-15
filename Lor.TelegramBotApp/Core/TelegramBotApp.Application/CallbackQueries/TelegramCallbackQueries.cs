@@ -2,6 +2,7 @@
 using System.Text;
 using FluentResults;
 using TelegramBotApp.AppCommunication;
+using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
@@ -36,7 +37,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName}\nОчередь:\n");
+        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}\nОчередь:\n");
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             string labClass = result.Value.StudentsQueue.ElementAt(i);

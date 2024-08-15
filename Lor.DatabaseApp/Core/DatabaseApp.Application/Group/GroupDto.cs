@@ -2,5 +2,6 @@
 
 public struct GroupDto
 {
-    public required Dictionary<int, string> GroupList { get; set; }
+    public required int Id { get; set; }
+    public required string GroupName { get; set; }
 }

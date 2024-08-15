@@ -1,7 +1,6 @@
 services:
   database:
     image: postgres:latest
-    restart: always
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}

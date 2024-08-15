@@ -1,7 +1,9 @@
 ﻿using System.Composition;
 using System.Text;
+using DatabaseApp.AppCommunication.Grpc;
 using FluentResults;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
@@ -56,6 +58,7 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => "/groups";
     public string Description => "- выводит поддерживаемые группы";
     
+    //
     // TODO: DI? Config?
     private TimeSpan CacheExpirationTime => TimeSpan.FromMinutes(1);
     
@@ -101,10 +104,10 @@ public class SetGroupTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<string> result = await factory.DatabaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsSuccess == true)
         {
-            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value}"));
+            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value.GroupName} как {result.Value.FullName}"));
         }
         
         IEnumerable<string> argumentsList = arguments.ToList();
@@ -139,7 +142,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<string> getUserGroupResult = await factory.DatabaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        Result<UserInfo> getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (getUserGroupResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getUserGroupResult.Errors.First()));
@@ -158,16 +161,17 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Ok(message.ToString() + "\n (кэш)"));
         }
 
-        Result<Dictionary<int,string>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        Result<IEnumerable<ClassInformation>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
         
         if (getAvailableLabClassesResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getAvailableLabClassesResult.Errors.First()));
         }
         
-        foreach (KeyValuePair<int,string> idClassPair in getAvailableLabClassesResult.Value)
+        foreach (ClassInformation classInformation in getAvailableLabClassesResult.Value)
         {
-            message.AppendLine(idClassPair.Value);
+            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            message.AppendLine($"{classInformation.ClassName} {dateTime:dd.MM}");
         }
 
         await factory.CacheService.SetAsync($"{Constants.AvailableClassesHeader}{getUserGroupResult.Value}", getAvailableLabClassesResult.Value, CacheExpirationTime, cancellationToken);
@@ -186,7 +190,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
-        Result<string> result = await databaseCommunicator.GetUserGroup(chatId, cancellationToken);
+        Result<UserInfo> result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
@@ -198,7 +202,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     
     private async Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(long userId, IDatabaseCommunicationClient databaseCommunicator)
     {
-        Result<Dictionary<int,string>> result = await databaseCommunicator.GetAvailableLabClasses(userId);
+        Result<IEnumerable<ClassInformation>> result = await databaseCommunicator.GetAvailableLabClasses(userId);
         
         if (result.IsFailed)
         {
@@ -206,9 +210,10 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         }
         
         List<InlineKeyboardButton[]> buttons = [];
-        foreach (KeyValuePair<int,string> idClassPair in result.Value)
+        foreach (ClassInformation classInformation in result.Value)
         {
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData(idClassPair.Value, $"!hop {idClassPair.Key}");
+            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"!hop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 

@@ -15,7 +15,7 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
         builder.Property(e => e.Id)
             .UseIdentityAlwaysColumn()
             .HasColumnName("id");
-        builder.Property(e => e.GroupName)
-            .HasColumnName("group_name");
+        builder.Property(e => e.Name)
+            .HasColumnName("name");
     }
 }
