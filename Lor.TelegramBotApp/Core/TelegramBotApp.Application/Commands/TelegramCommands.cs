@@ -58,7 +58,6 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => "/groups";
     public string Description => "- выводит поддерживаемые группы";
     
-    //
     // TODO: DI? Config?
     private TimeSpan CacheExpirationTime => TimeSpan.FromMinutes(1);
     
