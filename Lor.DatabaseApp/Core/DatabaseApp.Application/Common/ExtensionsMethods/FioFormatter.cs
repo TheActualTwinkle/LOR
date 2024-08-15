@@ -1,32 +1,29 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DatabaseApp.Application.Common.ExtensionsMethods;
-
 public static class FioFormatter
 {
-    public static async Task<string> FormatFio(this string fio)
+    public static async Task<string> FormatFio(this string fullName)
     {
-        Match match = Regex.Match(fio,
-            @"^(?<lastName>[А-Яа-я]+)\s+(?<firstName>[А-Яа-я]+)\s+(?<middleName>[А-Яа-я]+)$");
+        Match match = Regex.Match(fullName,
+            @"^(?<lastName>\p{L}+)\s+(?<firstName>\p{L}+)(\s+(?<middleName>\p{L}+))?$");
 
-        if (match.Success)
-        {
-            string lastName = match.Groups["lastName"].Value;
-            string firstName = match.Groups["firstName"].Value;
-            string middleName = match.Groups["middleName"].Value;
-
-            string formattedLastName = await lastName.FormatPart();
-            string formattedFirstName = await firstName.FormatPart();
-            string formattedMiddleName = await middleName.FormatPart();
-
-            return await Task.FromResult($"{formattedLastName} {formattedFirstName} {formattedMiddleName}");
-        }
-        else
+        if (!match.Success)
         {
             throw new ArgumentException("Некорректное ФИО");
         }
+
+        string lastName = match.Groups["lastName"].Value;
+        string firstName = match.Groups["firstName"].Value;
+        string middleName = match.Groups["middleName"].Value;
+
+        string formattedLastName = await lastName.FormatPart();
+        string formattedFirstName = await firstName.FormatPart();
+        string formattedMiddleName = string.IsNullOrEmpty(middleName) ? string.Empty : await middleName.FormatPart();
+
+        return $"{formattedLastName} {formattedFirstName} {formattedMiddleName}".Trim();
+
     }
 
     private static async Task<string> FormatPart(this string part) =>
-        await Task.FromResult(part.Substring(0, 1).ToUpper() + part.Substring(1).ToLower());
+        await Task.FromResult(part[..1].ToUpper() + part[1..].ToLower());
 }
