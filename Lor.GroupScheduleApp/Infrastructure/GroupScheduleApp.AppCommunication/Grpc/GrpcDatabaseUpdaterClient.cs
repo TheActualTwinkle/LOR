@@ -1,6 +1,4 @@
 ﻿using DatabaseApp.AppCommunication.Grpc;
-using Google.Protobuf.Collections;
-using Google.Protobuf.WellKnownTypes;
 using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.Shared;
 using Grpc.Net.Client;

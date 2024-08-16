@@ -1,6 +1,5 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Queue.Commands.DeleteQueue;

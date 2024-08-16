@@ -1,5 +1,4 @@
-﻿using DatabaseApp.Application.Class;
-using FluentResults;
+﻿using FluentResults;
 using MediatR;
 
 namespace DatabaseApp.Application.Queue.Commands.DeleteQueue;

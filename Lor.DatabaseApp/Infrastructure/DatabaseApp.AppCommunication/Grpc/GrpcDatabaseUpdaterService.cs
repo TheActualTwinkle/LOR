@@ -1,10 +1,8 @@
-﻿using DatabaseApp.Application.Class;
-using DatabaseApp.Application.Class.Command.CreateClass;
+﻿using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
-using DatabaseApp.Domain.Models;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;

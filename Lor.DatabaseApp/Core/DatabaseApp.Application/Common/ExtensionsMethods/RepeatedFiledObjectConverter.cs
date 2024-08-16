@@ -16,6 +16,6 @@ public static class RepeatedFiledObjectConverter
             repeatedField.Add(targetItem);
         }
 
-        return repeatedField;
+        return await Task.FromResult(repeatedField);
     }
 }
