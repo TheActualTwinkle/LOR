@@ -23,12 +23,14 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
     }
 
     #endregion
+    
+    public const string CommandPrefix = "/";
 
     public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
     public IAuthorizationService AuthorizationService => authorizationService;
     public ICacheService CacheService => cacheService;
     
-    private static readonly ImportInfo s_info = new();
+    private static readonly ImportInfo Info = new();
     
     static TelegramCommandFactory()
     {
@@ -45,7 +47,7 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
         }
         
         using CompositionHost container = configuration.CreateContainer();
-        container.SatisfyImports(s_info);   
+        container.SatisfyImports(Info);   
     }
     
     public async Task<ExecutionResult> StartCommand(string commandString, long chatId, CancellationToken token)
@@ -54,7 +56,7 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
         
         if (command == null)
         {
-            return new ExecutionResult(Result.Fail("Команда не найдена\nДля получения списка команд введите /help"));
+            return new ExecutionResult(Result.Fail($"Команда не найдена\nДля получения списка команд введите {CommandPrefix}help"));
         }
 
         return await command.Execute(chatId, this, GetArguments(commandString), token);
@@ -62,12 +64,12 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
     
     public static IEnumerable<string> GetAllCommandsInfo()
     {
-        return s_info.Commands.Select(x => $"{x.Metadata.Command} {x.Metadata.Description}");
+        return Info.Commands.Select(x => $"{x.Metadata.Command} {x.Metadata.Description}");
     }
 
-    private ITelegramCommand? GetCommand(string command)
+    private static ITelegramCommand? GetCommand(string command)
     {
-        return s_info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
+        return Info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
     }
     
     private string[] GetArguments(string commandString)

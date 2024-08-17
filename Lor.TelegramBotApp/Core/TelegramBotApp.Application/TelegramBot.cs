@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using System.Text.RegularExpressions;
+using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -13,7 +14,7 @@ using TelegramBotApp.Caching.Interfaces;
 
 namespace TelegramBotApp.Application;
 
-public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions) : ITelegramBot
+public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions) : ITelegramBot
 {
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
@@ -48,6 +49,12 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         Task.Run(async () =>
         {
             using CancellationTokenSource cts = new(_settings.Timeout);
+            
+            if (message.ReplyToMessage is not null && message.ReplyToMessage.From?.Id == bot.BotId)
+            {
+                await HandleMessageReply(bot, message, chatId, cts.Token);
+                return;
+            }
             
             try
             {
@@ -117,4 +124,42 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         
         await bot.AnswerCallbackQueryAsync(callbackQuery.Id, cancellationToken: cancellationToken);
     }
+    
+    private async Task HandleMessageReply(ITelegramBotClient bot, Message message, long chatId, CancellationToken cancellationToken)
+    {
+        if (message.ReplyToMessage is not {} reply) return;
+        if (reply.Text is not {} replyText) return;
+        if (message.Text is not {} text) return;
+
+        Match commandMatch = TelegramCommand().Match(replyText);
+        if (commandMatch.Success == false)
+        {
+            Console.WriteLine("Can`t handle message reply: ReplyToMessage has no command");
+            return;
+        }
+        
+        string commandString = commandMatch.Value.Trim();
+        
+        try
+        {
+            var wholeCommandString = $"{commandString} {text}";
+            ExecutionResult result = await _telegramCommandFactory.StartCommand(wholeCommandString, chatId, cancellationToken);
+            
+            if (result.Result.IsFailed)
+            {
+                await SendErrorMessage(bot, chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
+            }
+            else
+            {
+                await bot.SendTextMessageAsync(chatId, result.Result.Value, replyMarkup: result.ReplyMarkup, cancellationToken: cancellationToken);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"HandleMessageReply Error: {e.Message}");
+        }
+    }
+
+    [GeneratedRegex(@"\/\w+\s")]
+    private static partial Regex TelegramCommand();
 }

@@ -12,10 +12,10 @@ using TelegramBotApp.Application.Interfaces;
 namespace TelegramBotApp.Application.CallbackQueries;
 
 [Export(typeof(ICallbackQuery))]
-[ExportMetadata(nameof(Query), "!hop")]
+[ExportMetadata(nameof(Query), $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop")]
 public class EnqueueCallbackQuery : ICallbackQuery
 {
-    public string Query => "!hop";
+    public string Query => $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop";
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {        
