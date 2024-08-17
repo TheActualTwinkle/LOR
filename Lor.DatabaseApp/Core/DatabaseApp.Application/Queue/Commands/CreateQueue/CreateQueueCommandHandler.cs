@@ -16,7 +16,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         Domain.Models.User? user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден. Для авторизации введите /auth <ФИО>");
+        if (user is null) return Result.Fail("Пользователь не найден.");
 
         Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
@@ -26,15 +26,14 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         
         if (someClass is null) return Result.Fail("Пара не найдена.");
 
-        int queueNum =
-            await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken);
+        uint queueNum =
+             Convert.ToUInt32(await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken));
 
         bool queueExist =
             await unitOfWork.QueueRepository.CheckQueue(user.Id, user.GroupId, request.ClassId, cancellationToken);
 
         if (queueExist)
         {
-            // TODO: Cache it.
             return Result.Fail($"Ваша запись на пару \"{someClass.Name} - {someClass.Date:dd.MM}\" уже создана.");
         }
             
@@ -42,7 +41,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         {
             UserId = user.Id,
             ClassId = request.ClassId,
-            QueueNum = Convert.ToUInt32(queueNum) + 1
+            QueueNum = queueNum + 1
         };
         
         await unitOfWork.QueueRepository.AddAsync(queue, cancellationToken);

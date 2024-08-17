@@ -12,7 +12,7 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
         Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден. Для авторизации введите /auth <ФИО>");
+        if (user is null) return Result.Fail("Пользователь не найден.");
 
         Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 

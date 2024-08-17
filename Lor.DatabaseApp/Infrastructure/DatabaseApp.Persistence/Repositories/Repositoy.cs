@@ -6,6 +6,7 @@ namespace DatabaseApp.Persistence.Repositories;
 public abstract class RepositoryBase<TEntity>(IDatabaseContext context)
     where TEntity : class, IEntity
 {
+    // ReSharper disable once InconsistentNaming
     protected readonly IDatabaseContext _context = context;
 
     public async Task SaveDbChangesAsync(CancellationToken cancellationToken) =>

@@ -5,7 +5,7 @@ namespace DatabaseApp.Application.Common.ExtensionsMethods;
 
 public static class RepeatedFiledObjectConverter
 {
-    public static async Task<RepeatedField<T>> FromList<T, TSource>(this RepeatedField<T> repeatedField, 
+    public static Task<RepeatedField<T>> FromList<T, TSource>(this RepeatedField<T> repeatedField, 
         List<TSource> sourceList, 
         Func<TSource, T> mapper) 
         where T : IMessage
@@ -16,6 +16,6 @@ public static class RepeatedFiledObjectConverter
             repeatedField.Add(targetItem);
         }
 
-        return repeatedField;
+        return Task.FromResult(repeatedField);
     }
 }

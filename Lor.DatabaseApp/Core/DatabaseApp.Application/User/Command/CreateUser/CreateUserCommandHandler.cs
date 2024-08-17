@@ -1,5 +1,4 @@
-﻿using DatabaseApp.Application.Common.ExtensionsMethods;
-using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MediatR;
 
