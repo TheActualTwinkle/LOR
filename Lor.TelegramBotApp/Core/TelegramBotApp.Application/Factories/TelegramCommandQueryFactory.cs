@@ -22,10 +22,12 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
     }
 
     #endregion
-
+    
+    public const string CommandQueryPrefix = "!"; 
+    
     public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
     
-    private static readonly ImportInfo s_info = new();
+    private static readonly ImportInfo Info = new();
     
     static TelegramCommandQueryFactory()
     {
@@ -42,12 +44,14 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
         }
         
         using CompositionHost container = configuration.CreateContainer();
-        container.SatisfyImports(s_info);   
+        container.SatisfyImports(Info);   
     }
     
     public async Task<ExecutionResult> Handle(CallbackQuery callbackQuery, CancellationToken cancellationToken = default)
     {
-        if (callbackQuery.Data?.First() != '!') throw new ArgumentException("CallbackQuery: Неверный формат запроса");
+        if (callbackQuery.Data is null) return new ExecutionResult(Result.Fail("CallbackQuery: Не найдены данные"));
+        
+        if (callbackQuery.Data.StartsWith(CommandQueryPrefix) == false) return new ExecutionResult(Result.Fail("CallbackQuery: Неверный формат запроса"));
         
         if (callbackQuery.Message is null) return new ExecutionResult(Result.Fail("CallbackQuery: Не найдено сообщение"));
         
@@ -66,7 +70,7 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
     
     private ICallbackQuery? GetQuery(string queryString)
     {
-        return s_info.Queries.FirstOrDefault(x => x.Metadata.Query == queryString)?.Value;
+        return Info.Queries.FirstOrDefault(x => x.Metadata.Query == queryString)?.Value;
     }
     
     private string[] GetArguments(string commandString)

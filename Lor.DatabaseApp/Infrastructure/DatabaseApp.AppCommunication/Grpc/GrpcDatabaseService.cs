@@ -67,7 +67,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         {
             ClassId = dto.Id,
             ClassName = dto.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds()
+            ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
         });
 
         return reply;
@@ -138,7 +138,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         }
         
         reply.ClassName = classDto.Value.Name;
-        reply.ClassDateUnixTimestamp = ((DateTimeOffset)classDto.Value.Date.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds();
+        reply.ClassDateUnixTimestamp = ((DateTimeOffset)classDto.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds();
         
         return reply;
     }
