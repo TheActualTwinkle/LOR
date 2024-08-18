@@ -11,6 +11,7 @@ using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
 using FluentResults;
+using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MediatR;
@@ -60,17 +61,15 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         if (classDto.IsFailed)
             return new GetAvailableLabClassesReply
                 { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
-
-        GetAvailableLabClassesReply reply = new();
-
-        await reply.ClassInformation.FromList<ClassInformation, ClassDto>(classDto.Value, dto => new ClassInformation()
+        
+        RepeatedField<ClassInformation> classInformation = await classDto.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
         {
             ClassId = dto.Id,
             ClassName = dto.Name,
             ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
         });
 
-        return reply;
+        return new GetAvailableLabClassesReply { ClassInformation = { classInformation }};
     }
 
     public override async Task<TrySetGroupReply> TrySetGroup(TrySetGroupRequest request, ServerCallContext context)
