@@ -7,11 +7,10 @@ using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization.Interfaces;
-using TelegramBotApp.Caching.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService, ICacheService cacheService)
+public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService)
 {
     #region ImportsInfo
 
@@ -28,7 +27,6 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
 
     public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
     public IAuthorizationService AuthorizationService => authorizationService;
-    public ICacheService CacheService => cacheService;
     
     private static readonly ImportInfo Info = new();
     

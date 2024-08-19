@@ -8,7 +8,6 @@ using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization;
-using TelegramBotApp.Caching;
 
 // ReSharper disable UnusedType.Global
 
@@ -58,23 +57,9 @@ public class GroupsTelegramCommand : ITelegramCommand
     public string Command => $"{TelegramCommandFactory.CommandPrefix}groups";
     public string Description => "- выводит поддерживаемые группы";
     
-    // TODO: DI? Config?
-    private TimeSpan CacheExpirationTime => TimeSpan.FromMinutes(1);
-    
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         StringBuilder message = new("Поддерживаемые группы:\n");
-
-        Dictionary<int, string>? supportedGroups = await factory.CacheService.GetAsync<Dictionary<int, string>>(Constants.SupportedGroupsKey, cancellationToken);
-        if (supportedGroups != null)
-        {
-            foreach (KeyValuePair<int, string> idGroupPair in supportedGroups)
-            {
-                message.AppendLine(idGroupPair.Value);
-            }
-
-            return new ExecutionResult(Result.Ok(message.ToString() + "\n (кэш)"));
-        }
         
         Result<Dictionary<int, string>> result = await factory.DatabaseCommunicator.GetAvailableGroups(cancellationToken);
         
@@ -88,7 +73,6 @@ public class GroupsTelegramCommand : ITelegramCommand
             message.AppendLine(idGroupPair.Value);
         }
 
-        await factory.CacheService.SetAsync(Constants.SupportedGroupsKey, result.Value, CacheExpirationTime, cancellationToken);
         return new ExecutionResult(Result.Ok(message.ToString() + "\n (дб)"));
     }
 }
@@ -142,9 +126,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}labs";
     public string Description => "- выводит доступные лабораторные работы для выбранной группы";
-    
-    private TimeSpan CacheExpirationTime => TimeSpan.FromSeconds(15);
-    
+
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         Result<UserInfo> getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
@@ -154,17 +136,6 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
         }
         
         StringBuilder message = new("Доступные лабораторные работы:\n");
-        
-        Dictionary<int,string>? classes = await factory.CacheService.GetAsync<Dictionary<int, string>>($"{Constants.AvailableClassesHeader}{getUserGroupResult.Value}", cancellationToken);
-        if (classes != null)
-        {
-            foreach (KeyValuePair<int,string> idClassPair in classes)
-            {
-                message.AppendLine(idClassPair.Value);
-            }
-
-            return new ExecutionResult(Result.Ok(message.ToString() + "\n (кэш)"));
-        }
 
         Result<IEnumerable<ClassInformation>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
         
@@ -179,7 +150,6 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
             message.AppendLine($"{classInformation.ClassName} {dateTime:dd.MM}");
         }
 
-        await factory.CacheService.SetAsync($"{Constants.AvailableClassesHeader}{getUserGroupResult.Value}", getAvailableLabClassesResult.Value, CacheExpirationTime, cancellationToken);
         return new ExecutionResult(Result.Ok(message.ToString() + "\n (дб)"));
     }
 }
