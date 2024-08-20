@@ -1,9 +1,11 @@
 ﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
+using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Group.Queries.GetGroupInfo;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Caching;
@@ -66,8 +68,6 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             });
         }
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classDto, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
         if (outdatedClassList.IsFailed) return new Empty();
@@ -83,6 +83,14 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         {
             OutdatedClassList = outdatedClassList.Value
         });
+        
+        Result<GroupDto> group = await mediator.Send(new GetGroupInfoQuery
+        {
+            GroupName = request.GroupName
+        });
+        
+        // TODO: get List<Dto>
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Value.Id, newDto, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         return new Empty();
     }

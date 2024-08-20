@@ -3,6 +3,7 @@ using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Application.Group;
+using DatabaseApp.Application.Group.Queries.GetGroupInfo;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
@@ -79,25 +80,12 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
     public override async Task<GetAvailableLabClassesReply> GetAvailableLabClasses(
         GetAvailableLabClassesRequest request, ServerCallContext context)
     {
-        UserDto? user = await cacheService.GetAsync<UserDto>(Constants.UserPrefix);
-
-        if (user is null)
+        Result<GroupDto> group = await mediator.Send(new GetGroupInfoQuery
         {
-            Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
-            {
-                TelegramId = request.UserId
-            });
-
-            if (userDto.IsFailed)
-                return new GetAvailableLabClassesReply()
-                    { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
-
-            await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-
-            user = userDto.Value;
-        }
+            TelegramId = request.UserId
+        });
         
-        List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + user.GroupName);
+        List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + group.Value.Id);
 
         RepeatedField<ClassInformation> classInformation;
         
@@ -129,7 +117,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
         });
         
-        // await cacheService.SetAsync(Constants.AvailableClassesPrefix + group_id, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: найти айди группы && TODO: DI
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Value.Id, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
         return new GetAvailableLabClassesReply { ClassInformation = { classInformation }};
     }
