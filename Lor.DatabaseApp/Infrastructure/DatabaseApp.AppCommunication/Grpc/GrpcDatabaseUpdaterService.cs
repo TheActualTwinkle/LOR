@@ -4,6 +4,7 @@ using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
@@ -26,8 +27,9 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             });
         }
         
-        // TODO передать List<Dto>
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, request.GroupNames.ToList(), cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
+        
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         return new Empty();
     }

@@ -12,6 +12,7 @@ using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Models;
 using FluentResults;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
@@ -78,21 +79,39 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
     public override async Task<GetAvailableLabClassesReply> GetAvailableLabClasses(
         GetAvailableLabClassesRequest request, ServerCallContext context)
     {
-        // List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + group_id); // TODO: найти айди группы
+        UserDto? user = await cacheService.GetAsync<UserDto>(Constants.UserPrefix);
+
+        if (user is null)
+        {
+            Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+            {
+                TelegramId = request.UserId
+            });
+
+            if (userDto.IsFailed)
+                return new GetAvailableLabClassesReply()
+                    { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
+
+            await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+
+            user = userDto.Value;
+        }
+        
+        List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + user.GroupName);
 
         RepeatedField<ClassInformation> classInformation;
         
-        // if (classes is not null)
-        // {
-        //     classInformation = await classes.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
-        //     {
-        //         ClassId = dto.Id,
-        //         ClassName = dto.Name,
-        //         ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
-        //     });
-        //
-        //     return new GetAvailableLabClassesReply { ClassInformation = { classInformation } };
-        // }
+        if (classes is not null)
+        {
+            classInformation = await classes.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
+            {
+                ClassId = dto.Id,
+                ClassName = dto.Name,
+                ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
+            });
+        
+            return new GetAvailableLabClassesReply { ClassInformation = { classInformation } };
+        }
         
         Result<List<ClassDto>> classDto = await mediator.Send(new GetClassesQuery
         {
