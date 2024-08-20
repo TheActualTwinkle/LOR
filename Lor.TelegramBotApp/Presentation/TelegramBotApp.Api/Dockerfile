@@ -9,7 +9,6 @@ COPY ["Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/TelegramBotApp.Api.csp
 COPY ["Lor.TelegramBotApp/Core/TelegramBotApp.Application/TelegramBotApp.Application.csproj", "Lor.TelegramBotApp/Core/TelegramBotApp.Application/"]
 COPY ["Lor.TelegramBotApp/Infrastructure/TelegramBotApp.AppCommunication/TelegramBotApp.AppCommunication.csproj", "Lor.TelegramBotApp/Infrastructure/TelegramBotApp.AppCommunication/"]
 COPY ["Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Authorization/TelegramBotApp.Authorization.csproj", "Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Authorization/"]
-COPY ["Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Caching/TelegramBotApp.Caching.csproj", "Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Caching/"]
 RUN dotnet restore "Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/TelegramBotApp.Api.csproj"
 COPY . .
 WORKDIR "/src/Lor.TelegramBotApp/Presentation/TelegramBotApp.Api"

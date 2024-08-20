@@ -1,8 +1,11 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClass;
+﻿using DatabaseApp.Application.Class;
+using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
+using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -10,7 +13,7 @@ using MediatR;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -21,6 +24,8 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
                 GroupName = groupName
             });
         }
+
+        await cacheService.SetAsync(Constants.SupportedGroupsKey, request.GroupNames.ToList(), TimeSpan.Zero, new CancellationTokenSource((TimeSpan.Zero)).Token);
         
         return new Empty();
     }
@@ -28,6 +33,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
         ServerCallContext context)
     {
+        List<ClassDto> classDto = [];
         foreach (KeyValuePair<string, long> classObject in request.Classes)
         {
             DateOnly date;
@@ -48,7 +54,15 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
                 ClassName = classObject.Key,
                 Date = date
             });
+            
+            classDto.Add(new ClassDto
+            {
+                Date = date,
+                Name = classObject.Key
+            });
         }
+        
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classDto, TimeSpan.Zero, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
@@ -65,8 +79,6 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
         {
             OutdatedClassList = outdatedClassList.Value
         });
-        
-       
         
         return new Empty();
     }
