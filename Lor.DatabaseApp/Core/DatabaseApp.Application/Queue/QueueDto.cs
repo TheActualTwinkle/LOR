@@ -1,6 +1,6 @@
 ﻿namespace DatabaseApp.Application.Queue;
 
-public struct QueueDto
+public record QueueDto
 {
     public required int ClassId { get; set; }
     public required string FullName { get; set; }

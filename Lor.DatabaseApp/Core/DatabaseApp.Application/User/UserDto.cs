@@ -1,6 +1,6 @@
 ﻿namespace DatabaseApp.Application.User;
 
-public struct UserDto
+public record UserDto
 {
     public required string FullName { get; set; }
     public required string GroupName { get; set; }
