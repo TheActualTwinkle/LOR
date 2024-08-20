@@ -52,6 +52,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Application", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Domain", "Lor.DatabaseApp\Core\DatabaseApp.Domain\DatabaseApp.Domain.csproj", "{2FB9678D-EF2F-41F2-94FD-E71F51ECB922}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Caching", "Lor.DatabaseApp\Infrastructure\DatabaseApp.Caching\DatabaseApp.Caching.csproj", "{E3405A53-917E-49FF-9975-532D3227DCA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,7 @@ Global
 		{B47B375F-0F2E-4576-95E5-C7B8EBC381A5} = {3E36A9F0-EEF9-48E1-B82C-F4A2629BD1E0}
 		{02EFA860-CC26-4C00-A16F-132E5648620E} = {B47B375F-0F2E-4576-95E5-C7B8EBC381A5}
 		{2FB9678D-EF2F-41F2-94FD-E71F51ECB922} = {B47B375F-0F2E-4576-95E5-C7B8EBC381A5}
+		{E3405A53-917E-49FF-9975-532D3227DCA4} = {08D73883-B6F1-480F-8080-0BE81C99ABF9}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C3D4568A-A822-4003-BD64-A01BC16F69F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -139,5 +142,9 @@ Global
 		{2FB9678D-EF2F-41F2-94FD-E71F51ECB922}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FB9678D-EF2F-41F2-94FD-E71F51ECB922}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FB9678D-EF2F-41F2-94FD-E71F51ECB922}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3405A53-917E-49FF-9975-532D3227DCA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3405A53-917E-49FF-9975-532D3227DCA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3405A53-917E-49FF-9975-532D3227DCA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3405A53-917E-49FF-9975-532D3227DCA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
