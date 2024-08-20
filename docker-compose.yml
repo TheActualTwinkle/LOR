@@ -21,7 +21,11 @@ services:
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings:DefaultConnection=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-
+      - ConnectionStrings:Redis=redis:6379
+    depends_on:
+          redis:
+            condition: service_healthy
+        
   telegrambot:
     build:
       context: .
@@ -29,10 +33,6 @@ services:
     environment:
       - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
       - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
-      - ConnectionStrings:Redis=redis:6379
-    depends_on:
-      redis:
-        condition: service_healthy
 
   groupschedule:
     build:
