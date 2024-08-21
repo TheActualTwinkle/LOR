@@ -5,7 +5,6 @@ using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Group.Queries.GetGroupInfo;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Caching;
@@ -39,7 +38,6 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
         ServerCallContext context)
     {
-        List<ClassDto> classDto = [];
         foreach (KeyValuePair<string, long> classObject in request.Classes)
         {
             DateOnly date;
@@ -60,19 +58,11 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
                 ClassName = classObject.Key,
                 Date = date
             });
-            
-            classDto.Add(new ClassDto
-            {
-                Date = date,
-                Name = classObject.Key
-            });
         }
         
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        if (outdatedClassList.IsFailed) return new Empty();
-        
-        if (outdatedClassList.Value.Count == 0) return new Empty();
+        if (outdatedClassList.IsFailed || outdatedClassList.Value.Count == 0) return new Empty();
         
         await mediator.Send(new DeleteQueueCommand
         {
@@ -83,14 +73,15 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         {
             OutdatedClassList = outdatedClassList.Value
         });
-        
-        Result<GroupDto> group = await mediator.Send(new GetGroupInfoQuery
+
+        Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
         {
             GroupName = request.GroupName
         });
         
-        // TODO: get List<Dto>
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Value.Id, newDto, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        if (classes.IsFailed) return new Empty();
+        
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         return new Empty();
     }

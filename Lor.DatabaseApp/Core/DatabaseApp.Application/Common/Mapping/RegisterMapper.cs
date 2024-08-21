@@ -12,8 +12,7 @@ public class RegisterMapper : IRegister
     {
         config.NewConfig<Domain.Models.Class, ClassDto>()
             .Map(dest => dest.Name, src => src.Name)
-            .Map(dest => dest.Date, src => src.Date)
-            .Map(dest => dest.GroupId, src => src.GroupId);
+            .Map(dest => dest.Date, src => src.Date);
         config.NewConfig<Domain.Models.Group, GroupDto>()
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.GroupName, src => src.Name);
