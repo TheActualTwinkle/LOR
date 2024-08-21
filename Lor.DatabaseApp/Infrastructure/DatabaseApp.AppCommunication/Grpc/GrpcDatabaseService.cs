@@ -174,12 +174,34 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                 { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
 
 
-        List<QueueDto>? queue = await cacheService.GetAsync<List<QueueDto>>(Constants.QueuePrefix + request.ClassId);
+        // List<QueueDto>? queue = await cacheService.GetAsync<List<QueueDto>>(Constants.QueuePrefix + request.ClassId);
         
         TryEnqueueInClassReply reply = new();
         
-        if (queue is not null)
+        /*if (queue is not null)
         {
+            Result result = await mediator.Send(new CreateQueueCommand
+            {
+                TelegramId = request.UserId,
+                ClassId = request.ClassId
+            });
+        
+            if (result.IsFailed)
+                return new TryEnqueueInClassReply
+                    { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+
+            Result<List<QueueDto>> queueDtos = await mediator.Send(new GetQueueQuery
+            {
+                TelegramId = request.UserId,
+                ClassId = request.ClassId
+            });
+
+            if (queueDto.IsFailed)
+                return new TryEnqueueInClassReply
+                    { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
+
+            await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+            
             foreach (var item in queue)
             {
                 reply.StudentsQueue.Add(item.FullName);
@@ -189,7 +211,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             reply.ClassDateUnixTimestamp = ((DateTimeOffset)classDto.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds();
         
             return reply;
-        }
+        }*/
         
         Result result = await mediator.Send(new CreateQueueCommand
         {
@@ -211,7 +233,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             return new TryEnqueueInClassReply
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
 
-        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        // await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         foreach (var item in queueDto.Value)
         {
