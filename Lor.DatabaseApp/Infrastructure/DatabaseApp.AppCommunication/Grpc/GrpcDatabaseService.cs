@@ -10,6 +10,8 @@ using DatabaseApp.Application.Queue.Queries.GetQueue;
 using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
+using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
 using FluentResults;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
@@ -18,10 +20,17 @@ using MediatR;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
+public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) : Database.DatabaseBase
 {
     public override async Task<GetUserInfoReply> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
     {
+        UserDto? user = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.UserId);
+
+        if (user is not null)
+        {
+            return new GetUserInfoReply { FullName = user.FullName, GroupName = user.GroupName };
+        }
+
         Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
         {
             TelegramId = request.UserId
@@ -31,16 +40,32 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new GetUserInfoReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
+        await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+
         return new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName };
     }
 
     public override async Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)
     {
+        List<GroupDto>? groups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey);
+
+        GetAvailableGroupsReply reply = new();
+        
+        if (groups is not null )
+        { 
+            foreach (var item in groups)
+            {
+                reply.IdGroupsMap.Add(item.Id, item.GroupName);
+            }
+
+            return reply;
+        }
+        
         Result<List<GroupDto>> groupDto = await mediator.Send(new GetGroupsQuery());
 
         if (groupDto.IsFailed) return new GetAvailableGroupsReply();
-
-        GetAvailableGroupsReply reply = new();
+        
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groupDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
         foreach (var item in groupDto.Value)
         {
@@ -53,21 +78,58 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     public override async Task<GetAvailableLabClassesReply> GetAvailableLabClasses(
         GetAvailableLabClassesRequest request, ServerCallContext context)
     {
+        UserDto? user = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.UserId);
+
+        if (user is null)
+        {
+            Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+            {
+                TelegramId = request.UserId
+            });
+
+            if (userDto.IsFailed)
+                return new GetAvailableLabClassesReply
+                    { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
+
+            await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, 
+                cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+
+            user = userDto.Value;
+        }
+
+        List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + user.GroupName);
+
+        RepeatedField<ClassInformation> classInformation;
+        
+        if (classes is not null)
+        {
+            classInformation = await classes.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
+            {
+                ClassId = dto.Id,
+                ClassName = dto.Name,
+                ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
+            });
+        
+            return new GetAvailableLabClassesReply { ClassInformation = { classInformation } };
+        }
+        
         Result<List<ClassDto>> classDto = await mediator.Send(new GetClassesQuery
         {
-            TelegramId = request.UserId
+            GroupName = user.GroupName
         });
 
-        if (classDto.IsFailed)
+        if (classDto.IsFailed || classDto.Value.Count == 0)
             return new GetAvailableLabClassesReply
                 { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
-        
-        RepeatedField<ClassInformation> classInformation = await classDto.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
+
+        classInformation = await classDto.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
         {
             ClassId = dto.Id,
             ClassName = dto.Name,
             ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
         });
+        
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + user.GroupName, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
         return new GetAvailableLabClassesReply { ClassInformation = { classInformation }};
     }
@@ -94,6 +156,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new TrySetGroupReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
+        await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+
         return new TrySetGroupReply { FullName = await request.FullName.FormatFio(), GroupName = userDto.Value.GroupName };
     }
 
@@ -108,6 +172,24 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         if (classDto.IsFailed)
             return new TryEnqueueInClassReply
                 { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
+
+
+        List<QueueDto>? queue = await cacheService.GetAsync<List<QueueDto>>(Constants.QueuePrefix + request.ClassId);
+        
+        TryEnqueueInClassReply reply = new();
+        
+        if (queue is not null)
+        {
+            foreach (var item in queue)
+            {
+                reply.StudentsQueue.Add(item.FullName);
+            }
+        
+            reply.ClassName = classDto.Value.Name;
+            reply.ClassDateUnixTimestamp = ((DateTimeOffset)classDto.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds();
+        
+            return reply;
+        }
         
         Result result = await mediator.Send(new CreateQueueCommand
         {
@@ -128,8 +210,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         if (queueDto.IsFailed)
             return new TryEnqueueInClassReply
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
-        
-        TryEnqueueInClassReply reply = new();
+
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         foreach (var item in queueDto.Value)
         {

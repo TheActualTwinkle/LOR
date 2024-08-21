@@ -1,8 +1,14 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClass;
+﻿using DatabaseApp.Application.Class;
+using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
+using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
+using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
+using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -10,7 +16,7 @@ using MediatR;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -21,6 +27,10 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
                 GroupName = groupName
             });
         }
+        
+        Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
+        
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         return new Empty();
     }
@@ -49,12 +59,10 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
                 Date = date
             });
         }
-
+        
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        if (outdatedClassList.IsFailed) return new Empty();
-        
-        if (outdatedClassList.Value.Count == 0) return new Empty();
+        if (outdatedClassList.IsFailed || outdatedClassList.Value.Count == 0) return new Empty();
         
         await mediator.Send(new DeleteQueueCommand
         {
@@ -65,8 +73,15 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
         {
             OutdatedClassList = outdatedClassList.Value
         });
+
+        Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
+        {
+            GroupName = request.GroupName
+        });
         
-       
+        if (classes.IsFailed) return new Empty();
+        
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
         
         return new Empty();
     }

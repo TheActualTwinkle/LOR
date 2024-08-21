@@ -1,4 +1,6 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.UnitOfWorkContext;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +13,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMediator, Mediator>();
+        services.AddScoped<ICacheService, CacheService>();
 
         return services;
     }

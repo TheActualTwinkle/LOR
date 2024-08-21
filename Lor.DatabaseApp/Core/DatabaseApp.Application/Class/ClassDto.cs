@@ -1,9 +1,8 @@
 ﻿namespace DatabaseApp.Application.Class;
 
-public struct ClassDto
+public record ClassDto
 {
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required string Name { get; set; }
     public required DateOnly Date { get; set; }
-    public required int GroupId { get; set; }
 }
