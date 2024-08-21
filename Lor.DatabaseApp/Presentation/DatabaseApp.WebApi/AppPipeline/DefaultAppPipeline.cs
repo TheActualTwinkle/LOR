@@ -24,9 +24,9 @@ public class DefaultAppPipeline : IAppPipeline
         
         builder.Services.AddGrpc();
         builder.Services.AddApplication();
-        builder.Services.AddCommunication();
         builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
+        builder.Services.AddBus();
 
         WebApplication app = builder.Build();
         

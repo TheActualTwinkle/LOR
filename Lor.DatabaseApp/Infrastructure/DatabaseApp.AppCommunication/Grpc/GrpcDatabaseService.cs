@@ -92,7 +92,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                     { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
             await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, 
-                cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
             user = userDto.Value;
         }

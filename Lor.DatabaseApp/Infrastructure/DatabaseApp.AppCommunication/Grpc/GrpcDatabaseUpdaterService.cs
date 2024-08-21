@@ -12,11 +12,13 @@ using DatabaseApp.Caching.Interfaces;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using MassTransit;
 using MediatR;
+using TelegramBotApp.AppCommunication.Consumers.Data;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IBus bus) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -30,7 +32,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
         
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         return new Empty();
     }
@@ -52,6 +54,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
                 continue;
             }
 
+            // TODO @ext4zzzy: Может оптимизировать, чтобы не делать запрос на каждый класс, а слать сразу все?
             await mediator.Send(new CreateClassCommand
             {
                 GroupName = request.GroupName,
@@ -59,9 +62,13 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
                 Date = date
             });
         }
+
+        TestMessage message = new() { Classes = [new Class { Id = 1, Name = "kek", Date = new DateOnly()}] }; // TODO: REMOVE AFTER TESTING
+        await bus.Publish(message, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: REMOVE AFTER TESTING
         
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
+        // TODO @ext4zzzy: Кэш не обновляется, если список устаревших классов пуст или фейл.
         if (outdatedClassList.IsFailed || outdatedClassList.Value.Count == 0) return new Empty();
         
         await mediator.Send(new DeleteQueueCommand
@@ -81,7 +88,10 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         if (classes.IsFailed) return new Empty();
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        
+        // TODO: send ONLY new classes.
+        // await bus.Publish(classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         return new Empty();
     }

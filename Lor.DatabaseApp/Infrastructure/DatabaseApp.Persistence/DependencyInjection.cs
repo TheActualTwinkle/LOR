@@ -1,7 +1,6 @@
 ﻿using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.Persistence.Repositories;
-using DatabaseApp.Persistence.UnitOfWorkContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +21,6 @@ public static class DependencyInjection
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IQueueRepository, QueueRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
