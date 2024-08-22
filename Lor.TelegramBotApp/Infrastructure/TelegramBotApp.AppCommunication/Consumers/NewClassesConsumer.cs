@@ -25,7 +25,7 @@ public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient c
 
         foreach (SubscriberInfo subscriber in subscribers)
         {
-            await bot.SendMessageAsync(subscriber.TelegramId, "", new ReplyKeyboardRemove(), new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
+            await bot.SendMessageAsync(subscriber.TelegramId, "КЕК", new ReplyKeyboardRemove(), new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
         }
     }
 }

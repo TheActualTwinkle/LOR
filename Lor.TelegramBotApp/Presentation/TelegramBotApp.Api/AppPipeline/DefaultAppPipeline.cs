@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection; 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot.Types;
 using TelegramBotApp.Api.AppPipeline.Interfaces;
 using TelegramBotApp.AppCommunication;
-using TelegramBotApp.Application;
 using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application;
 using TelegramBotApp.Authorization;
-using TelegramBotApp.Authorization.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.Api.AppPipeline;
@@ -29,6 +28,7 @@ public class DefaultAppPipeline : IAppPipeline
                     .AddCommunicators(builder.Configuration)
                     .AddAuthorization()                  
                     .AddApplication(builder.Configuration)
+                    .AddBus(builder.Configuration)
                 )
                 .Build();
             
@@ -45,7 +45,7 @@ public class DefaultAppPipeline : IAppPipeline
             User me = await botClient.GetMeAsync();
             Console.WriteLine($"Start listening for @{me.Username}");
 
-            await Task.Delay(Timeout.Infinite, cancellationToken.Token);
+            await host.RunAsync(cancellationToken.Token);
         }
         catch (Exception e)
         {

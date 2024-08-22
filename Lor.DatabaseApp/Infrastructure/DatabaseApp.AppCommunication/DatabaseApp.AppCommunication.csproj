@@ -19,7 +19,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Core\DatabaseApp.Application\DatabaseApp.Application.csproj"/>
-        <ProjectReference Include="..\DatabaseApp.Caching\DatabaseApp.Caching.csproj" />
+        <ProjectReference Include="..\DatabaseApp.Caching\DatabaseApp.Caching.csproj"/>
     </ItemGroup>
 
 </Project>

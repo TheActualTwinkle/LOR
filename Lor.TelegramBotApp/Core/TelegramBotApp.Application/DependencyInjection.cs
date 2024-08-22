@@ -13,7 +13,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<ITelegramBotInitializer, TelegramBotInitializer>();
         
-        services.AddSingleton<ITelegramBot>(s =>
+        services.AddScoped<ITelegramBot>(s =>
         {
             ITelegramBotInitializer botInitializer = s.GetRequiredService<ITelegramBotInitializer>();
             IDatabaseCommunicationClient databaseCommunicator = s.GetRequiredService<IDatabaseCommunicationClient>();
