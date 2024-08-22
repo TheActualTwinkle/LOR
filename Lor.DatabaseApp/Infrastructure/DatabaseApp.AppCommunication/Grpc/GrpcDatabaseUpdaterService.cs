@@ -14,11 +14,10 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MassTransit;
 using MediatR;
-using TelegramBotApp.AppCommunication.Consumers.Data;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IPublishEndpoint bus) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IBus bus) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -40,6 +39,13 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
         ServerCallContext context)
     {
+        Result<List<ClassDto>> oldClasses = await mediator.Send(new GetClassesQuery
+        {
+            GroupName = request.GroupName
+        });
+        
+        if (oldClasses.IsFailed) return new Empty();
+        
         try
         {
             await mediator.Send(new CreateClassesCommand
@@ -57,38 +63,22 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             throw;
         }
         
-        NewClassesMessage message = new() { Classes = [new Class { Id = 1, Name = "kek", Date = new DateOnly()}] }; // TODO: REMOVE AFTER TESTING
-        await bus.Publish(message, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: REMOVE AFTER TESTING
-        
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        Result<List<ClassDto>> classes;
-        
-        if (outdatedClassList.IsFailed || outdatedClassList.Value.Count == 0)
+        if (!outdatedClassList.IsFailed || outdatedClassList.Value.Count != 0)
         {
-            classes = await mediator.Send(new GetClassesQuery
+            await mediator.Send(new DeleteQueueCommand
             {
-                GroupName = request.GroupName
+                OutdatedClassList = outdatedClassList.Value
             });
         
-            if (classes.IsFailed) return new Empty();
-        
-            await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
-
-            return new Empty();
+            await mediator.Send(new DeleteClassCommand
+            {
+                OutdatedClassList = outdatedClassList.Value
+            });
         }
         
-        await mediator.Send(new DeleteQueueCommand
-        {
-            OutdatedClassList = outdatedClassList.Value
-        });
-        
-        await mediator.Send(new DeleteClassCommand
-        {
-            OutdatedClassList = outdatedClassList.Value
-        });
-
-        classes = await mediator.Send(new GetClassesQuery
+        Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
         {
             GroupName = request.GroupName
         });
@@ -96,9 +86,10 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         if (classes.IsFailed) return new Empty();
         
         await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+
+        List<ClassDto> newClasses = classes.Value.Except(oldClasses.Value).ToList();
         
-        // TODO: send ONLY new classes.
-        // await bus.Publish(classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await bus.Publish(newClasses, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         return new Empty();
     }
