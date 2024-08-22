@@ -5,10 +5,10 @@ using Telegram.Bot.Types;
 using TelegramBotApp.Api.AppPipeline.Interfaces;
 using TelegramBotApp.AppCommunication;
 using TelegramBotApp.Application;
-using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Authorization;
 using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.Api.AppPipeline;
 
@@ -24,22 +24,23 @@ public class DefaultAppPipeline : IAppPipeline
                 .ConfigureAppConfiguration(config => 
                     config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true).AddEnvironmentVariables())
                 
+                // Order of services registration is important!!!
                 .ConfigureServices((builder, services) => services
-                    .AddApplication(builder.Configuration)
                     .AddCommunicators(builder.Configuration)
-                    .AddAuthorization())
+                    .AddAuthorization()                  
+                    .AddApplication(builder.Configuration)
+                )
                 .Build();
             
             ITelegramBot botClient = host.Services.GetRequiredService<ITelegramBot>();
             IDatabaseCommunicationClient databaseCommunicator = host.Services.GetRequiredService<IDatabaseCommunicationClient>();
-            IAuthorizationService authorizationService = host.Services.GetRequiredService<IAuthorizationService>();
             
             await InitializeAppCommunicators([
                 databaseCommunicator
             ]);
 
             CancellationTokenSource cancellationToken = new();
-            botClient.StartReceiving(databaseCommunicator, authorizationService, cancellationToken.Token);
+            botClient.StartReceiving(cancellationToken.Token);
 
             User me = await botClient.GetMeAsync();
             Console.WriteLine($"Start listening for @{me.Username}");

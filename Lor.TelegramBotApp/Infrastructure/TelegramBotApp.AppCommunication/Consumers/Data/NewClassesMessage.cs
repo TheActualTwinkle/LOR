@@ -2,6 +2,8 @@
 
 public record NewClassesMessage
 {
+    public required int GroupId { get; init; }
+    
     public required IEnumerable<Class> Classes { get; init; }
 }
 

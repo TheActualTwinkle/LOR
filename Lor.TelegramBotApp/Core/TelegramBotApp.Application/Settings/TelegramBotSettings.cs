@@ -1,4 +1,4 @@
-﻿using TelegramBotApp.Application.Interfaces;
+﻿using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.Application.Settings;
 

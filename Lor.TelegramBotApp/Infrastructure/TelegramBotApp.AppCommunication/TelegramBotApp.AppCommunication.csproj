@@ -29,4 +29,12 @@
       </Protobuf>
     </ItemGroup>
     
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\TelegramBotApp.Domain\TelegramBotApp.Domain.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\TelegramBotApp.Domain\TelegramBotApp.Domain.csproj" />
+    </ItemGroup>
+    
 </Project>

@@ -55,4 +55,33 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult(reply.StudentsQueue, reply.ClassName, DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime));
     }
+
+    public async Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default)
+    {
+        AddSubscriberReply reply = await _client!.AddSubscriberAsync(new AddSubscriberRequest { SubscriberId = userId }, cancellationToken: cancellationToken);
+        
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
+    }
+
+    public async Task<Result> DeleteSubscriber(long userId, CancellationToken cancellationToken = default)
+    {
+        DeleteSubscriberReply reply = await _client!.DeleteSubscriberAsync(new DeleteSubscriberRequest { SubscriberId = userId}, cancellationToken: cancellationToken);
+        
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
+    }
+
+    public async Task<Result<IEnumerable<SubscriberInfo>>> GetSubscribers(CancellationToken cancellationToken = default)
+    {
+        GetSubscribersReply reply = await _client!.GetSubscribersAsync(new Empty(), cancellationToken: cancellationToken);
+
+        if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
+
+        List<SubscriberInfo> subscribers = [];
+        foreach (SubscriberInformation subscriber in reply.Subscribers.ToList())
+        {
+            subscribers.Add(new SubscriberInfo { TelegramId = subscriber.UserId, GroupId = subscriber.GroupId });
+        }
+
+        return subscribers;
+    }
 }

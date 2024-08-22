@@ -245,4 +245,19 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         
         return reply;
     }
+
+    public override Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
+    {
+        return base.AddSubscriber(request, context);
+    }
+
+    public override Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
+    {
+        return base.DeleteSubscriber(request, context);
+    }
+
+    public override Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
+    {
+        return base.GetSubscribers(request, context);
+    }
 }

@@ -195,3 +195,33 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         return Task.FromResult<IReplyMarkup>(new InlineKeyboardMarkup(buttons));
     }
 }
+
+[Export(typeof(ITelegramCommand))]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}sub")]
+[ExportMetadata(nameof(Description), "- подписывает на уведомления о появлении новых лабораторных работ")]
+public class AddSubscriberTelegramCommand : ITelegramCommand
+{
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}sub";
+    public string Description => "- подписывает на уведомления о появлении новых пар";
+    
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        Result result = await factory.DatabaseCommunicator.AddSubscriber(chatId, cancellationToken);
+        return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Теперь вы будете получать уведомления о новых лабораторных работах"));
+    }
+}
+
+[Export(typeof(ITelegramCommand))]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}unsub")]
+[ExportMetadata(nameof(Description), "- отписывает от уведомлений о появлении новых лабораторных работ")]
+public class DeleteSubscriberTelegramCommand : ITelegramCommand
+{
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}unsub";
+    public string Description => "- отписывает от уведомлений о появлении новых пар";
+    
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        Result result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);
+        return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Вы отписаны от уведомлений о новых лабораторных работах"));
+    }
+}
