@@ -1,6 +1,6 @@
 ﻿namespace TelegramBotApp.AppCommunication.Consumers.Data;
 
-public record TestMessage
+public record NewClassesMessage
 {
     public required IEnumerable<Class> Classes { get; init; }
 }

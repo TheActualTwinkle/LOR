@@ -63,7 +63,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             });
         }
 
-        TestMessage message = new() { Classes = [new Class { Id = 1, Name = "kek", Date = new DateOnly()}] }; // TODO: REMOVE AFTER TESTING
+        NewClassesMessage message = new() { Classes = [new Class { Id = 1, Name = "kek", Date = new DateOnly()}] }; // TODO: REMOVE AFTER TESTING
         await bus.Publish(message, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: REMOVE AFTER TESTING
         
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());

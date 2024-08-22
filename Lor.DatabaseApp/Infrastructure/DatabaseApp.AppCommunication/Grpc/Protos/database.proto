@@ -12,6 +12,8 @@ service Database {
 
   rpc TrySetGroup (TrySetGroupRequest) returns (TrySetGroupReply);
   rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
+  
+  rpc GetSubscribers (google.protobuf.Empty) returns (GetSubscribersReply);
 }
 
 message GetUserInfoRequest {
@@ -67,4 +69,8 @@ message TryEnqueueInClassReply {
   int64 classDateUnixTimestamp = 3;
   bool isFailed = 4;
   string errorMessage = 5;
+}
+
+message GetSubscribersReply {
+  repeated int64 subscribersId = 1;
 }

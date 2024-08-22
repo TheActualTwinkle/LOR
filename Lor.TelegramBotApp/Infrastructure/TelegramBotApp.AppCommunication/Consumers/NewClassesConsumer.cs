@@ -4,9 +4,9 @@ using TelegramBotApp.AppCommunication.Consumers.Data;
 namespace TelegramBotApp.AppCommunication.Consumers;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class TestConsumer : IConsumer<TestMessage>
+public class NewClassesConsumer : IConsumer<NewClassesMessage>
 {
-    public Task Consume(ConsumeContext<TestMessage> context)
+    public Task Consume(ConsumeContext<NewClassesMessage> context)
     {
         return Task.CompletedTask;
     }

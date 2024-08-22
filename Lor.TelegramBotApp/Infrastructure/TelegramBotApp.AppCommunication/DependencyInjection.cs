@@ -10,7 +10,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDatabaseCommunicationClient, GrpcDatabaseClient>(_ =>
         {
-            string url = configuration.GetSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            string url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
             return new GrpcDatabaseClient(url);
         });
         return services;
