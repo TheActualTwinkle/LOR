@@ -7,7 +7,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddAuthorization(this IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationService, NstuAuthorizationService>();
+        services.AddScoped<IAuthorizationService, NstuAuthorizationService>();
         return services;
     }
 }

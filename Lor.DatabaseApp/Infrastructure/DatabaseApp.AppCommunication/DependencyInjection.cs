@@ -1,7 +1,6 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TelegramBotApp.AppCommunication.Consumers;
 
 namespace DatabaseApp.AppCommunication;
 
@@ -11,17 +10,16 @@ public static class DependencyInjection
     {
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<NewClassesConsumer>();
+            x.SetKebabCaseEndpointNameFormatter();
             
             x.UsingRabbitMq((context,cfg) =>
             {
                 IConfigurationSection configurationSection = configuration.GetRequiredSection("RabbitMqSettings");
                 string host = configurationSection["Host"]!;
-                string virtualHost = configurationSection["VirtualHost"]!;
                 string username = configurationSection["Username"]!;
                 string password = configurationSection["Password"]!;
-
-                cfg.Host(host, virtualHost, h => {
+                
+                cfg.Host(host, h => {
                     h.Username(username);
                     h.Password(password);
                 });
