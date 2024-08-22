@@ -257,8 +257,16 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             TelegramId = request.SubscriberId
         });
 
-        return result.IsFailed ? new AddSubscriberReply 
-            { IsFailed = true, ErrorMessage = result.Errors.First().Message } : new AddSubscriberReply();
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        // List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
+        // cachedSubscriptions.Add(new SubscriberDto() { TelegramId = request.SubscriberId, GroupId = ???}); TODO @ext4: Cant get group id
+        
+        // await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        
+        return new AddSubscriberReply();
     }
 
     public override async Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
@@ -268,20 +276,40 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             TelegramId = request.SubscriberId
         });
 
-        return result.IsFailed ? new DeleteSubscriberReply 
-            { IsFailed = true, ErrorMessage = result.Errors.First().Message } : new DeleteSubscriberReply();
+        if (result.IsFailed)
+            return new DeleteSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+
+        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
+        
+        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions.Where(x => x.TelegramId != request.SubscriberId),
+            cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        
+        return new DeleteSubscriberReply();
     }
 
     public override async Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
     {
-        Result<List<SubscriberDto>> subscribers = await mediator.Send(new GetAllSubscribersQuery());
+        List<SubscriberDto>? cachedSubscribers = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey);
 
-        RepeatedField<SubscriberInformation> repeatedField = await subscribers.Value.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
+        if (cachedSubscribers is null)
+        {
+            Result<List<SubscriberDto>> subscribersResult = await mediator.Send(new GetAllSubscribersQuery());
+            
+            if (subscribersResult.IsFailed)
+                return new GetSubscribersReply
+                    { IsFailed = true, ErrorMessage = subscribersResult.Errors.First().Message };
+
+            cachedSubscribers = subscribersResult.Value;
+            await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscribers, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        }
+
+        RepeatedField<SubscriberInformation> repeatedField = await cachedSubscribers.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
         {
             UserId = dto.TelegramId,
             GroupId = dto.GroupId
         });
-
+        
         return new GetSubscribersReply { Subscribers = { repeatedField } };
     }
 }

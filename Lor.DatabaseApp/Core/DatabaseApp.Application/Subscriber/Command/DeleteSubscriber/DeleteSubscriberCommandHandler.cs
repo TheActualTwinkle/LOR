@@ -15,11 +15,11 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork)
 
         Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByTelegramId(request.TelegramId, cancellationToken);
         
-        if (subscriber is null) return Result.Fail("Подписчик не найден");
+        if (subscriber is null) return Result.Fail("Вы не подписаны");
 
         unitOfWork.SubscriberRepository.Delete(subscriber);
 
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken));
+        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
 
         return Result.Ok();
     }

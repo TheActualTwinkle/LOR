@@ -11,12 +11,14 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
 {
     private Database.DatabaseClient? _client;
     
-    public Task Start()
+    public async Task StartAsync()
     {
+        Console.WriteLine("Connecting to the gRPC service...");
         GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
+        await channel.ConnectAsync();
+        Console.WriteLine("Successfully connected to the gRPC service.");
+        
         _client = new Database.DatabaseClient(channel);
-            
-        return Task.CompletedTask;
     }
     
     public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)

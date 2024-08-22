@@ -14,6 +14,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MassTransit;
 using MediatR;
+using TelegramBotApp.AppCommunication.Consumers.Data;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
@@ -65,7 +66,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        if (!outdatedClassList.IsFailed || outdatedClassList.Value.Count != 0)
+        if (outdatedClassList.IsSuccess && outdatedClassList.Value.Count != 0)
         {
             await mediator.Send(new DeleteQueueCommand
             {
@@ -89,7 +90,14 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
 
         List<ClassDto> newClasses = classes.Value.Except(oldClasses.Value).ToList();
         
-        await bus.Publish(newClasses, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        if (newClasses.Count == 0) return new Empty();
+        
+        NewClassesMessage newClassesMessage = new()
+        {
+            GroupId = 0, // TODO @ext4: Сделать чтобы можно было получать GroupId из запроса в бд
+            Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
+        };
+        await bus.Publish(newClassesMessage, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         return new Empty();
     }

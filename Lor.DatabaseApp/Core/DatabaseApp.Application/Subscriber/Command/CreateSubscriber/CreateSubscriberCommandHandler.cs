@@ -15,17 +15,17 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork)
 
         Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByTelegramId(request.TelegramId, cancellationToken);
         
-        if (subscriber is null) return Result.Fail("Подписчик не найден");
+        if (subscriber is not null) return Result.Fail("Вы уже подписаны");
 
 
-        Domain.Models.Subscriber newSubscriber = new Domain.Models.Subscriber
+        Domain.Models.Subscriber newSubscriber = new()
         {
             TelegramId = request.TelegramId
         };
 
         await unitOfWork.SubscriberRepository.AddAsync(newSubscriber, cancellationToken);
 
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken));
+        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
 
         return Result.Ok();
     }
