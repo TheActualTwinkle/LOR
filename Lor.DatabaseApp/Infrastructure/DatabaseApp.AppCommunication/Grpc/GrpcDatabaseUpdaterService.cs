@@ -40,36 +40,43 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
         ServerCallContext context)
     {
-        foreach (KeyValuePair<string, long> classObject in request.Classes)
+        try
         {
-            DateOnly date;
-            try
-            {
-                DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classObject.Value).DateTime;
-                date = new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                continue;
-            }
-
-            // TODO @ext4zzzy: Может оптимизировать, чтобы не делать запрос на каждый класс, а слать сразу все?
-            await mediator.Send(new CreateClassCommand
+            await mediator.Send(new CreateClassesCommand
             {
                 GroupName = request.GroupName,
-                ClassName = classObject.Key,
-                Date = date
+                Classes = request.Classes.ToDictionary(
+                    c => c.Key,
+                    c => DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(c.Value).DateTime)
+                )
             });
         }
-
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
         NewClassesMessage message = new() { Classes = [new Class { Id = 1, Name = "kek", Date = new DateOnly()}] }; // TODO: REMOVE AFTER TESTING
         await bus.Publish(message, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: REMOVE AFTER TESTING
         
         Result<List<int>> outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery());
 
-        // TODO @ext4zzzy: Кэш не обновляется, если список устаревших классов пуст или фейл.
-        if (outdatedClassList.IsFailed || outdatedClassList.Value.Count == 0) return new Empty();
+        Result<List<ClassDto>> classes;
+        
+        if (outdatedClassList.IsFailed || outdatedClassList.Value.Count == 0)
+        {
+            classes = await mediator.Send(new GetClassesQuery
+            {
+                GroupName = request.GroupName
+            });
+        
+            if (classes.IsFailed) return new Empty();
+        
+            await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+
+            return new Empty();
+        }
         
         await mediator.Send(new DeleteQueueCommand
         {
@@ -81,7 +88,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             OutdatedClassList = outdatedClassList.Value
         });
 
-        Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
+        classes = await mediator.Send(new GetClassesQuery
         {
             GroupName = request.GroupName
         });
