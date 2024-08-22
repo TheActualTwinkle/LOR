@@ -7,6 +7,10 @@ using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
+using DatabaseApp.Application.Subscriber;
+using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
+using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
+using DatabaseApp.Application.Subscriber.Queries.GetSubscribers;
 using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
@@ -230,7 +234,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         });
 
         if (queueDto.IsFailed)
-            return new TryEnqueueInClassReply
+            return new TryEnqueueInClassReply 
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
 
         // await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
@@ -246,18 +250,38 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         return reply;
     }
 
-    public override Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
+    public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
     {
-        return base.AddSubscriber(request, context);
+        Result result = await mediator.Send(new CreateSubscriberCommand
+        {
+            TelegramId = request.SubscriberId
+        });
+
+        return result.IsFailed ? new AddSubscriberReply 
+            { IsFailed = true, ErrorMessage = result.Errors.First().Message } : new AddSubscriberReply();
     }
 
-    public override Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
+    public override async Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
     {
-        return base.DeleteSubscriber(request, context);
+        Result result = await mediator.Send(new DeleteSubscriberCommand
+        {
+            TelegramId = request.SubscriberId
+        });
+
+        return result.IsFailed ? new DeleteSubscriberReply 
+            { IsFailed = true, ErrorMessage = result.Errors.First().Message } : new DeleteSubscriberReply();
     }
 
-    public override Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
+    public override async Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
     {
-        return base.GetSubscribers(request, context);
+        Result<List<SubscriberDto>> subscribers = await mediator.Send(new GetAllSubscribersQuery());
+
+        RepeatedField<SubscriberInformation> repeatedField = await subscribers.Value.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
+        {
+            UserId = dto.TelegramId,
+            GroupId = dto.GroupId
+        });
+
+        return new GetSubscribersReply { Subscribers = { repeatedField } };
     }
 }

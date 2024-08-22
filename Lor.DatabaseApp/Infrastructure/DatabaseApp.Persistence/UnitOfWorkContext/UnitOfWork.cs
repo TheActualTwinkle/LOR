@@ -8,6 +8,7 @@ public sealed class UnitOfWork(
     IClassRepository classRepository,
     IGroupRepository groupRepository,
     IQueueRepository queueRepository,
+    ISubscriberRepository subscriberRepository,
     IUserRepository userRepository) : IUnitOfWork
 {
     private bool _disposed;
@@ -15,6 +16,7 @@ public sealed class UnitOfWork(
     public IClassRepository ClassRepository => classRepository;
     public IGroupRepository GroupRepository => groupRepository;
     public IQueueRepository QueueRepository => queueRepository;
+    public ISubscriberRepository SubscriberRepository => subscriberRepository;
     public IUserRepository UserRepository => userRepository;
 
     public Task SaveDbChangesAsync(CancellationToken cancellationToken)
