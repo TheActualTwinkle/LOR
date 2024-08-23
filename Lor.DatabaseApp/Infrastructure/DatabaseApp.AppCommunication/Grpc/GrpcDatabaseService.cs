@@ -309,9 +309,9 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
 
     public override async Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
     {
-        List<SubscriberDto>? cachedSubscribers = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey);
+        List<SubscriberDto>? subscriberDto = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey);
 
-        if (cachedSubscribers is null)
+        if (subscriberDto is null)
         {
             Result<List<SubscriberDto>> subscribersResult = await mediator.Send(new GetAllSubscribersQuery());
             
@@ -319,11 +319,12 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                 return new GetSubscribersReply
                     { IsFailed = true, ErrorMessage = subscribersResult.Errors.First().Message };
 
-            cachedSubscribers = subscribersResult.Value;
-            await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscribers, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+            subscriberDto = subscribersResult.Value;
+            
+            await cacheService.SetAsync(Constants.AllSubscribersKey, subscriberDto, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         }
 
-        RepeatedField<SubscriberInformation> repeatedField = await cachedSubscribers.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
+        RepeatedField<SubscriberInformation> repeatedField = await subscriberDto.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
         {
             UserId = dto.TelegramId,
             GroupId = dto.GroupId

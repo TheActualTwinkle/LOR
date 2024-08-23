@@ -11,7 +11,7 @@ public class SubscriberConfiguration : IEntityTypeConfiguration<Subscriber>
     {
         builder.ToTable("SUBSCRIBERS");
 
-        builder.HasKey(s => s.UserId).HasName("Subscriber_pkey");
+        builder.HasKey(s => s.Id).HasName("Subscriber_pkey");
 
         builder.HasIndex(s => s.UserId, "tg_id_check").IsUnique();
 
