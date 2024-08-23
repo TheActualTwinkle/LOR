@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240823065724_Test18")]
-    partial class Test18
+    [Migration("20240823115431_Test19")]
+    partial class Test19
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -113,6 +113,10 @@ namespace DatabaseApp.Persistence.Migrations
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
                 {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -120,14 +124,10 @@ namespace DatabaseApp.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
 
-                    b.Property<long>("TelegramId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("telegram_id");
-
-                    b.HasKey("Id")
+                    b.HasKey("UserId")
                         .HasName("Subscriber_pkey");
 
-                    b.HasIndex(new[] { "TelegramId" }, "tg_id_check")
+                    b.HasIndex(new[] { "UserId" }, "tg_id_check")
                         .IsUnique();
 
                     b.ToTable("SUBSCRIBERS", (string)null);
@@ -157,8 +157,6 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("Users_pkey");
-
-                    b.HasAlternateKey("TelegramId");
 
                     b.HasIndex("GroupId");
 
@@ -206,6 +204,18 @@ namespace DatabaseApp.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
+                {
+                    b.HasOne("DatabaseApp.Domain.Models.User", "User")
+                        .WithOne("Subscriber")
+                        .HasForeignKey("DatabaseApp.Domain.Models.Subscriber", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("User_subscriber_id_fkey");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
                 {
                     b.HasOne("DatabaseApp.Domain.Models.Group", "Group")
@@ -215,17 +225,7 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("User_group_id_fkey");
 
-                    b.HasOne("DatabaseApp.Domain.Models.Subscriber", "Subscriber")
-                        .WithOne("User")
-                        .HasForeignKey("DatabaseApp.Domain.Models.User", "TelegramId")
-                        .HasPrincipalKey("DatabaseApp.Domain.Models.Subscriber", "TelegramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("User_subscriber_id_fkey");
-
                     b.Navigation("Group");
-
-                    b.Navigation("Subscriber");
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Class", b =>
@@ -242,15 +242,11 @@ namespace DatabaseApp.Persistence.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
-                {
-                    b.Navigation("User")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
                 {
                     b.Navigation("Queues");
+
+                    b.Navigation("Subscriber");
                 });
 #pragma warning restore 612, 618
         }

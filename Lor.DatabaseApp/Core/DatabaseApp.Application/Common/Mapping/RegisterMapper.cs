@@ -22,7 +22,7 @@ public class RegisterMapper : IRegister
             .Map(dest => dest.FullName, src => src.User.FullName)
             .Map(dest => dest.QueueNum, src => src.QueueNum);
         config.NewConfig<Domain.Models.Subscriber, SubscriberDto>()
-            .Map(dest => dest.TelegramId, src => src.TelegramId)
+            .Map(dest => dest.TelegramId, src => src.UserId)
             .Map(dest => dest.GroupId, src => src.User.GroupId);
         config.NewConfig<Domain.Models.User, UserDto>()
             .Map(dest => dest.FullName, src => src.FullName)

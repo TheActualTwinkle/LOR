@@ -12,7 +12,7 @@ public class SubscriberRepository(IDatabaseContext context)
         await _context.Subscribers
             .ToListAsync(cancellationToken);
 
-    public async Task<Subscriber?> GetSubscriberByTelegramId(long telegramId, CancellationToken cancellationToken) =>
+    public async Task<Subscriber?> GetSubscriberByUserId(int userId, CancellationToken cancellationToken) =>
         await _context.Subscribers
-            .FirstOrDefaultAsync(s => s.TelegramId == telegramId, cancellationToken);
+            .FirstOrDefaultAsync(s => s.UserId == userId, cancellationToken);
 }

@@ -13,14 +13,14 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork)
 
         if (user is null) return Result.Fail("Пользователь не найден");
 
-        Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByTelegramId(request.TelegramId, cancellationToken);
+        Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
         if (subscriber is not null) return Result.Fail("Вы уже подписаны");
 
 
         Domain.Models.Subscriber newSubscriber = new()
         {
-            TelegramId = request.TelegramId
+            UserId = user.Id
         };
 
         await unitOfWork.SubscriberRepository.AddAsync(newSubscriber, cancellationToken);

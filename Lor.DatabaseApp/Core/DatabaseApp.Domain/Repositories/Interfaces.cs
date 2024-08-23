@@ -67,7 +67,7 @@ public interface ISubscriberRepository : IRepository
 
     public Task<List<Subscriber>> GetAllSubscribers(CancellationToken cancellationToken);
     
-    public Task<Subscriber?> GetSubscriberByTelegramId(long telegramId, CancellationToken cancellationToken);
+    public Task<Subscriber?> GetSubscriberByUserId(int userId, CancellationToken cancellationToken);
 }
 
 public interface IUserRepository : IRepository
@@ -75,6 +75,5 @@ public interface IUserRepository : IRepository
     public Task AddAsync(User user, CancellationToken cancellationToken);
     
     public Task<User?> CheckUser(long telegramId, string fullName, CancellationToken cancellationToken);
-
     public Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken);
 }
