@@ -30,5 +30,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasPrincipalKey(g => g.Id)
             .HasForeignKey(u => u.GroupId)
             .HasConstraintName("User_group_id_fkey");
+        
+        builder.HasOne(u => u.Subscriber).WithOne(s => s.User)
+            .HasPrincipalKey<Subscriber>(s => s.TelegramId)
+            .HasForeignKey<User>(u => u.TelegramId)
+            .HasConstraintName("User_subscriber_id_fkey");
     }
 }

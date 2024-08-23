@@ -8,6 +8,5 @@ public class User : IEntity
     public int GroupId { get; init; }
     public Group Group { get; init; } = null!;
     public ICollection<Queue> Queues { get; init; } = null!;
-
     public Subscriber Subscriber { get; init; } = null!;
 }

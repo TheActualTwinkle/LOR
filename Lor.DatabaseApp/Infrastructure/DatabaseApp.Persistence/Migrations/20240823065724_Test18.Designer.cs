@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240822214100_Test17")]
-    partial class Test17
+    [Migration("20240823065724_Test18")]
+    partial class Test18
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,6 +158,8 @@ namespace DatabaseApp.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("Users_pkey");
 
+                    b.HasAlternateKey("TelegramId");
+
                     b.HasIndex("GroupId");
 
                     b.HasIndex(new[] { "FullName" }, "full_name_check")
@@ -204,19 +206,6 @@ namespace DatabaseApp.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
-                {
-                    b.HasOne("DatabaseApp.Domain.Models.User", "User")
-                        .WithOne("Subscriber")
-                        .HasForeignKey("DatabaseApp.Domain.Models.Subscriber", "TelegramId")
-                        .HasPrincipalKey("DatabaseApp.Domain.Models.User", "TelegramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("Subscriber_user_id_fkey");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
                 {
                     b.HasOne("DatabaseApp.Domain.Models.Group", "Group")
@@ -226,7 +215,17 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("User_group_id_fkey");
 
+                    b.HasOne("DatabaseApp.Domain.Models.Subscriber", "Subscriber")
+                        .WithOne("User")
+                        .HasForeignKey("DatabaseApp.Domain.Models.User", "TelegramId")
+                        .HasPrincipalKey("DatabaseApp.Domain.Models.Subscriber", "TelegramId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("User_subscriber_id_fkey");
+
                     b.Navigation("Group");
+
+                    b.Navigation("Subscriber");
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Class", b =>
@@ -243,12 +242,15 @@ namespace DatabaseApp.Persistence.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
+                {
+                    b.Navigation("User")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
                 {
                     b.Navigation("Queues");
-
-                    b.Navigation("Subscriber")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
