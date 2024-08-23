@@ -73,7 +73,7 @@ public class GroupsTelegramCommand : ITelegramCommand
             message.AppendLine(idGroupPair.Value);
         }
 
-        return new ExecutionResult(Result.Ok(message.ToString() + "\n (дб)"));
+        return new ExecutionResult(Result.Ok(message.ToString()));
     }
 }
 
@@ -150,7 +150,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
             message.AppendLine($"{classInformation.ClassName} {dateTime:dd.MM}");
         }
 
-        return new ExecutionResult(Result.Ok(message.ToString() + "\n (дб)"));
+        return new ExecutionResult(Result.Ok(message.ToString()));
     }
 }
 

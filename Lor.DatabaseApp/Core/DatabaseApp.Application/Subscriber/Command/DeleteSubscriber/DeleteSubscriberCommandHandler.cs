@@ -15,7 +15,7 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork)
 
         Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
-        if (subscriber is null) return Result.Fail("Подписчик не найден");
+        if (subscriber is null) return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
 
         unitOfWork.SubscriberRepository.Delete(subscriber);
 
