@@ -1,7 +1,6 @@
 ﻿using DatabaseApp.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using User = Telegram.Bot.Types.User;
 
 namespace DatabaseApp.Persistence.EntityTypeConfiguration;
 
@@ -20,5 +19,10 @@ public class SubscriberConfiguration : IEntityTypeConfiguration<Subscriber>
             .HasColumnName("id");
         builder.Property(s => s.UserId)
             .HasColumnName("user_id");
+
+        builder.HasOne(s => s.User)
+            .WithOne(u => u.Subscriber)
+            .HasForeignKey<Subscriber>(s => s.UserId)
+            .HasConstraintName("Subscriber_user_id_fkey");
     }
 }

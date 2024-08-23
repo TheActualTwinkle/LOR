@@ -110,10 +110,6 @@ namespace DatabaseApp.Persistence.Migrations
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -121,7 +117,11 @@ namespace DatabaseApp.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
 
-                    b.HasKey("UserId")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
                         .HasName("Subscriber_pkey");
 
                     b.HasIndex(new[] { "UserId" }, "tg_id_check")
