@@ -5,6 +5,7 @@ using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Caching;
@@ -37,8 +38,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         return new Empty();
     }
 
-    public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request,
-        ServerCallContext context)
+    public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request, ServerCallContext context)
     {
         Result<List<ClassDto>> oldClasses = await mediator.Send(new GetClassesQuery
         {
@@ -92,9 +92,16 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         if (newClasses.Count == 0) return new Empty();
         
+        Result<GroupDto> groupDto = await mediator.Send(new GetGroupQuery()
+        {
+            GroupName = request.GroupName
+        });
+        
+        if (classes.IsFailed) return new Empty();
+        
         NewClassesMessage newClassesMessage = new()
         {
-            GroupId = 0, // TODO @ext4: Сделать чтобы можно было получать GroupId из запроса в бд
+            GroupId = groupDto.Value.Id,
             Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
         };
         await bus.Publish(newClassesMessage, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI

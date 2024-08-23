@@ -3,6 +3,7 @@ using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Application.Group;
+using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
@@ -261,10 +262,28 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             return new AddSubscriberReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
         
-        // List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
-        // cachedSubscriptions.Add(new SubscriberDto() { TelegramId = request.SubscriberId, GroupId = ???}); TODO @ext4: Cant get group id
+        Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+        {
+            TelegramId = request.SubscriberId
+        });
         
-        // await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        Result<GroupDto> groupDto = await mediator.Send(new GetGroupQuery()
+        {
+            GroupName = userDto.Value.GroupName
+        });
+        
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
+        cachedSubscriptions.Add(new SubscriberDto() { TelegramId = request.SubscriberId, GroupId = groupDto.Value.Id});
+        
+        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
         
         return new AddSubscriberReply();
     }
