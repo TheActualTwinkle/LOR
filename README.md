@@ -21,7 +21,7 @@ flowchart TD;
 ## Installation and Running
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/shishnk/weather-bot-api.git
+   git clone https://github.com/TheActualTwinkle/LOR.git
    ```
 2. **Fill the '???' gaps in _.env_ file. Other settings may be left as is**
 	```env
