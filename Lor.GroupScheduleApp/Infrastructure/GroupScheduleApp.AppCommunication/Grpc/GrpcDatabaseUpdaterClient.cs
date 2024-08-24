@@ -11,10 +11,10 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
     
     public async Task Start()
     {
-        Console.WriteLine("Connecting to the Database...");
+        Console.WriteLine("Connecting to the gRPC service...");
         GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
         await channel.ConnectAsync();
-        Console.WriteLine("Successfully connected to the Database.");
+        Console.WriteLine("Successfully connected to the gRPC service.");
         
         _client = new DatabaseUpdater.DatabaseUpdaterClient(channel);
     }

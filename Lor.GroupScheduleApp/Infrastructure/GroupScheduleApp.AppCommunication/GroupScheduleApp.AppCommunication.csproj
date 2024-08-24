@@ -7,7 +7,6 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <Protobuf Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\Grpc\Protos\databaseUpdater.proto" GrpcServices="Client"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
         <PackageReference Include="Google.Protobuf" Version="3.18.0" />
@@ -20,6 +19,13 @@
     
     <ItemGroup>
       <ProjectReference Include="..\..\Core\GroupScheduleApp.Shared\GroupScheduleApp.Shared.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Protobuf Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\Grpc\Protos\databaseUpdater.proto">
+        <Link>Grpc\Protos\databaseUpdater.proto</Link>
+        <Generator>MSBuild:Compile</Generator>
+      </Protobuf>
     </ItemGroup>
 
 </Project>

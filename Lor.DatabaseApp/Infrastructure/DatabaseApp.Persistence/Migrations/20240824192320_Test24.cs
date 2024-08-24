@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test15 : Migration
+    public partial class Test24 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -74,17 +74,11 @@ namespace DatabaseApp.Persistence.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     class_id = table.Column<int>(type: "integer", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false),
-                    queue_num = table.Column<long>(type: "bigint", nullable: false),
-                    GroupId = table.Column<int>(type: "integer", nullable: true)
+                    queue_num = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("Queue_pkey", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_QUEUES_GROUPS_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "GROUPS",
-                        principalColumn: "id");
                     table.ForeignKey(
                         name: "Queue_classes_id_fkey",
                         column: x => x.class_id,
@@ -95,6 +89,25 @@ namespace DatabaseApp.Persistence.Migrations
                         column: x => x.user_id,
                         principalTable: "USERS",
                         principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SUBSCRIBERS",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                    user_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("Subscriber_pkey", x => x.id);
+                    table.ForeignKey(
+                        name: "User_subscriber_id_fkey",
+                        column: x => x.user_id,
+                        principalTable: "USERS",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -108,14 +121,15 @@ namespace DatabaseApp.Persistence.Migrations
                 column: "class_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QUEUES_GroupId",
-                table: "QUEUES",
-                column: "GroupId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_QUEUES_user_id",
                 table: "QUEUES",
                 column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "user_id_check",
+                table: "SUBSCRIBERS",
+                column: "user_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "full_name_check",
@@ -140,6 +154,9 @@ namespace DatabaseApp.Persistence.Migrations
         {
             migrationBuilder.DropTable(
                 name: "QUEUES");
+
+            migrationBuilder.DropTable(
+                name: "SUBSCRIBERS");
 
             migrationBuilder.DropTable(
                 name: "CLASSES");

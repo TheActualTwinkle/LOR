@@ -3,10 +3,15 @@ using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Application.Group;
+using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
+using DatabaseApp.Application.Subscriber;
+using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
+using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
+using DatabaseApp.Application.Subscriber.Queries.GetSubscribers;
 using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
@@ -92,7 +97,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                     { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
             await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, 
-                cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
             user = userDto.Value;
         }
@@ -230,7 +235,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         });
 
         if (queueDto.IsFailed)
-            return new TryEnqueueInClassReply
+            return new TryEnqueueInClassReply 
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
 
         // await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
@@ -244,5 +249,87 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         reply.ClassDateUnixTimestamp = ((DateTimeOffset)classDto.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds();
         
         return reply;
+    }
+
+    public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
+    {
+        Result result = await mediator.Send(new CreateSubscriberCommand
+        {
+            TelegramId = request.SubscriberId
+        });
+
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+        {
+            TelegramId = request.SubscriberId
+        });
+        
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        Result<GroupDto> groupDto = await mediator.Send(new GetGroupQuery()
+        {
+            GroupName = userDto.Value.GroupName
+        });
+        
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
+        cachedSubscriptions.Add(new SubscriberDto() { TelegramId = request.SubscriberId, GroupId = groupDto.Value.Id});
+        
+        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        
+        return new AddSubscriberReply();
+    }
+
+    public override async Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
+    {
+        Result result = await mediator.Send(new DeleteSubscriberCommand
+        {
+            TelegramId = request.SubscriberId
+        });
+
+        if (result.IsFailed)
+            return new DeleteSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+
+        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
+        
+        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions.Where(x => x.TelegramId != request.SubscriberId),
+            cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        
+        return new DeleteSubscriberReply();
+    }
+
+    public override async Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
+    {
+        List<SubscriberDto>? subscriberDto = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey);
+
+        if (subscriberDto is null)
+        {
+            Result<List<SubscriberDto>> subscribersResult = await mediator.Send(new GetAllSubscribersQuery());
+            
+            if (subscribersResult.IsFailed)
+                return new GetSubscribersReply
+                    { IsFailed = true, ErrorMessage = subscribersResult.Errors.First().Message };
+
+            subscriberDto = subscribersResult.Value;
+            
+            await cacheService.SetAsync(Constants.AllSubscribersKey, subscriberDto, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        }
+
+        RepeatedField<SubscriberInformation> repeatedField = await subscriberDto.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
+        {
+            UserId = dto.TelegramId,
+            GroupId = dto.GroupId
+        });
+        
+        return new GetSubscribersReply { Subscribers = { repeatedField } };
     }
 }

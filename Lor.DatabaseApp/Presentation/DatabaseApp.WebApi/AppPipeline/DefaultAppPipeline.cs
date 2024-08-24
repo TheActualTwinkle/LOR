@@ -22,11 +22,13 @@ public class DefaultAppPipeline : IAppPipeline
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         
+        builder.Configuration.AddConfiguration(host.Services.GetRequiredService<IConfiguration>());
+        
         builder.Services.AddGrpc();
         builder.Services.AddApplication();
-        builder.Services.AddCommunication();
         builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
+        builder.Services.AddBus(builder.Configuration);
 
         WebApplication app = builder.Build();
         

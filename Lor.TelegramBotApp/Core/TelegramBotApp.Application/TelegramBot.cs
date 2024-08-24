@@ -7,26 +7,30 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
-using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Application.Settings;
 using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.Application;
 
-public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions) : ITelegramBot
+public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions, IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService) : ITelegramBot
 {
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
     private TelegramCommandQueryFactory _telegramCommandQueryFactory = null!;
 
-    public void StartReceiving(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService, CancellationToken cancellationToken)
+    public void StartReceiving(CancellationToken cancellationToken)
     {
         _telegramCommandFactory = new TelegramCommandFactory(databaseCommunicator, authorizationService);
         _telegramCommandQueryFactory = new TelegramCommandQueryFactory(databaseCommunicator);
 
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
-    
+
+    public async Task SendMessageAsync(long telegramId, string message, IReplyMarkup replyMarkup, CancellationToken cancellationToken = default) => 
+        await telegramBot.SendTextMessageAsync(telegramId, message, replyMarkup: replyMarkup, cancellationToken: cancellationToken); 
+
+
     public Task<User> GetMeAsync() => telegramBot.GetMeAsync();
     
     private Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
@@ -61,28 +65,28 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
 
                 if (executionResult.Result.IsFailed)
                 {
-                    await SendErrorMessage(bot, chatId, new Exception(executionResult.Result.Errors.First()?.Message ?? "Неизвестная ошибка"), executionResult.ReplyMarkup, cts.Token);
+                    await SendErrorMessage(chatId, new Exception(executionResult.Result.Errors.First()?.Message ?? "Неизвестная ошибка"), executionResult.ReplyMarkup, cts.Token);
                     return;
                 }
-
-                await bot.SendTextMessageAsync(chatId: chatId, executionResult.Result.Value, replyMarkup: executionResult.ReplyMarkup, cancellationToken: cts.Token);
+                
+                await SendMessageAsync(chatId, executionResult.Result.Value, executionResult.ReplyMarkup, cts.Token);
             }
             catch (TaskCanceledException)
             {
-                await SendErrorMessage(bot, chatId, new Exception("Время запроса истекло"), new ReplyKeyboardRemove(), cts.Token);
+                await SendErrorMessage(chatId, new Exception("Время запроса истекло"), new ReplyKeyboardRemove(), cts.Token);
             }
             catch (Exception e)
             {
-                await SendErrorMessage(bot, chatId, new Exception($"Внутрення ошибка. {e}"), new ReplyKeyboardRemove(), cts.Token);
+                await SendErrorMessage(chatId, new Exception($"Внутрення ошибка. {e}"), new ReplyKeyboardRemove(), cts.Token);
             }
         }, cancellationToken);
         
         return Task.CompletedTask;
     }
 
-    private async Task SendErrorMessage(ITelegramBotClient bot, long chatIdInner, Exception exception, IReplyMarkup replyMarkup, CancellationToken cancellationToken)
+    private async Task SendErrorMessage(long chatIdInner, Exception exception, IReplyMarkup replyMarkup, CancellationToken cancellationToken)
     {
-        await bot.SendTextMessageAsync(chatId: chatIdInner, exception.Message, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
+        await SendMessageAsync(chatIdInner, exception.Message, replyMarkup, cancellationToken);
     }
     
     private Task HandleError(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
@@ -109,11 +113,11 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
             
             if (result.Result.IsFailed)
             {
-                await SendErrorMessage(bot, chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
+                await SendErrorMessage(chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
             }
             else
             {
-                await bot.SendTextMessageAsync(chatId, result.Result.Value, replyMarkup: result.ReplyMarkup, cancellationToken: cancellationToken);
+                await SendMessageAsync(chatId, result.Result.Value, result.ReplyMarkup, cancellationToken);
             }
         }
         catch (Exception e)
@@ -146,11 +150,11 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
             
             if (result.Result.IsFailed)
             {
-                await SendErrorMessage(bot, chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
+                await SendErrorMessage(chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
             }
             else
             {
-                await bot.SendTextMessageAsync(chatId, result.Result.Value, replyMarkup: result.ReplyMarkup, cancellationToken: cancellationToken);
+                await SendMessageAsync(chatId, result.Result.Value, result.ReplyMarkup, cancellationToken);
             }
         }
         catch (Exception e)
