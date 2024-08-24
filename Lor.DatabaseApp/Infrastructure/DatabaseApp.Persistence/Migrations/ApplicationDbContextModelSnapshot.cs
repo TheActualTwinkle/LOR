@@ -85,9 +85,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("class_id");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("integer");
-
                     b.Property<long>("QueueNum")
                         .HasColumnType("bigint")
                         .HasColumnName("queue_num");
@@ -100,8 +97,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasName("Queue_pkey");
 
                     b.HasIndex("ClassId");
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserId");
 
@@ -185,10 +180,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("Queue_classes_id_fkey");
 
-                    b.HasOne("DatabaseApp.Domain.Models.Group", null)
-                        .WithMany("Queues")
-                        .HasForeignKey("GroupId");
-
                     b.HasOne("DatabaseApp.Domain.Models.User", "User")
                         .WithMany("Queues")
                         .HasForeignKey("UserId")
@@ -232,8 +223,6 @@ namespace DatabaseApp.Persistence.Migrations
             modelBuilder.Entity("DatabaseApp.Domain.Models.Group", b =>
                 {
                     b.Navigation("Classes");
-
-                    b.Navigation("Queues");
 
                     b.Navigation("Users");
                 });

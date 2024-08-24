@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240824172953_Test23")]
-    partial class Test23
+    [Migration("20240824192320_Test24")]
+    partial class Test24
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,9 +88,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("class_id");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("integer");
-
                     b.Property<long>("QueueNum")
                         .HasColumnType("bigint")
                         .HasColumnName("queue_num");
@@ -103,8 +100,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasName("Queue_pkey");
 
                     b.HasIndex("ClassId");
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserId");
 
@@ -188,10 +183,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("Queue_classes_id_fkey");
 
-                    b.HasOne("DatabaseApp.Domain.Models.Group", null)
-                        .WithMany("Queues")
-                        .HasForeignKey("GroupId");
-
                     b.HasOne("DatabaseApp.Domain.Models.User", "User")
                         .WithMany("Queues")
                         .HasForeignKey("UserId")
@@ -235,8 +226,6 @@ namespace DatabaseApp.Persistence.Migrations
             modelBuilder.Entity("DatabaseApp.Domain.Models.Group", b =>
                 {
                     b.Navigation("Classes");
-
-                    b.Navigation("Queues");
 
                     b.Navigation("Users");
                 });

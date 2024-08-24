@@ -102,7 +102,7 @@ public class AuthorizationTelegramCommand : ITelegramCommand
         
         if (argumentsList.Count() != 2 && argumentsList.Count() != 3)
         {
-            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"));
+            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"), new ForceReplyMarkup());
         }
         
         string fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");

@@ -11,7 +11,7 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork)
     {
         Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден");
+        if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
         Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         

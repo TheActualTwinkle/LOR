@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test23 : Migration
+    public partial class Test24 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -74,17 +74,11 @@ namespace DatabaseApp.Persistence.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     class_id = table.Column<int>(type: "integer", nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false),
-                    queue_num = table.Column<long>(type: "bigint", nullable: false),
-                    GroupId = table.Column<int>(type: "integer", nullable: true)
+                    queue_num = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("Queue_pkey", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_QUEUES_GROUPS_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "GROUPS",
-                        principalColumn: "id");
                     table.ForeignKey(
                         name: "Queue_classes_id_fkey",
                         column: x => x.class_id,
@@ -125,11 +119,6 @@ namespace DatabaseApp.Persistence.Migrations
                 name: "IX_QUEUES_class_id",
                 table: "QUEUES",
                 column: "class_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_QUEUES_GroupId",
-                table: "QUEUES",
-                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QUEUES_user_id",

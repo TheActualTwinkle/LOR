@@ -11,5 +11,5 @@ public class GetGroupQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     public async Task<Result<GroupDto>> Handle(GetGroupQuery request, CancellationToken cancellationToken) =>
         await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken) is null
             ? Result.Fail("Группа не найдена")
-            : Result.Ok(mapper.From(unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken)).AdaptToType<GroupDto>());
+            : Result.Ok(mapper.From(await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken)).AdaptToType<GroupDto>());
 }
