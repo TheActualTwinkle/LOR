@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Test22 : Migration
+    public partial class Test23 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -137,7 +137,7 @@ namespace DatabaseApp.Persistence.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "tg_id_check",
+                name: "user_id_check",
                 table: "SUBSCRIBERS",
                 column: "user_id",
                 unique: true);
@@ -154,7 +154,7 @@ namespace DatabaseApp.Persistence.Migrations
                 column: "group_id");
 
             migrationBuilder.CreateIndex(
-                name: "tg_id_check1",
+                name: "tg_id_check",
                 table: "USERS",
                 column: "telegram_id",
                 unique: true);

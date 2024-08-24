@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DatabaseApp.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240823193929_Test22")]
-    partial class Test22
+    [Migration("20240824172953_Test23")]
+    partial class Test23
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -127,7 +127,7 @@ namespace DatabaseApp.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("Subscriber_pkey");
 
-                    b.HasIndex(new[] { "UserId" }, "tg_id_check")
+                    b.HasIndex(new[] { "UserId" }, "user_id_check")
                         .IsUnique();
 
                     b.ToTable("SUBSCRIBERS", (string)null);
@@ -164,8 +164,7 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsUnique();
 
                     b.HasIndex(new[] { "TelegramId" }, "tg_id_check")
-                        .IsUnique()
-                        .HasDatabaseName("tg_id_check1");
+                        .IsUnique();
 
                     b.ToTable("USERS", (string)null);
                 });

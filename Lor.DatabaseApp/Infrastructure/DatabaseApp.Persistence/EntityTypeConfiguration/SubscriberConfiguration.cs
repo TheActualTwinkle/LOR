@@ -12,7 +12,7 @@ public class SubscriberConfiguration : IEntityTypeConfiguration<Subscriber>
 
         builder.HasKey(s => s.Id).HasName("Subscriber_pkey");
 
-        builder.HasIndex(s => s.UserId, "tg_id_check").IsUnique();
+        builder.HasIndex(s => s.UserId, "user_id_check").IsUnique();
 
         builder.Property(s => s.Id)
             .UseIdentityAlwaysColumn()
