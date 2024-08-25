@@ -60,6 +60,8 @@ public interface IQueueRepository : IRepository
     public Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);
     
     public Task<uint> GetUserQueueNum(int userId, int groupId, int classId, CancellationToken cancellationToken);
+    
+    public Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken);
 }
 
 public interface ISubscriberRepository : IRepository

@@ -38,4 +38,7 @@ public class QueueRepository(IDatabaseContext context)
             .Where(q => q.UserId == userId && q.Class.GroupId == groupId && q.ClassId == classId)
             .Select(q => q.QueueNum)
             .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken) => await _context.Queues
+        .AnyAsync(q => q.UserId == userId && q.ClassId == classId, cancellationToken);
 }

@@ -62,7 +62,7 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
         
         if (query == null)
         {
-            throw new ArgumentException($"CallbackQuery: {queryString} - не найден");
+            return new ExecutionResult(Result.Fail("CallbackQuery: {queryString} - не найден"));
         }
 
         return await query.Execute(chatId, this, GetArguments(queryString), cancellationToken);

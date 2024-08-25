@@ -25,7 +25,7 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
     {
         GetUserInfoReply reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth <ФИО>") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
+        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
     }
 
     public async Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default)
@@ -55,7 +55,13 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
     {
         TryEnqueueInClassReply reply = await _client!.TryEnqueueInClassAsync(new TryEnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult(reply.StudentsQueue, reply.ClassName, DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime));
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult
+        {
+            WasAlreadyEnqueued = reply.WasAlreadyEnqueued,
+            StudentsQueue = reply.StudentsQueue,
+            ClassName = reply.ClassName,
+            ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
+        });
     }
 
     public async Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default)
