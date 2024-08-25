@@ -16,7 +16,12 @@ public class QueueRepository(IDatabaseContext context)
         await Task.FromResult(_context.Queues
             .Count(q => q.Class.GroupId == groupId && q.ClassId == classId));
 
-    public async Task<List<Queue>?> GetQueueList(uint queueNum, int groupId, int classId,
+    public async Task<List<Queue>?> GetQueueList(int groupId, int classId, CancellationToken cancellationToken) =>
+        await _context.Queues
+            .Where(q => q.Class.GroupId == groupId && q.ClassId == classId)
+            .ToListAsync(cancellationToken);
+    
+    public async Task<List<Queue>?> GetUserQueueList(uint queueNum, int groupId, int classId,
         CancellationToken cancellationToken) =>
         await _context.Queues
             .Include(q => q.User)
