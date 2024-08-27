@@ -1,7 +1,6 @@
 ﻿using System.Composition;
 using System.Text;
 using FluentResults;
-using TelegramBotApp.AppCommunication;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
@@ -12,10 +11,10 @@ using TelegramBotApp.Application.Interfaces;
 namespace TelegramBotApp.Application.CallbackQueries;
 
 [Export(typeof(ICallbackQuery))]
-[ExportMetadata(nameof(Query), "!hop")]
+[ExportMetadata(nameof(Query), $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop")]
 public class EnqueueCallbackQuery : ICallbackQuery
 {
-    public string Query => "!hop";
+    public string Query => $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop";
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {        
@@ -36,8 +35,12 @@ public class EnqueueCallbackQuery : ICallbackQuery
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
+
+        var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
+        string messageHeader = result.Value.WasAlreadyEnqueued ? 
+            $"Вы уже были записаны на {classData}\n" : $"Вы успешно записаны на {classData}\nОчередь:\n";
         
-        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}\nОчередь:\n");
+        StringBuilder message = new(messageHeader);
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             string labClass = result.Value.StudentsQueue.ElementAt(i);

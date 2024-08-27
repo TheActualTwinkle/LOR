@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
+using DatabaseApp.Caching.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
-using TelegramBotApp.Caching.Interfaces;
 
-namespace TelegramBotApp.Caching;
+namespace DatabaseApp.Caching;
 
 public class CacheService(IDistributedCache distributedCache) : ICacheService
 {
@@ -12,7 +12,7 @@ public class CacheService(IDistributedCache distributedCache) : ICacheService
         return value == null ? null : JsonSerializer.Deserialize<T>(value);
     }
 
-    public async Task SetAsync<T>(string key, T value, TimeSpan expirationTime, CancellationToken cancellationToken = default) where T : class
+    public async Task SetAsync<T>(string key, T value, TimeSpan? expirationTime = null, CancellationToken cancellationToken = default) where T : class
     {
         await distributedCache.SetStringAsync(key, JsonSerializer.Serialize(value), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = expirationTime}, cancellationToken);
     }

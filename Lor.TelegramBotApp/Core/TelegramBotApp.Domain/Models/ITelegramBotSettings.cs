@@ -1,4 +1,4 @@
-﻿namespace TelegramBotApp.Application.Interfaces;
+﻿namespace TelegramBotApp.Domain.Interfaces;
 
 public interface ITelegramBotSettings
 {

@@ -10,11 +10,7 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 {
     public async Task<Result<List<ClassDto>>> Handle(GetClassesQuery request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
-
-        if (user is null) return Result.Fail("Пользователь не найден.");
-
-        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не найдена.");
 

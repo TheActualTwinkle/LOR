@@ -16,7 +16,6 @@
       <ProjectReference Include="..\..\Core\TelegramBotApp.Application\TelegramBotApp.Application.csproj" />
       <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
       <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.Authorization\TelegramBotApp.Authorization.csproj" />
-      <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.Caching\TelegramBotApp.Caching.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -30,6 +29,12 @@
         <Link>DatabaseSettings\launchSettings.json</Link>
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore">
+        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.2\Microsoft.AspNetCore.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

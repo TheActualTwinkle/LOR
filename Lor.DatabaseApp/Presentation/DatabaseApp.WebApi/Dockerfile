@@ -12,6 +12,7 @@ COPY ["Lor.DatabaseApp/Core/DatabaseApp.Domain/DatabaseApp.Domain.csproj", "Lor.
 COPY ["Lor.DatabaseApp/Core/DatabaseApp.Application/DatabaseApp.Application.csproj", "Lor.DatabaseApp/Core/DatabaseApp.Application/"]
 COPY ["Lor.DatabaseApp/Infrastructure/DatabaseApp.Persistence/DatabaseApp.Persistence.csproj", "Lor.DatabaseApp/Infrastructure/DatabaseApp.Persistence/"]
 COPY ["Lor.DatabaseApp/Infrastructure/DatabaseApp.AppCommunication/DatabaseApp.AppCommunication.csproj", "Lor.DatabaseApp/Infrastructure/DatabaseApp.AppCommunication/"]
+COPY ["Lor.DatabaseApp/Infrastructure/DatabaseApp.Caching/DatabaseApp.Caching.csproj", "Lor.DatabaseApp/Infrastructure/DatabaseApp.Caching/"]
 RUN dotnet restore "Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/DatabaseApp.WebApi.csproj"
 COPY . .
 WORKDIR "/src/Lor.DatabaseApp/Presentation/DatabaseApp.WebApi"

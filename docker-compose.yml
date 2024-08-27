@@ -21,7 +21,16 @@ services:
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings:DefaultConnection=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-
+      - ConnectionStrings:Redis=redis:6379
+      - RabbitMqSettings:Host=${RABBITMQ_HOST}
+      - RabbitMqSettings:Username=${RABBITMQ_USER}
+      - RabbitMqSettings:Password=${RABBITMQ_PASSWORD}
+    depends_on:
+          redis:
+            condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
+        
   telegrambot:
     build:
       context: .
@@ -29,10 +38,12 @@ services:
     environment:
       - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
       - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
-      - ConnectionStrings:Redis=redis:6379
+      - RabbitMqSettings:Host=${RABBITMQ_HOST}
+      - RabbitMqSettings:Username=${RABBITMQ_USER}
+      - RabbitMqSettings:Password=${RABBITMQ_PASSWORD}
     depends_on:
-      redis:
-        condition: service_healthy
+          rabbitmq:
+            condition: service_healthy
 
   groupschedule:
     build:
@@ -47,6 +58,21 @@ services:
       - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
+      interval: 15s
+      timeout: 15s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: ${RABBITMQ_HOST}
+    volumes:
+      - ./.containers/queue/data/:/var/lib/rabbitmq
+      - ./.containers/queue/log/:/var/log/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
       interval: 15s
       timeout: 15s
       retries: 3

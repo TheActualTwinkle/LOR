@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using DatabaseApp.Caching.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TelegramBotApp.Caching.Interfaces;
 
-namespace TelegramBotApp.Caching;
+namespace DatabaseApp.Caching;
 
 public static class DependencyInjection
 {
@@ -11,8 +11,8 @@ public static class DependencyInjection
     {
         services.AddStackExchangeRedisCache(options =>
                 options.Configuration = configuration.GetConnectionString("Redis") ?? throw new NullReferenceException("Can`t find Redis connection string in configuration"))
-            .AddSingleton<ICacheService, CacheService>();
-
+            .AddScoped<ICacheService, CacheService>();
+        
         return services;
     }
 }

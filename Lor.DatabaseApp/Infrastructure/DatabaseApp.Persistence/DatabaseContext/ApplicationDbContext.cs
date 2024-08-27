@@ -13,6 +13,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public required DbSet<Class> Classes { get; init; }
     public required DbSet<Group> Groups { get; init; }
     public required DbSet<Queue> Queues { get; init; }
+    public required DbSet<Subscriber> Subscribers { get; init; }
     public required DbSet<User> Users { get; init; }
     public DatabaseFacade Db => Database;
 
@@ -27,6 +28,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         modelBuilder.ApplyConfiguration(new ClassConfiguration());
         modelBuilder.ApplyConfiguration(new GroupConfiguration());
         modelBuilder.ApplyConfiguration(new QueueConfiguration());
+        modelBuilder.ApplyConfiguration(new SubscriberConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
 
         base.OnModelCreating(modelBuilder);
@@ -52,6 +54,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             Classes = null!,
             Groups = null!,
             Queues = null!,
+            Subscribers = null!,
             Users = null!
         };
     }

@@ -9,7 +9,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddSenderService(this IServiceCollection services)
     {
-        
         services.AddSingleton<IScheduleSendService>(s =>
         {
             IScheduleProvider scheduleProvider = s.GetRequiredService<IScheduleProvider>();

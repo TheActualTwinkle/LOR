@@ -85,9 +85,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("class_id");
 
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("integer");
-
                     b.Property<long>("QueueNum")
                         .HasColumnType("bigint")
                         .HasColumnName("queue_num");
@@ -101,11 +98,31 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.HasIndex("GroupId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("QUEUES", (string)null);
+                });
+
+            modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("Subscriber_pkey");
+
+                    b.HasIndex(new[] { "UserId" }, "user_id_check")
+                        .IsUnique();
+
+                    b.ToTable("SUBSCRIBERS", (string)null);
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
@@ -163,10 +180,6 @@ namespace DatabaseApp.Persistence.Migrations
                         .IsRequired()
                         .HasConstraintName("Queue_classes_id_fkey");
 
-                    b.HasOne("DatabaseApp.Domain.Models.Group", null)
-                        .WithMany("Queues")
-                        .HasForeignKey("GroupId");
-
                     b.HasOne("DatabaseApp.Domain.Models.User", "User")
                         .WithMany("Queues")
                         .HasForeignKey("UserId")
@@ -174,6 +187,18 @@ namespace DatabaseApp.Persistence.Migrations
                         .HasConstraintName("Queue_user_id_fkey");
 
                     b.Navigation("Class");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DatabaseApp.Domain.Models.Subscriber", b =>
+                {
+                    b.HasOne("DatabaseApp.Domain.Models.User", "User")
+                        .WithOne("Subscriber")
+                        .HasForeignKey("DatabaseApp.Domain.Models.Subscriber", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("User_subscriber_id_fkey");
 
                     b.Navigation("User");
                 });
@@ -199,14 +224,14 @@ namespace DatabaseApp.Persistence.Migrations
                 {
                     b.Navigation("Classes");
 
-                    b.Navigation("Queues");
-
                     b.Navigation("Users");
                 });
 
             modelBuilder.Entity("DatabaseApp.Domain.Models.User", b =>
                 {
                     b.Navigation("Queues");
+
+                    b.Navigation("Subscriber");
                 });
 #pragma warning restore 612, 618
         }

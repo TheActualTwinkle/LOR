@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
+using TelegramBotApp.Authorization.Dto;
 using TelegramBotApp.Authorization.Interfaces;
 
 namespace TelegramBotApp.Authorization;
@@ -14,8 +15,8 @@ public class NstuAuthorizationService : IAuthorizationService
             string fullName = request.FullName;
             DateTime? dateOfBirth = request.DateOfBirth;
 
-            Result<string> result = await GetUserGroup(fullName, dateOfBirth);
-            return result.IsSuccess ? Result.Ok(new AuthorizationReply(fullName, result.Value)) : Result.Fail(result.Errors.First());
+            Result<UserDto> result = await ParseUserDto(fullName, dateOfBirth);
+            return result.IsSuccess ? Result.Ok(new AuthorizationReply(result.Value.FullName, result.Value.GroupName)) : Result.Fail(result.Errors.First());
         }
         catch (Exception e)
         {
@@ -23,7 +24,7 @@ public class NstuAuthorizationService : IAuthorizationService
         }
     }
     
-    private async Task<Result<string>> GetUserGroup(string fullName, DateTime? dateOfBirth = default)
+    private async Task<Result<UserDto>> ParseUserDto(string fullName, DateTime? dateOfBirth = default)
     {
         using HttpClient client = new();
         
@@ -39,19 +40,32 @@ public class NstuAuthorizationService : IAuthorizationService
         string responseBody = await response.Content.ReadAsStringAsync();
 
         using JsonDocument document = JsonDocument.Parse(responseBody);
+        if (document.RootElement.TryGetProperty("fullname", out JsonElement fullNameElement))
+        {
+            string? fullNameFromData = fullNameElement.GetString()?.Trim();
+
+            if (fullNameFromData == null) return Result.Fail("Can't get fullname from the response.");
+            
+            fullName = fullNameFromData;
+        }
+        
         if (document.RootElement.TryGetProperty("fullname_and_info", out JsonElement fullnameAndInfoElement))
         {
             string fullnameAndInfo = fullnameAndInfoElement.GetString()!;
-
+            
+            fullnameAndInfo = fullnameAndInfo.Replace(fullName, string.Empty).Trim();
             const string pattern = @"\((.*?)\)";
             Match match = Regex.Match(fullnameAndInfo, pattern);
-
             if (match.Success)
             {
-                string extractedData = match.Groups[1].Value.Split(' ').Last();
-                return Result.Ok(extractedData);
+                string groupName = match.Groups[1].Value.Split(' ').Last();
+                return Result.Ok(new UserDto
+                {
+                    FullName = fullName, 
+                    GroupName = groupName
+                });
             }
-
+            
             Console.WriteLine("Pattern not found in the fullname_and_info.");
         }
         else

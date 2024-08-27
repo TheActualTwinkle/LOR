@@ -369,3 +369,6 @@ FodyWeavers.xsd
 
 # Obsidian
 .obsidian/
+
+# Docker stuff
+.containers/

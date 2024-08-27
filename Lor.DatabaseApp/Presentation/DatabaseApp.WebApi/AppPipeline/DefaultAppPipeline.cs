@@ -1,6 +1,7 @@
 ﻿using DatabaseApp.AppCommunication;
 using DatabaseApp.AppCommunication.Grpc;
 using DatabaseApp.Application;
+using DatabaseApp.Caching;
 using DatabaseApp.Persistence;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi.AppPipeline.Interfaces;
@@ -21,10 +22,13 @@ public class DefaultAppPipeline : IAppPipeline
 
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         
+        builder.Configuration.AddConfiguration(host.Services.GetRequiredService<IConfiguration>());
+        
         builder.Services.AddGrpc();
         builder.Services.AddApplication();
-        builder.Services.AddCommunication();
+        builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
+        builder.Services.AddBus(builder.Configuration);
 
         WebApplication app = builder.Build();
         

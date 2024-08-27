@@ -58,12 +58,8 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
 
     public async Task<IEnumerable<GroupClassesData>> GetGroupClassesDataAsync()
     {
-        List<GroupClassesData> groupClassesData = [new GroupClassesData("АВТ-218", [
-            new ClassData("Вычмат", new DateTime(2024, 8, 13, 0, 0, 0)), 
-            new ClassData("ООП", new DateTime(2024, 8, 20, 0, 0, 0))
-        ])]; // [] TODO: Testing
+        List<GroupClassesData> groupClassesData = [];
 
-        return groupClassesData; // remove TODO: Testing
         foreach (string url in _urls)
         {
             List<ClassData> classesData = [];
@@ -80,7 +76,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={++weekNumber}");
             classesData.AddRange(ParseForWeek());
             
-            classesData = classesData.Where(d => d.Date >= Today() && d.Date <= Today() + ScheduleFetchInterval).ToList();
+            // classesData = classesData.Where(d => d.Date >= Today() && d.Date <= Today() + ScheduleFetchInterval).ToList(); TODO: uncomment on production
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));
         }
@@ -111,7 +107,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
 
             foreach (string className in classNames)
             {
-                classesData.Add(new ClassData(className, new DateTime(2024, 8, 3))); // TODO: Testing
+                classesData.Add(new ClassData(className, date));
             }
         }
 
@@ -125,7 +121,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        text = "14 неделя"; // TODO: Testing
+        text = "1 неделя"; // TODO: Testing
         
         const string pattern = @"\d+";
         Match match = Regex.Match(text, pattern);
