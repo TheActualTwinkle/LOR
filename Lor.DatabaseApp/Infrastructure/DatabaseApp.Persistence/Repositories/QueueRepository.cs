@@ -20,13 +20,16 @@ public class QueueRepository(IDatabaseContext context)
         await _context.Queues
             .Where(q => q.Class.GroupId == groupId && q.ClassId == classId)
             .ToListAsync(cancellationToken);
-    
-    public async Task<List<Queue>?> GetUserQueueList(uint queueNum, int groupId, int classId,
-        CancellationToken cancellationToken) =>
-        await _context.Queues
-            .Include(q => q.User)
-            .Where(q => q.QueueNum <= queueNum && q.Class.GroupId == groupId && q.ClassId == classId)
-            .ToListAsync(cancellationToken);
+
+    public async Task<List<Queue>?> GetQueueByClassId(int classId, CancellationToken cancellationToken)
+    {
+        if (_context.Classes.Any(x => x.Id == classId) == false)
+        {
+            return null;
+        }
+        
+        return await _context.Queues.Where(q => q.ClassId == classId).ToListAsync(cancellationToken);
+    }
 
     public async Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken) =>
         await _context.Queues

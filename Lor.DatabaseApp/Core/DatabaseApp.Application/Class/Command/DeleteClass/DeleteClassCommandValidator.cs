@@ -6,6 +6,6 @@ public class DeleteClassCommandValidator : AbstractValidator<DeleteClassCommand>
 {
     public DeleteClassCommandValidator()
     {
-        RuleFor(x => x.OutdatedClassList).NotEmpty().NotNull();
+        RuleFor(x => x.ClassesId).NotEmpty().NotNull();
     }
 }

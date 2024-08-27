@@ -16,8 +16,7 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork)
         Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
         if (subscriber is not null) return Result.Fail("Вы уже подписаны");
-
-
+        
         Domain.Models.Subscriber newSubscriber = new()
         {
             UserId = user.Id
