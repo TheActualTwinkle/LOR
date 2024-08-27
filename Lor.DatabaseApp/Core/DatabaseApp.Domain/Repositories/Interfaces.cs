@@ -50,13 +50,18 @@ public interface IQueueRepository : IRepository
     public void Delete(Queue queue);
 
     public Task<int> GetCurrentQueueNum(int groupId, int classId, CancellationToken cancellationToken);
+    
+    public Task<List<Queue>?> GetQueueList(int groupId, int classId,
+        CancellationToken cancellationToken);
 
-    public Task<List<Queue>?> GetQueueList(uint queueNum, int groupId, int classId,
+    public Task<List<Queue>?> GetUserQueueList(uint queueNum, int groupId, int classId,
         CancellationToken cancellationToken);
 
     public Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);
     
     public Task<uint> GetUserQueueNum(int userId, int groupId, int classId, CancellationToken cancellationToken);
+    
+    public Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken);
 }
 
 public interface ISubscriberRepository : IRepository

@@ -35,8 +35,12 @@ public class EnqueueCallbackQuery : ICallbackQuery
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
+
+        var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
+        string messageHeader = result.Value.WasAlreadyEnqueued ? 
+            $"Вы уже были записаны на {classData}\n" : $"Вы успешно записаны на {classData}\nОчередь:\n";
         
-        StringBuilder message = new($"Вы успешно записаны на {result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}\nОчередь:\n");
+        StringBuilder message = new(messageHeader);
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             string labClass = result.Value.StudentsQueue.ElementAt(i);

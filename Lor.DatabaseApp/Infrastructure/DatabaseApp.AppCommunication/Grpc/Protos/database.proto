@@ -70,8 +70,9 @@ message TryEnqueueInClassReply {
   repeated string studentsQueue = 1;
   string className = 2;
   int64 classDateUnixTimestamp = 3;
-  bool isFailed = 4;
-  string errorMessage = 5;
+  bool wasAlreadyEnqueued = 4;
+  bool isFailed = 5;
+  string errorMessage = 6;
 }
 
 message AddSubscriberRequest {

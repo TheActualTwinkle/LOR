@@ -19,7 +19,7 @@ public class GetQueueQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
             request.ClassId, cancellationToken);
 
         List<Domain.Models.Queue>? queueList =
-            await unitOfWork.QueueRepository.GetQueueList(queueNum, user.GroupId, request.ClassId,
+            await unitOfWork.QueueRepository.GetUserQueueList(queueNum, user.GroupId, request.ClassId,
                 cancellationToken);
 
         return queueList is null ? Result.Fail("Очередь не найдена.") : Result.Ok(mapper.From(queueList).AdaptToType<List<QueueDto>>());

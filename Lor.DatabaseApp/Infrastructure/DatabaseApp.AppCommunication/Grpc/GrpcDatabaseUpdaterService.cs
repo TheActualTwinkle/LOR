@@ -92,7 +92,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         if (newClasses.Count == 0) return new Empty();
         
-        Result<GroupDto> groupDto = await mediator.Send(new GetGroupQuery()
+        Result<GroupDto> groupDto = await mediator.Send(new GetGroupQuery
         {
             GroupName = request.GroupName
         });

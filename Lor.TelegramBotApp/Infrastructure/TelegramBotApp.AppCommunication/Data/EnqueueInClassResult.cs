@@ -1,8 +1,12 @@
 ﻿namespace TelegramBotApp.AppCommunication.Data;
 
-public readonly struct EnqueueInClassResult(IEnumerable<string> studentsQueue, string className, DateTime dateTime)
+public readonly struct EnqueueInClassResult
 {
-    public IEnumerable<string> StudentsQueue { get; } = studentsQueue;
-    public string ClassName { get; } = className;
-    public DateTime ClassesDateTime { get; } = dateTime;
+    public bool WasAlreadyEnqueued { get; init; }
+
+    public IEnumerable<string> StudentsQueue { get; init; }
+    
+    public string ClassName { get; init; }
+    
+    public DateTime ClassesDateTime { get; init; }
 }
