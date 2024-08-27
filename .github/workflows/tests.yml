@@ -27,4 +27,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Test DatabaseApp
-        run: dotnet test .\Lor.DatabaseApp\Tests\DatabaseApp.Tests\DatabaseApp.Tests.csproj
+        run: dotnet test Lor.DatabaseApp/Tests/DatabaseApp.Tests/DatabaseApp.Tests.csproj
