@@ -103,7 +103,30 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             userCache = userDto.Value;
         }
 
-        List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + userCache.GroupName);
+        List<GroupDto>? groups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey);
+
+        if (groups is null)
+        {
+            Result<List<GroupDto>> groupDto = await mediator.Send(new GetGroupsQuery());
+
+            if (groupDto.IsFailed) return new GetAvailableLabClassesReply
+                { IsFailed = true, ErrorMessage = groupDto.Errors.First().Message };
+
+            groups = groupDto.Value;
+        }
+
+        GroupDto group;
+        try
+        {
+            group = groups.First(g => g.GroupName == userCache.GroupName);
+        }
+        catch (Exception e)
+        {
+            return new GetAvailableLabClassesReply
+            { IsFailed = true, ErrorMessage = e.Message };
+        }
+
+        List<ClassDto>? classes = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + group.Id);
 
         RepeatedField<ClassInformation> classInformation;
         
@@ -135,7 +158,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
         });
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + userCache.GroupName, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
         return new GetAvailableLabClassesReply { ClassInformation = { classInformation }};
     }
@@ -229,23 +252,37 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             return new TryEnqueueInClassReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
 
-        // TODO: Подумать как НЕ делать еще один запрос на получение очереди. Может как то использовать полученную до этого queue?
-        Result<List<QueueDto>> queueDto = await mediator.Send(new GetClassQueueQuery
+        UserDto? user = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.UserId);
+
+        if (user is null)
         {
-            ClassId = request.ClassId
+            Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+            {
+                TelegramId = request.UserId
+            });
+
+            if (userDto.IsFailed)
+                return new TryEnqueueInClassReply
+                    { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
+
+            await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+
+            user = userDto.Value;
+        }
+        
+        queueCache.Add(new QueueDto
+        {
+            ClassId = request.ClassId,
+            FullName = user.FullName
         });
 
-        if (queueDto.IsFailed)
-            return new TryEnqueueInClassReply 
-                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
-
-        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueCache, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
         return new TryEnqueueInClassReply
         {
             ClassName = selectedClass.Value.Name,
             ClassDateUnixTimestamp = ((DateTimeOffset)selectedClass.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+            StudentsQueue = { queueCache.Select(x => x.FullName) }
         };
     }
 
