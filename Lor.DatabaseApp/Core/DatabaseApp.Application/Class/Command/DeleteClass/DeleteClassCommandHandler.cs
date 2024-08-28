@@ -9,9 +9,13 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.OutdatedClassList)
+        foreach (int item in request.ClassesId)
         {
-            unitOfWork.ClassRepository.Delete((await unitOfWork.ClassRepository.GetClassById(item, cancellationToken))!);
+            Domain.Models.Class? @class = await unitOfWork.ClassRepository.GetClassById(item, cancellationToken);
+            
+            if (@class is null) return Result.Fail($"Пара {@class?.Name} не найдена.");
+            
+            unitOfWork.ClassRepository.Delete(@class);
         }
         
         await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);

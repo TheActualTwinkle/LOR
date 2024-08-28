@@ -9,8 +9,6 @@ public class GetOutdatedClassesQueryHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result<List<int>>> Handle(GetOutdatedClassesQuery request, CancellationToken cancellationToken)
     {
-        List<int>? outdatedClasses = await unitOfWork.ClassRepository.GetOutdatedClassesId(cancellationToken);
-
-        return outdatedClasses is null ? Result.Fail("Нет устаревших пар") : outdatedClasses;
+        return await unitOfWork.ClassRepository.GetOutdatedClassesId(cancellationToken);
     }
 }

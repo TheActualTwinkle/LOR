@@ -174,9 +174,8 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         
         if (queue is null)
         {
-            Result<List<QueueDto>> getQueueResult = await mediator.Send(new GetQueueQuery
+            Result<List<QueueDto>> getQueueResult = await mediator.Send(new GetClassQueueQuery
             {
-                TelegramId = request.UserId,
                 ClassId = request.ClassId
             });
 
@@ -231,9 +230,8 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
 
         // TODO: Подумать как НЕ делать еще один запрос на получение очереди. Может как то использовать полученную до этого queue?
-        Result<List<QueueDto>> queueDto = await mediator.Send(new GetQueueQuery
+        Result<List<QueueDto>> queueDto = await mediator.Send(new GetClassQueueQuery
         {
-            TelegramId = request.UserId,
             ClassId = request.ClassId
         });
 

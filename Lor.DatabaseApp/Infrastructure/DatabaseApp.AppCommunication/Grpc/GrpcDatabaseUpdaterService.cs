@@ -75,7 +75,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
             await mediator.Send(new DeleteClassCommand
             {
-                OutdatedClassList = outdatedClassList.Value
+                ClassesId = outdatedClassList.Value
             });
         }
         

@@ -5,5 +5,5 @@ namespace DatabaseApp.Application.Class.Command.DeleteClass;
 
 public struct DeleteClassCommand : IRequest<Result>
 {
-   public required List<int> OutdatedClassList { get; init; }  
+   public required List<int> ClassesId { get; init; }  
 }
