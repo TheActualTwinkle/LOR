@@ -266,7 +266,7 @@ public class QueueTests
         });
 
         // Act
-        Result<bool> isUserInQueue = await _sender.Send(new IsUserInQueueQuery
+        Result<bool> isUserInQueue = await _sender.Send(new GetUserStateInQueueQuery
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
@@ -285,7 +285,7 @@ public class QueueTests
         Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         // Act
-        Result<bool> isUserInQueue = await _sender.Send(new IsUserInQueueQuery
+        Result<bool> isUserInQueue = await _sender.Send(new GetUserStateInQueueQuery
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id

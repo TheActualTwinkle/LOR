@@ -4,10 +4,10 @@ using MediatR;
 
 namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
 
-public class IsUserInQueueQueryHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<IsUserInQueueQuery, Result<bool>>
+public class GetUserStateInQueueHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<GetUserStateInQueueQuery, Result<bool>>
 {
-    public async Task<Result<bool>> Handle(IsUserInQueueQuery request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(GetUserStateInQueueQuery request, CancellationToken cancellationToken)
     {
         Domain.Models.User? user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken); 
@@ -17,6 +17,6 @@ public class IsUserInQueueQueryHandler(IUnitOfWork unitOfWork)
         bool isUserInQueue =
             await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
-        return Result.Ok(isUserInQueue);
+        return Result.Ok(isUserInQueue); // TODO: вернуть юхера
     }
 }

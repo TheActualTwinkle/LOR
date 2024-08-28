@@ -22,19 +22,19 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
 
         if (group is null) return Result.Fail("Группа не поддерживается.");
 
-        Domain.Models.Class? someClass = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        Domain.Models.Class? @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
         
-        if (someClass is null) return Result.Fail("Пара не найдена.");
+        if (@class is null) return Result.Fail("Пара не найдена.");
 
         uint queueNum =
-             Convert.ToUInt32(await unitOfWork.QueueRepository.GetCurrentQueueNum(user.GroupId, request.ClassId, cancellationToken));
+             Convert.ToUInt32(await unitOfWork.QueueRepository.GetCurrentQueueNum(request.ClassId));
 
         bool queueExist =
-            await unitOfWork.QueueRepository.CheckQueue(user.Id, user.GroupId, request.ClassId, cancellationToken);
+            await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
 
         if (queueExist)
         {
-            return Result.Fail($"Ваша запись на пару \"{someClass.Name} - {someClass.Date:dd.MM}\" уже создана.");
+            return Result.Fail($"Ваша запись на пару \"{@class.Name} - {@class.Date:dd.MM}\" уже создана.");
         }
             
         Domain.Models.Queue queue = new()
