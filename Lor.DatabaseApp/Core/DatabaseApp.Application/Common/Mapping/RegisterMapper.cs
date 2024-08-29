@@ -25,6 +25,7 @@ public class RegisterMapper : IRegister
             .Map(dest => dest.GroupId, src => src.User.GroupId);
         config.NewConfig<Domain.Models.User, UserDto>()
             .Map(dest => dest.FullName, src => src.FullName)
+            .Map(dest => dest.GroupId, src => src.GroupId)
             .Map(dest => dest.GroupName, src => src.Group.Name);
     }
 }

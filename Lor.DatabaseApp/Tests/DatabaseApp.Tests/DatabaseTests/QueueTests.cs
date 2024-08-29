@@ -7,6 +7,7 @@ using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
 using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
@@ -266,14 +267,14 @@ public class QueueTests
         });
 
         // Act
-        Result<bool> isUserInQueue = await _sender.Send(new GetUserStateInQueueQuery
+        Result<UserDto?> isUserInQueue = await _sender.Send(new GetUserInQueueQuery
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
         });
         
         // Assert
-        Assert.That(isUserInQueue.Value, Is.True);
+        Assert.That(isUserInQueue.Value, Is.Not.Null);
     }
     
     [Test]
@@ -285,14 +286,14 @@ public class QueueTests
         Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         // Act
-        Result<bool> isUserInQueue = await _sender.Send(new GetUserStateInQueueQuery
+        Result<UserDto?> isUserInQueue = await _sender.Send(new GetUserInQueueQuery
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
         });
         
         // Assert
-        Assert.That(isUserInQueue.Value, Is.False);
+        Assert.That(isUserInQueue.Value, Is.Null);
     }
 
     private async Task CreateUserAndClasses()

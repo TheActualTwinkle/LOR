@@ -2,9 +2,9 @@
 
 namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
 
-public class GetUserStateInQueueValidator : AbstractValidator<GetUserStateInQueueQuery>
+public class GetUserInQueueValidator : AbstractValidator<GetUserInQueueQuery>
 {
-    public GetUserStateInQueueValidator()
+    public GetUserInQueueValidator()
     {
         RuleFor(x => x.TelegramId).GreaterThan(0);
         RuleFor(x => x.ClassId).GreaterThan(0);
