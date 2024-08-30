@@ -20,7 +20,15 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         
         _client = new Database.DatabaseClient(channel);
     }
-    
+
+    public Task StopAsync()
+    {
+        Console.WriteLine("Disconnecting from the gRPC service...");
+        _client = null;
+        Console.WriteLine("Successfully disconnected from the gRPC service.");
+        return Task.CompletedTask;
+    }
+
     public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)
     {
         GetUserInfoReply reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);

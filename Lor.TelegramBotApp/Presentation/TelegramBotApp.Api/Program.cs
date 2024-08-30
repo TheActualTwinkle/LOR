@@ -1,4 +1,12 @@
 ﻿using TelegramBotApp.Api.AppPipeline;
 
-DefaultAppPipeline pipeline = new();
-await pipeline.Run();
+namespace TelegramBotApp.Api;
+
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        DefaultAppPipeline pipeline = new();
+        await pipeline.Run();
+    }
+}
