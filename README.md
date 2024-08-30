@@ -23,7 +23,7 @@ flowchart TD;
    ```bash
    git clone https://github.com/TheActualTwinkle/LOR.git
    ```
-2. **Fill the '???' gaps in _.env_ file. Other settings may be left as is**
+2. **Create _.env_ file in root directory and fill the '???' gaps in. Other settings may be left as is**
 	```env
 	TELEGRAM_BOT_TOKEN=???
 	
