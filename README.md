@@ -38,8 +38,8 @@ flowchart TD;
 	```
 3. **Build and run Docker containers:**
     ```bash
-    git cd LOR
-    docker-compose up --build
+    docker-compose build
+    docker-compose up
     ```
 
 ## Technology Stack
