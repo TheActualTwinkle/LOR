@@ -16,7 +16,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
         public const string TableBody = "schedule__table-body";
         public const string TableBodyRow = "schedule__table-row";
         public const string ClassRow = "schedule__table-item";
-        public const string ClassDate = "schedule__table-day";
+        public const string ClassDate = "schedule__table-date";
         public const string GroupName = "schedule__title-h1";
     }
     
@@ -103,7 +103,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             if (classNames.Count == 0) continue;
             
             string dateRaw = row.FindElement(By.ClassName(Constants.ClassDate)).Text;
-            DateTime date = DateTime.ParseExact($"{dateRaw[2..]}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
+            DateTime date = DateTime.ParseExact($"{dateRaw}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
             foreach (string className in classNames)
             {
@@ -121,7 +121,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        text = "1 неделя"; // TODO: Testing
+        text = "1 неделя"; // TODO: Remove after Testing
         
         const string pattern = @"\d+";
         Match match = Regex.Match(text, pattern);
