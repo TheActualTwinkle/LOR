@@ -372,4 +372,4 @@ FodyWeavers.xsd
 
 # Docker stuff
 .containers/
-.env/
+*.env
