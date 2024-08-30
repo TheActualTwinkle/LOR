@@ -10,10 +10,8 @@ public class GetClassQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 {
     public async Task<Result<ClassDto>> Handle(GetClassQuery request, CancellationToken cancellationToken)
     {
-        Domain.Models.Class? someClass = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        Domain.Models.Class? @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
 
-        if (someClass is null) return Result.Fail("Такой пары не существует.");
-
-        return mapper.From(someClass).AdaptToType<ClassDto>();
+        return @class is null ? Result.Fail("Такой пары не существует.") : mapper.From(@class).AdaptToType<ClassDto>();
     }
 }

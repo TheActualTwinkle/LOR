@@ -19,14 +19,14 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork)
 
             if (classExist) continue;
             
-            Domain.Models.Class className = new()
+            Domain.Models.Class @class = new()
             {
                 GroupId = group.Id,
                 Name = item.Key,
                 Date = item.Value
             };
             
-            await unitOfWork.ClassRepository.AddAsync(className, cancellationToken);
+            await unitOfWork.ClassRepository.AddAsync(@class, cancellationToken);
         }
         
         await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);

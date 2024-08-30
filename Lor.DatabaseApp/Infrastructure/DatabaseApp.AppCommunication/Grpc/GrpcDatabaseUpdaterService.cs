@@ -86,18 +86,18 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         if (classes.IsFailed) return new Empty();
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
-
-        List<ClassDto> newClasses = classes.Value.Except(oldClasses.Value).ToList();
-        
-        if (newClasses.Count == 0) return new Empty();
-        
         Result<GroupDto> groupDto = await mediator.Send(new GetGroupQuery
         {
             GroupName = request.GroupName
         });
         
         if (classes.IsFailed) return new Empty();
+        
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+
+        List<ClassDto> newClasses = classes.Value.Except(oldClasses.Value).ToList();
+        
+        if (newClasses.Count == 0) return new Empty();
         
         NewClassesMessage newClassesMessage = new()
         {
