@@ -145,7 +145,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         {
             TelegramId = request.UserId,
             FullName = request.FullName,
-            GroupName = request.GroupName
+            GroupName = await request.GroupName.GroupNameFormat()
         });
 
         if (result.IsFailed)
