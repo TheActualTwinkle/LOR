@@ -21,7 +21,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     }
     
     // TODO: DI
-    private TimeSpan ScheduleFetchInterval => TimeSpan.FromDays(7);
+    private TimeSpan ScheduleFetchDateOffset => TimeSpan.FromDays(7);
     
     private readonly ChromeDriver _chromeDriver;
     private readonly IEnumerable<string> _urls;
@@ -76,7 +76,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={++weekNumber}");
             classesData.AddRange(ParseForWeek());
             
-            classesData = classesData.Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchInterval).ToList();
+            classesData = classesData.Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchDateOffset).ToList();
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));
         }
