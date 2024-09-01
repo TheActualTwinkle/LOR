@@ -123,7 +123,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             GroupName = userCache.GroupName
         });
 
-        if (classDto.IsFailed || classDto.Value.Count == 0)
+        if (classDto.IsFailed)
             return new GetAvailableLabClassesReply
                 { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
 
