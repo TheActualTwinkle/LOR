@@ -21,7 +21,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     }
     
     // TODO: DI
-    private TimeSpan ScheduleFetchInterval => TimeSpan.FromDays(1);
+    private TimeSpan ScheduleFetchInterval => TimeSpan.FromDays(7);
     
     private readonly ChromeDriver _chromeDriver;
     private readonly IEnumerable<string> _urls;
