@@ -20,8 +20,8 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
         public const string GroupName = "schedule__title-h1";
     }
     
-    // Week fetch interval
-    private TimeSpan ScheduleFetchInterval => TimeSpan.FromDays(7);
+    // TODO: DI
+    private TimeSpan ScheduleFetchInterval => TimeSpan.FromDays(1);
     
     private readonly ChromeDriver _chromeDriver;
     private readonly IEnumerable<string> _urls;
@@ -76,7 +76,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={++weekNumber}");
             classesData.AddRange(ParseForWeek());
             
-            classesData = classesData.Where(d => d.Date >= Today() && d.Date <= Today() + ScheduleFetchInterval).ToList();
+            classesData = classesData.Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchInterval).ToList();
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));
         }
