@@ -76,7 +76,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={++weekNumber}");
             classesData.AddRange(ParseForWeek());
             
-            // classesData = classesData.Where(d => d.Date >= Today() && d.Date <= Today() + ScheduleFetchInterval).ToList(); TODO: uncomment on production
+            classesData = classesData.Where(d => d.Date >= Today() && d.Date <= Today() + ScheduleFetchInterval).ToList();
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));
         }
@@ -121,8 +121,6 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        text = "1 неделя"; // TODO: Remove after Testing
-        
         const string pattern = @"\d+";
         Match match = Regex.Match(text, pattern);
         
