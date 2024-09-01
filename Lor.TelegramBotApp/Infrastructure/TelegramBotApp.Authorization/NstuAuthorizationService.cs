@@ -54,7 +54,7 @@ public class NstuAuthorizationService : IAuthorizationService
             string fullnameAndInfo = fullnameAndInfoElement.GetString()!;
             
             fullnameAndInfo = fullnameAndInfo.Replace(fullName, string.Empty).Trim();
-            const string pattern = @"\((.*?)\)";
+            const string pattern = @"\((.*?)(?:,\s|\))";
             Match match = Regex.Match(fullnameAndInfo, pattern);
             if (match.Success)
             {
