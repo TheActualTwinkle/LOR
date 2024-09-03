@@ -15,6 +15,7 @@ builder.Configuration.AddJsonFile("appsettings.json", false, true).AddEnvironmen
 builder.Services.AddGrpc();
 builder.Services.AddApplication();
 builder.Services.AddCaching(builder.Configuration);
+builder.Services.AddCommunication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddBus(builder.Configuration);
 

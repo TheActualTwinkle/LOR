@@ -1,4 +1,8 @@
-﻿using MassTransit;
+﻿using DatabaseApp.Application.Common;
+using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using MassTransit;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +32,15 @@ public static class DependencyInjection
             });
         });
         
+        return services;
+    }
+    
+    public static IServiceCollection AddCommunication(this IServiceCollection services)
+    {
+        services.AddScoped<ISender, Mediator>();
+        services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<ProjectConfig, ProjectConfig>(provider => new ProjectConfig(TimeSpan.FromSeconds(10)));
+
         return services;
     }
 }
