@@ -37,8 +37,6 @@ public static class DependencyInjection
     
     public static IServiceCollection AddCommunication(this IServiceCollection services)
     {
-        services.AddScoped<ISender, Mediator>();
-        services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<ProjectConfig, ProjectConfig>(provider => new ProjectConfig(TimeSpan.FromSeconds(10)));
 
         return services;
