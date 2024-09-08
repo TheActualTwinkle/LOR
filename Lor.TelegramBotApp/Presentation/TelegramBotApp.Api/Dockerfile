@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER $APP_UID
 WORKDIR /app
 
@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/TelegramBotApp.Api.csproj", "Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/"]
 COPY ["Lor.TelegramBotApp/Core/TelegramBotApp.Application/TelegramBotApp.Application.csproj", "Lor.TelegramBotApp/Core/TelegramBotApp.Application/"]
 COPY ["Lor.TelegramBotApp/Infrastructure/TelegramBotApp.AppCommunication/TelegramBotApp.AppCommunication.csproj", "Lor.TelegramBotApp/Infrastructure/TelegramBotApp.AppCommunication/"]
-COPY ["Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Authorization/TelegramBotApp.Authorization.csproj", "Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Authorization/"]
+COPY ["Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Identity/TelegramBotApp.Identity.csproj", "Lor.TelegramBotApp/Infrastructure/TelegramBotApp.Identity/"]
 RUN dotnet restore "Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/TelegramBotApp.Api.csproj"
 COPY . .
 WORKDIR "/src/Lor.TelegramBotApp/Presentation/TelegramBotApp.Api"

@@ -1,13 +1,13 @@
 ﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
+using DatabaseApp.Application.Dto;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
-using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
-using DatabaseApp.Application.User;
+using DatabaseApp.Application.Queue.Queries.GetUserInQueue;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;

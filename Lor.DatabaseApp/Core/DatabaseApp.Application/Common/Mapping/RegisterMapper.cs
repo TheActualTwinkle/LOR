@@ -1,4 +1,5 @@
 ﻿using DatabaseApp.Application.Class;
+using DatabaseApp.Application.Dto;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Subscriber;
@@ -26,6 +27,8 @@ public class RegisterMapper : IRegister
         config.NewConfig<Domain.Models.User, UserDto>()
             .Map(dest => dest.FullName, src => src.FullName)
             .Map(dest => dest.GroupId, src => src.GroupId)
-            .Map(dest => dest.GroupName, src => src.Group.Name);
+            .Map(dest => dest.GroupName, src => src.Group.Name)
+            .Map(dest => dest.Email, src => src.Email)
+            .Map(dest => dest.IsEmailConfirmed, src => src.IsEmailConfirmed);
     }
 }

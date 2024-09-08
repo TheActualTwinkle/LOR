@@ -29,7 +29,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
             throw new ArgumentException($"EnqueueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
         }
         
-        Result<EnqueueInClassResult> result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
+        Result<EnqueueInClassResult> result = await factory.DatabaseCommunicator.EnqueueInClassAsync(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
         {
