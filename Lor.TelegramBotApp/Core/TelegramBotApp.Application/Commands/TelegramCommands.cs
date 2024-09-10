@@ -7,7 +7,7 @@ using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
-using TelegramBotApp.Authorization;
+using TelegramBotApp.Identity.Services.AuthService.AuthContext;
 
 // ReSharper disable UnusedType.Global
 
@@ -69,7 +69,7 @@ public class GroupsTelegramCommand : ITelegramCommand
     {
         StringBuilder message = new("Поддерживаемые группы:\n");
         
-        Result<Dictionary<int, string>> result = await factory.DatabaseCommunicator.GetAvailableGroups(cancellationToken);
+        Result<Dictionary<int, string>> result = await factory.DatabaseCommunicator.GetAvailableGroupsAsync(cancellationToken);
         
         if (result.IsFailed)
         {
@@ -86,6 +86,44 @@ public class GroupsTelegramCommand : ITelegramCommand
 }
 
 [Export(typeof(ITelegramCommand))]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}reg")]
+[ExportMetadata(nameof(Description), "- регистрирует пользователя")]
+public class RegistrationTelegramCommand : ITelegramCommand
+{
+    private const int MinimumRequiredArgumentsCount = 3;
+
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}reg";
+    public string Description => "- регистрирует пользователя";
+
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory,
+        IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        IEnumerable<string> argumentsList = arguments.ToList();
+
+        if (argumentsList.Count() < MinimumRequiredArgumentsCount || argumentsList.Count() > MinimumRequiredArgumentsCount + 1)
+        {
+            return new(Result.Fail(
+                    $"Обработка {Command}\nОшибка при вводе данных. Ответом на это сообщение введите, пожалуйста, данные в формате: НГТУ-почта ФИ/ФИО"),
+                new ForceReplyMarkup());
+        }
+
+        // skip email, take 2/3 arguments for full name
+        var fullName = argumentsList.Skip(1).Take(3).Aggregate((x, y) => $"{x} {y}");
+        var result =
+            await factory.RegistrationService.RegisterAsync(
+                new(
+                    fullName,
+                    argumentsList.First(),
+                    chatId),
+                factory.DatabaseCommunicator, cancellationToken);
+        
+        return result.IsFailed
+            ? new(Result.Fail(result.Errors.First()))
+            : new ExecutionResult(Result.Ok(result.Value.Value));
+    }
+}
+
+[Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}auth")]
 [ExportMetadata(nameof(Description), "- авторизует пользователя")]
 [ExportMetadata(nameof(ButtonDescriptionText), "Авторизация \ud83d\udd11")]
@@ -97,7 +135,7 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfoAsync(chatId, cancellationToken);
         if (result.IsSuccess == true)
         {
             return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value.GroupName} как {result.Value.FullName}"));
@@ -116,14 +154,14 @@ public class AuthorizationTelegramCommand : ITelegramCommand
         }
         
         string fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
-        Result<AuthorizationReply> authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
+        Result<AuthReply> authorizeResult = await factory.AuthService.AuthAsync(new AuthRequest(fullName));
         
         if (authorizeResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(authorizeResult.Errors.First()));
         }
 
-        Result<string> setGroupResult = await factory.DatabaseCommunicator.TrySetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
+        Result<string> setGroupResult = await factory.DatabaseCommunicator.TrySetGroupAsync(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
 
         return setGroupResult.IsFailed ? new ExecutionResult(Result.Fail(setGroupResult.Errors.First())) : new ExecutionResult(Result.Ok(setGroupResult.Value));
     }
@@ -141,7 +179,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<UserInfo> getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        Result<UserInfo> getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfoAsync(chatId, cancellationToken);
         if (getUserGroupResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getUserGroupResult.Errors.First()));
@@ -149,7 +187,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
         
         StringBuilder message = new("Доступные лабораторные работы:\n");
 
-        Result<IEnumerable<ClassInformation>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        Result<IEnumerable<ClassInformation>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClassesAsync(chatId, cancellationToken);
         
         if (getAvailableLabClassesResult.IsFailed)
         {
@@ -179,13 +217,13 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
-        Result<UserInfo> result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        Result<UserInfo> result = await databaseCommunicator.GetUserInfoAsync(chatId, cancellationToken);
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
 
-        Result<IEnumerable<ClassInformation>> availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        Result<IEnumerable<ClassInformation>> availableLabClassesResult = await databaseCommunicator.GetAvailableLabClassesAsync(chatId, cancellationToken);
         if (availableLabClassesResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
@@ -222,7 +260,7 @@ public class AddSubscriberTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result result = await factory.DatabaseCommunicator.AddSubscriber(chatId, cancellationToken);
+        Result result = await factory.DatabaseCommunicator.AddSubscriberAsync(chatId, cancellationToken);
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Теперь вы будете получать уведомления о новых лабораторных работах"));
     }
 }
@@ -239,7 +277,7 @@ public class DeleteSubscriberTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);
+        Result result = await factory.DatabaseCommunicator.DeleteSubscriberAsync(chatId, cancellationToken);
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Вы отписаны от уведомлений о новых лабораторных работах"));
     }
 }

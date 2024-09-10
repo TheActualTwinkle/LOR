@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TelegramBotApp.AppCommunication.Consumers;
+using TelegramBotApp.AppCommunication.Grpc;
 using TelegramBotApp.AppCommunication.Interfaces;
 
 namespace TelegramBotApp.AppCommunication;

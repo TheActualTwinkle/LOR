@@ -8,11 +8,14 @@ using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
 using TelegramBotApp.Application.Interfaces;
-using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Identity.Services.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public partial class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService)
+public class TelegramCommandFactory(
+    IDatabaseCommunicationClient databaseCommunicator,
+    IRegistrationService registrationService,
+    IAuthService authService)
 {
     #region ImportsInfo
 
@@ -28,7 +31,8 @@ public partial class TelegramCommandFactory(IDatabaseCommunicationClient databas
     public const string CommandPrefix = "/";
 
     public IDatabaseCommunicationClient DatabaseCommunicator => databaseCommunicator;
-    public IAuthorizationService AuthorizationService => authorizationService;
+    public IRegistrationService RegistrationService => registrationService;
+    public IAuthService AuthService => authService;
     
     private static readonly ImportInfo Info = new();
     

@@ -7,14 +7,20 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - PGPORT=31400
     ports:
-      - "31400:31400"
+      - 31400:31400
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
   databaseapp:
     build:
       context: .
       dockerfile: Lor.DatabaseApp/Presentation/DatabaseApp.WebApi/Dockerfile
     ports:
-      - "31401:31401"
+      - 31401:31401
+      - 31402:31402
     environment:
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
@@ -28,7 +34,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-        
+  
   telegrambot:
     build:
       context: .
@@ -53,7 +59,7 @@ services:
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"
+      - 6379:6379
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 15s
@@ -63,6 +69,8 @@ services:
   rabbitmq:
     image: rabbitmq:management
     hostname: ${RABBITMQ_HOST}
+    ports:
+      - 5672:5672
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}

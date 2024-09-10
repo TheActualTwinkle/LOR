@@ -4,7 +4,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
-using TelegramBotApp.Domain.Interfaces;
+using TelegramBotApp.Domain.Models;
 
 namespace TelegramBotApp.AppCommunication.Consumers;
 
@@ -13,7 +13,7 @@ public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient c
 {
     public async Task Consume(ConsumeContext<NewClassesMessage> context)
     {
-        Result<IEnumerable<SubscriberInfo>> result = await communicationClient.GetSubscribers();
+        Result<IEnumerable<SubscriberInfo>> result = await communicationClient.GetSubscribersAsync();
 
         if (result.IsFailed)
         {

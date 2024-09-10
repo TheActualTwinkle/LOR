@@ -1,10 +1,10 @@
-﻿using DatabaseApp.Application.User;
+﻿using DatabaseApp.Application.Dto;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.Queue.Queries.GetUserInQueue;
 
 public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>

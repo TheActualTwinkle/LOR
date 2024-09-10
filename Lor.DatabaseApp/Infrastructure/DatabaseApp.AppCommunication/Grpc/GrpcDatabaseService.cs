@@ -1,18 +1,18 @@
 ﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
+using DatabaseApp.Application.Dto;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
-using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+using DatabaseApp.Application.Queue.Queries.GetUserInQueue;
 using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
 using DatabaseApp.Application.Subscriber.Queries.GetSubscribers;
-using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
 using DatabaseApp.Caching;
@@ -27,6 +27,42 @@ namespace DatabaseApp.AppCommunication.Grpc;
 
 public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) : Database.DatabaseBase
 {
+    public override async Task<PreregisterUserReply> PreregisterUser(
+        PreregisterUserRequest request,
+        ServerCallContext context)
+    {
+        const int defaultTokenExpireTime = 20; // minutes, consistent with the TelegramBotApp
+
+        await Task.WhenAll(
+            cacheService.SetAsync(
+                Constants.UserPrefix + request.Token.Guid,
+                new EmailUserDto
+                {
+                    FullName = request.FullName,
+                    TelegramId = request.TelegramId,
+                    GroupName = request.GroupName,
+                    Email = request.Email,
+                },
+                expirationTime: TimeSpan.FromMinutes(defaultTokenExpireTime),
+                context.CancellationToken),
+            cacheService.SetAsync(
+                Constants.TokenPrefix + request.Token.Guid,
+                request.Token,
+                expirationTime: TimeSpan.FromMinutes(defaultTokenExpireTime),
+                context.CancellationToken),
+            cacheService.SetAsync(
+                Constants.TokenPrefix + request.TelegramId,
+                string.Empty, // mock for checking email is confirmed or not
+                expirationTime: TimeSpan.FromMinutes(defaultTokenExpireTime),
+                context.CancellationToken));
+
+        return new() { IsFailed = false, TelegramId = request.TelegramId };
+    }
+
+    public override async Task<CheckUserEmailStatusReply> CheckUserEmailStatus(CheckUserEmailStatusRequest request,
+        ServerCallContext context) => new()
+        { IsEmailConfirmed = await cacheService.GetAsync<string>(Constants.TokenPrefix + request.TelegramId) is null };
+
     public override async Task<GetUserInfoReply> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
     {
         UserDto? user = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.UserId);
@@ -47,7 +83,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
 
         await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
 
-        return new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName };
+        return new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName, IsEmailConfirmed = userDto.Value.IsEmailConfirmed};
     }
 
     public override async Task<GetAvailableGroupsReply> GetAvailableGroups(Empty request, ServerCallContext context)

@@ -1,8 +1,8 @@
-﻿using DatabaseApp.Application.User;
+﻿using DatabaseApp.Application.Dto;
 using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.Queue.Queries.GetUserInQueue;
 
 public struct GetUserInQueueQuery : IRequest<Result<UserDto?>>
 {

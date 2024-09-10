@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace TelegramBotApp.Domain.Interfaces;
+namespace TelegramBotApp.Domain.Models;
 
 public interface ITelegramBot
 {

@@ -42,7 +42,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroupScheduleApp.Shared", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroupScheduleApp.AppCommunication", "Lor.GroupScheduleApp\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj", "{57B0EAC5-D2FB-4E8A-AFAA-5A84E71ECB67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBotApp.Authorization", "Lor.TelegramBotApp\Infrastructure\TelegramBotApp.Authorization\TelegramBotApp.Authorization.csproj", "{ABBB1936-ECB6-40BB-A907-607EAF6FC606}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegramBotApp.Identity", "Lor.TelegramBotApp\Infrastructure\TelegramBotApp.Identity\TelegramBotApp.Identity.csproj", "{ABBB1936-ECB6-40BB-A907-607EAF6FC606}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Persistence", "Lor.DatabaseApp\Infrastructure\DatabaseApp.Persistence\DatabaseApp.Persistence.csproj", "{2A9E9AB7-3E46-41AD-A1D7-EA47AE21121A}"
 EndProject

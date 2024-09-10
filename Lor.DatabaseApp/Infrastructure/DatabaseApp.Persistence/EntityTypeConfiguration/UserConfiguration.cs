@@ -12,9 +12,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.HasKey(e => e.Id).HasName("Users_pkey");
 
-        builder.HasIndex(e => e.FullName, "full_name_check").IsUnique();
-
         builder.HasIndex(e => e.TelegramId, "tg_id_check").IsUnique();
+        builder.HasIndex(e => e.Email, "email_check").IsUnique();
 
         builder.Property(e => e.Id)
             .UseIdentityAlwaysColumn()
@@ -25,6 +24,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("telegram_id");
         builder.Property(e => e.GroupId)
             .HasColumnName("group_id");
+        builder.Property(e => e.Email)
+            .HasColumnName("email");
+        builder.Property(e => e.IsEmailConfirmed)
+            .HasColumnName("is_email_confirmed")
+            .HasDefaultValueSql("false");
         
         builder.HasOne(u => u.Group).WithMany(g => g.Users)
             .HasPrincipalKey(g => g.Id)
