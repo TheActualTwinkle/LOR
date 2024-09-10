@@ -7,6 +7,8 @@ public interface ITelegramCommand
 {
     string Command { get; }
     string Description { get; }
+    
+    string? ButtonDescriptionText { get; }
 
     Task<ExecutionResult> Execute(long chatId,
         TelegramCommandFactory factory,

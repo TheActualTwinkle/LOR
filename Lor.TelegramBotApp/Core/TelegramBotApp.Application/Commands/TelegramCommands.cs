@@ -20,7 +20,8 @@ public class StartTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}start";
     public string Description => "- выводит приветственное сообщение";
-    
+    public string? ButtonDescriptionText => null;
+
     public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         const string message = $"Привет! Данный бот служит для записи на лабораторные работы.\n\n" +
@@ -39,6 +40,7 @@ public class HelpTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}help";
     public string Description => "- выводит это сообщение справки";
+    public string? ButtonDescriptionText => null;
     
     public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
@@ -56,11 +58,13 @@ public class HelpTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}groups")]
 [ExportMetadata(nameof(Description), "- выводит поддерживаемые группы")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Доступные группы \ud83d\ude4b\u200d\u2642\ufe0f\ud83d\ude4b\u200d\u2640\ufe0f")]
 public class GroupsTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}groups";
     public string Description => "- выводит поддерживаемые группы";
-    
+    public string ButtonDescriptionText => "Доступные группы \ud83d\ude4b\u200d\u2642\ufe0f\ud83d\ude4b\u200d\u2640\ufe0f";
+
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         StringBuilder message = new("Поддерживаемые группы:\n");
@@ -84,11 +88,13 @@ public class GroupsTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}auth")]
 [ExportMetadata(nameof(Description), "- авторизует пользователя")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Авторизация \ud83d\udd11")]
 public class AuthorizationTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}auth";
     public string Description => "- авторизует пользователя";
-    
+    public string ButtonDescriptionText => "Авторизация \ud83d\udd11";
+
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
@@ -126,10 +132,12 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}labs")]
 [ExportMetadata(nameof(Description), "- выводит доступные лабораторные работы")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Доступные лаб. работы \ud83d\udc68\u200d\ud83d\udd2c\ud83d\udc69\u200d\ud83d\udd2c")]
 public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}labs";
     public string Description => "- выводит доступные лабораторные работы для выбранной группы";
+    public string ButtonDescriptionText => "Доступные лаб. работы \ud83d\udc68\u200d\ud83d\udd2c\ud83d\udc69\u200d\ud83d\udd2c";
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
@@ -161,10 +169,12 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}hop")]
 [ExportMetadata(nameof(Description), "- записывает на лабораторную работу")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Записаться на лаб. работу \u270d\ufe0f")]
 public class EnqueueInClassTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}hop";
     public string Description => "- записывает на лабораторную работу";
+    public string ButtonDescriptionText => "Записаться на лаб. работу \u270d\ufe0f";
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
@@ -203,11 +213,13 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}sub")]
 [ExportMetadata(nameof(Description), "- подписывает на уведомления о появлении новых лабораторных работ")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Рассылка новых лаб. работ \u2709\ufe0f\u2705")]
 public class AddSubscriberTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}sub";
     public string Description => "- подписывает на уведомления о появлении новых пар";
-    
+    public string ButtonDescriptionText => "Рассылка новых лаб. работ \u2709\ufe0f\u2705";
+
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         Result result = await factory.DatabaseCommunicator.AddSubscriber(chatId, cancellationToken);
@@ -218,11 +230,13 @@ public class AddSubscriberTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}unsub")]
 [ExportMetadata(nameof(Description), "- отписывает от уведомлений о появлении новых лабораторных работ")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Отписаться от рассылки \u2709\ufe0f\u274c")]
 public class DeleteSubscriberTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}unsub";
     public string Description => "- отписывает от уведомлений о появлении новых пар";
-    
+    public string ButtonDescriptionText => "Отписаться от рассылки \u2709\ufe0f\u274c";
+
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         Result result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);

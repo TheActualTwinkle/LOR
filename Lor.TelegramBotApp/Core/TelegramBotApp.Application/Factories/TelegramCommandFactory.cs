@@ -1,7 +1,9 @@
 ﻿using System.Composition;
 using System.Composition.Hosting;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using FluentResults;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories.Common;
@@ -10,7 +12,7 @@ using TelegramBotApp.Authorization.Interfaces;
 
 namespace TelegramBotApp.Application.Factories;
 
-public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService)
+public partial class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService)
 {
     #region ImportsInfo
 
@@ -50,7 +52,13 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
     
     public async Task<ExecutionResult> StartCommand(string commandString, long chatId, CancellationToken token)
     {
-        ITelegramCommand? command = GetCommand(commandString.Split(' ').FirstOrDefault()!);
+        Match match = TelegramCommand().Match(commandString);
+        if (match.Success == false)
+        {
+            return new ExecutionResult(Result.Fail($"Команда не найдена\nДля получения списка команд введите {CommandPrefix}help"));
+        }
+        
+        ITelegramCommand? command = GetCommand(match.Value.Trim());
         
         if (command == null)
         {
@@ -65,13 +73,30 @@ public class TelegramCommandFactory(IDatabaseCommunicationClient databaseCommuni
         return Info.Commands.Select(x => $"{x.Metadata.Command} {x.Metadata.Description}");
     }
 
+    public static ReplyKeyboardMarkup GetCommandButtonsReplyMarkup()
+    {
+        IEnumerable<Lazy<ITelegramCommand, TelegramCommandMetadata>> commandsWithButtonDescription = Info.Commands.Where(x => x.Metadata.ButtonDescriptionText != null);
+        
+        IEnumerable<KeyboardButton[]> buttons = commandsWithButtonDescription.Select(x => new[] { new KeyboardButton($"{x.Metadata.ButtonDescriptionText}\n\n({x.Metadata.Command})") });
+        
+        // Take 2 buttons per row
+        IEnumerable<IEnumerable<KeyboardButton>> buttonsPerRow = buttons.Select((x, i) => new { Index = i, Value = x }).GroupBy(x => x.Index / 2).Select(x => x.Select(v => v.Value).SelectMany(v => v));
+        
+        ReplyKeyboardMarkup replyKeyboardMarkup = new(buttonsPerRow);
+
+        return replyKeyboardMarkup;
+    }
+
     private static ITelegramCommand? GetCommand(string command)
     {
         return Info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
     }
-    
+
     private string[] GetArguments(string commandString)
     {
         return commandString.Split(' ').Skip(1).ToArray();
     }
+
+    [GeneratedRegex(@$"\{CommandPrefix}\w+")]
+    public static partial Regex TelegramCommand();
 }

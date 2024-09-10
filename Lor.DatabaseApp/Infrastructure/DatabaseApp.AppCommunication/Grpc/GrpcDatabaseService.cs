@@ -56,7 +56,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
 
         GetAvailableGroupsReply reply = new();
         
-        if (groups is not null )
+        if (groups is not null)
         { 
             foreach (var item in groups)
             {
