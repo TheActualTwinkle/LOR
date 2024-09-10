@@ -1,14 +1,15 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
-using TelegramBotApp.Authorization.Dto;
-using TelegramBotApp.Authorization.Interfaces;
+using TelegramBotApp.Identity.Dto;
+using TelegramBotApp.Identity.Services.AuthService.AuthContext;
+using TelegramBotApp.Identity.Services.Interfaces;
 
-namespace TelegramBotApp.Authorization;
+namespace TelegramBotApp.Identity.Services.AuthService;
 
-public class NstuAuthorizationService : IAuthorizationService
+public class NstuAuthService : IAuthService
 {
-    public async Task<Result<AuthorizationReply>> TryAuthorize(AuthorizationRequest request)
+    public async Task<Result<AuthReply>> AuthAsync(AuthRequest request)
     {
         try
         {
@@ -16,7 +17,7 @@ public class NstuAuthorizationService : IAuthorizationService
             DateTime? dateOfBirth = request.DateOfBirth;
 
             Result<UserDto> result = await ParseUserDto(fullName, dateOfBirth);
-            return result.IsSuccess ? Result.Ok(new AuthorizationReply(result.Value.FullName, result.Value.GroupName)) : Result.Fail(result.Errors.First());
+            return result.IsSuccess ? Result.Ok(new AuthReply(result.Value.FullName, result.Value.GroupName)) : Result.Fail(result.Errors.First());
         }
         catch (Exception e)
         {
@@ -24,7 +25,7 @@ public class NstuAuthorizationService : IAuthorizationService
         }
     }
     
-    private async Task<Result<UserDto>> ParseUserDto(string fullName, DateTime? dateOfBirth = default)
+    private static async Task<Result<UserDto>> ParseUserDto(string fullName, DateTime? dateOfBirth = default)
     {
         using HttpClient client = new();
         

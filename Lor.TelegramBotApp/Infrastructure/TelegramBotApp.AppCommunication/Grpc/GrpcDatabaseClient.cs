@@ -5,7 +5,7 @@ using Grpc.Net.Client;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 
-namespace TelegramBotApp.AppCommunication;
+namespace TelegramBotApp.AppCommunication.Grpc;
 
 public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClient
 {
@@ -20,22 +20,50 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         
         _client = new Database.DatabaseClient(channel);
     }
-    
-    public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)
+
+    public async Task<Result<Guid>> PreregisterUserAsync(string fullName, long telegramId, string email,
+        string groupName, CancellationToken cancellationToken = default)
+    {
+        const int defaultTokenExpireTime = 20; // minutes, parameter can take from shared library
+
+        var guid = Guid.NewGuid();
+        var reply = await _client!.PreregisterUserAsync(
+            new PreregisterUserRequest
+            {
+                FullName = fullName, TelegramId = telegramId, GroupName = groupName, Email = email, Token = new()
+                {
+                    Guid = guid.ToString(),
+                    TelegramId = telegramId,
+                    ExpirationDate = DateTime.UtcNow.AddMinutes(defaultTokenExpireTime).ToTimestamp()
+                }
+            },
+            cancellationToken: cancellationToken);
+
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(guid);
+    }
+
+    public async Task<Result> CheckUserEmailStatusAsync(long telegramId, CancellationToken cancellationToken = default)
+    {
+        var reply = await _client!.CheckUserEmailStatusAsync(new() { TelegramId =  telegramId }, cancellationToken: cancellationToken);
+        
+        return reply.IsEmailConfirmed ? Result.Ok() : Result.Fail("Email не подтвержден");
+    }
+
+    public async Task<Result<UserInfo>> GetUserInfoAsync(long userId, CancellationToken cancellationToken = default)
     {
         GetUserInfoReply reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
+        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName, IsEmailConfirmed = reply.IsEmailConfirmed});
     }
 
-    public async Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default)
+    public async Task<Result<Dictionary<int, string>>> GetAvailableGroupsAsync(CancellationToken cancellationToken = default)
     {
         GetAvailableGroupsReply reply = await _client!.GetAvailableGroupsAsync(new Empty(), cancellationToken: cancellationToken);
         Dictionary<int, string> groups = reply.IdGroupsMap.ToDictionary(pair => pair.Key, pair => pair.Value);
         return Result.Ok(groups);
     }
 
-    public async Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClassesAsync(long userId, CancellationToken cancellationToken = default)
     {
         GetAvailableLabClassesReply reply = await _client!.GetAvailableLabClassesAsync(new GetAvailableLabClassesRequest { UserId = userId }, cancellationToken: cancellationToken);
         
@@ -44,14 +72,14 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         return reply.ClassInformation.ToList();
     }
 
-    public async Task<Result<string>> TrySetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> TrySetGroupAsync(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
     {
         TrySetGroupReply reply = await _client!.TrySetGroupAsync(new TrySetGroupRequest { UserId = userId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
-    public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<EnqueueInClassResult>> EnqueueInClassAsync(int cassId, long userId, CancellationToken cancellationToken = default)
     {
         TryEnqueueInClassReply reply = await _client!.TryEnqueueInClassAsync(new TryEnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
@@ -64,21 +92,21 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         });
     }
 
-    public async Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result> AddSubscriberAsync(long userId, CancellationToken cancellationToken = default)
     {
         AddSubscriberReply reply = await _client!.AddSubscriberAsync(new AddSubscriberRequest { SubscriberId = userId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
     }
 
-    public async Task<Result> DeleteSubscriber(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteSubscriberAsync(long userId, CancellationToken cancellationToken = default)
     {
         DeleteSubscriberReply reply = await _client!.DeleteSubscriberAsync(new DeleteSubscriberRequest { SubscriberId = userId}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
     }
 
-    public async Task<Result<IEnumerable<SubscriberInfo>>> GetSubscribers(CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<SubscriberInfo>>> GetSubscribersAsync(CancellationToken cancellationToken = default)
     {
         GetSubscribersReply reply = await _client!.GetSubscribersAsync(new Empty(), cancellationToken: cancellationToken);
 

@@ -1,5 +1,5 @@
-﻿using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.User;
+﻿using DatabaseApp.Application.Dto;
+using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
 using DatabaseApp.Domain.Repositories;

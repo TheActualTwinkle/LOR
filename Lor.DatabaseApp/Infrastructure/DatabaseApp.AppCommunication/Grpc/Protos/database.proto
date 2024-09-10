@@ -3,8 +3,11 @@ syntax = "proto3";
 option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 service Database {
+  rpc PreregisterUser (PreregisterUserRequest) returns (PreregisterUserReply);
+  rpc CheckUserEmailStatus (CheckUserEmailStatusRequest) returns (CheckUserEmailStatusReply);
   rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoReply);
 
   rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
@@ -12,11 +15,39 @@ service Database {
 
   rpc TrySetGroup (TrySetGroupRequest) returns (TrySetGroupReply);
   rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
-  
+
   rpc AddSubscriber (AddSubscriberRequest) returns (AddSubscriberReply);
   rpc DeleteSubscriber (DeleteSubscriberRequest) returns (DeleteSubscriberReply);
-  
+
   rpc GetSubscribers (google.protobuf.Empty) returns (GetSubscribersReply);
+}
+
+message PreregisterUserRequest {
+  string fullName = 1;
+  int64 telegramId = 2;
+  string email = 3;
+  string groupName = 4;
+  EmailToken token = 5;
+}
+
+message PreregisterUserReply {
+  int64 telegramId = 1;
+  bool isFailed = 2;
+  string errorMessage = 3;
+}
+
+message CheckUserEmailStatusRequest {
+  int64 telegramId = 1;
+}
+
+message CheckUserEmailStatusReply {
+  bool isEmailConfirmed = 1;
+}
+
+message EmailToken {
+  string guid = 1;
+  int64 telegramId = 2;
+  google.protobuf.Timestamp expirationDate = 3;
 }
 
 message GetUserInfoRequest {
@@ -26,8 +57,9 @@ message GetUserInfoRequest {
 message GetUserInfoReply {
   string fullName = 1;
   string groupName = 2;
-  bool isFailed = 3;
-  string errorMessage = 4;
+  bool isEmailConfirmed = 3;
+  bool isFailed = 4;
+  string errorMessage = 5;
 }
 
 message GetAvailableGroupsReply {
@@ -98,6 +130,7 @@ message GetSubscribersReply {
   bool isFailed = 2;
   string errorMessage = 3;
 }
+
 message SubscriberInformation {
   int64 userId = 1;
   int32 groupId = 2;

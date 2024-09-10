@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using DatabaseApp.Application.Dto;
+using FluentResults;
 using MediatR;
 
 namespace DatabaseApp.Application.User.Queries.GetUserInfo;

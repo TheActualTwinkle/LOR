@@ -1,4 +1,5 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Application.Dto;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MapsterMapper;
 using MediatR;
@@ -10,12 +11,16 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 {
     public async Task<Result<UserDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        Domain.Models.User? user =
+            await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден.");
 
-        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        Domain.Models.Group? group =
+            await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
-        return group is null ? Result.Fail("Группа не найдена.") : Result.Ok(mapper.From(new UserDto{ FullName = user.FullName, GroupId = user.GroupId, GroupName = group.Name }).AdaptToType<UserDto>());
+        return group is null
+            ? Result.Fail("Группа не найдена.")
+            : Result.Ok(mapper.From(user).AdaptToType<UserDto>());
     }
 }

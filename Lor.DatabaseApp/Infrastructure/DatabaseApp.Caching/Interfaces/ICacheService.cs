@@ -11,4 +11,6 @@ public interface ICacheService
     //ReSharper disable InvalidXmlDocComment
     public Task SetAsync<T>(string key, T value, TimeSpan? expirationTime = null, CancellationToken cancellationToken = default) where T : class;
     //ReSharper restore InvalidXmlDocComment
+    
+    public Task RemoveAsync(string key, CancellationToken cancellationToken = default);
 }

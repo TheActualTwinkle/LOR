@@ -16,4 +16,9 @@ public class CacheService(IDistributedCache distributedCache) : ICacheService
     {
         await distributedCache.SetStringAsync(key, JsonSerializer.Serialize(value), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = expirationTime}, cancellationToken);
     }
+
+    public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+    {
+        return distributedCache.RemoveAsync(key, cancellationToken);
+    }
 }

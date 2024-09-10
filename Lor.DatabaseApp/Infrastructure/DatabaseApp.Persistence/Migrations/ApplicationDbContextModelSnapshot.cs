@@ -134,6 +134,11 @@ namespace DatabaseApp.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("email");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text")
@@ -142,6 +147,12 @@ namespace DatabaseApp.Persistence.Migrations
                     b.Property<int>("GroupId")
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
+
+                    b.Property<bool>("IsEmailConfirmed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_email_confirmed")
+                        .HasDefaultValueSql("false");
 
                     b.Property<long>("TelegramId")
                         .HasColumnType("bigint")
@@ -152,7 +163,7 @@ namespace DatabaseApp.Persistence.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex(new[] { "FullName" }, "full_name_check")
+                    b.HasIndex(new[] { "Email" }, "email_check")
                         .IsUnique();
 
                     b.HasIndex(new[] { "TelegramId" }, "tg_id_check")

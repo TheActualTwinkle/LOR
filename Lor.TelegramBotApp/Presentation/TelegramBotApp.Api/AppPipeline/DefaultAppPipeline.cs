@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot.Types;
@@ -6,8 +7,8 @@ using TelegramBotApp.Api.AppPipeline.Interfaces;
 using TelegramBotApp.AppCommunication;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application;
-using TelegramBotApp.Authorization;
-using TelegramBotApp.Domain.Interfaces;
+using TelegramBotApp.Domain.Models;
+using TelegramBotApp.Identity;
 
 namespace TelegramBotApp.Api.AppPipeline;
 
@@ -19,14 +20,16 @@ public class DefaultAppPipeline : IAppPipeline
         {
             using IHost host = Host.CreateDefaultBuilder()
                 .ConfigureAppConfiguration(config =>
-                    config.AddJsonFile("appsettings.json", false, true))
-                .ConfigureAppConfiguration(config => 
-                    config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true).AddEnvironmentVariables())
+                {
+                    config.AddJsonFile("appsettings.json", false, true);
+                    config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true).AddEnvironmentVariables();
+                    config.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
+                })
                 
                 // Order of services registration is important!!!
                 .ConfigureServices((builder, services) => services
                     .AddCommunicators(builder.Configuration)
-                    .AddAuthorization()                  
+                    .AddIdentity(builder.Configuration)                
                     .AddApplication(builder.Configuration)
                     .AddBus(builder.Configuration)
                 )
