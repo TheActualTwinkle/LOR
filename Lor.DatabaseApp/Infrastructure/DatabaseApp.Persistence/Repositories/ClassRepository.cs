@@ -21,7 +21,7 @@ public class ClassRepository(IDatabaseContext context)
             .Where(c => c.GroupId == groupId)
             .ToListAsync(cancellationToken);
     
-public async Task<List<int>?> GetOutdatedClassesId(CancellationToken cancellationToken) =>
+public async Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken) =>
         await _context.Classes
             .Where(c => c.Date < DateOnly.FromDateTime(DateTime.Now))
             .Select(c => c.Id)

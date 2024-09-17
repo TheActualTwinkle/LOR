@@ -23,7 +23,11 @@ public class StartTelegramCommand : ITelegramCommand
     
     public Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        const string message = $"Привет! Данный бот служит для записи на лабораторные работы. Для получения справки введите {TelegramCommandFactory.CommandPrefix}help";
+        const string message = $"Привет! Данный бот служит для записи на лабораторные работы.\n\n" +
+                               $"Для начала следует авторизоваться, для этого напишите {TelegramCommandFactory.CommandPrefix}auth а после введите своё ФИО\n\n" +
+                               $"Если все прошло успешно, бот назначит вам вашу группу и лабораторные работы, на которые вы можете записаться введя {TelegramCommandFactory.CommandPrefix}hop\n\n" +
+                               $"Для получения справки введите {TelegramCommandFactory.CommandPrefix}help\n\n" +
+                               $"Исходники проекта: https://github.com/TheActualTwinkle/LOR\nВопросы и предложения: @ext4zzzy\n\n";
         return Task.FromResult(new ExecutionResult(Result.Ok(message)));
     }
 }

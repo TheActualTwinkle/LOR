@@ -9,5 +9,5 @@ public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, IMapper mappe
     : IRequestHandler<GetAllSubscribersQuery, Result<List<SubscriberDto>>>
 {
     public async Task<Result<List<SubscriberDto>>> Handle(GetAllSubscribersQuery request, CancellationToken cancellationToken) =>
-        Result.Ok(mapper.Map<List<SubscriberDto>>(await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken)));
+        Result.Ok(mapper.From(await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken)).AdaptToType<List<SubscriberDto>>());
 }

@@ -1,13 +1,15 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Application.User;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
 
-public class IsUserInQueueQueryHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<IsUserInQueueQuery, Result<bool>>
+public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
+    : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>
 {
-    public async Task<Result<bool>> Handle(IsUserInQueueQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserDto?>> Handle(GetUserInQueueQuery request, CancellationToken cancellationToken)
     {
         Domain.Models.User? user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken); 
@@ -17,6 +19,6 @@ public class IsUserInQueueQueryHandler(IUnitOfWork unitOfWork)
         bool isUserInQueue =
             await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
-        return Result.Ok(isUserInQueue);
+        return isUserInQueue == true ? Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) : Result.Ok<UserDto?>(null);
     }
 }

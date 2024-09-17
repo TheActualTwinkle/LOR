@@ -7,11 +7,9 @@ namespace GroupScheduleApp.ScheduleUpdating;
 
 public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient, ScheduleSendServiceSettings settings) : IScheduleSendService
 {
-    public Task Start()
+    public async Task RunAsync()
     {
-        // ReSharper disable once AsyncVoidLambda
-        // ReSharper disable once ObjectCreationAsStatement
-        new Timer(async _ =>
+        while (true)
         {
             try
             {
@@ -21,9 +19,10 @@ public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUp
             {
                 Console.WriteLine(e.Message);
             }
-        }, null, TimeSpan.Zero, settings.SendInterval);
 
-        return Task.CompletedTask;
+            await Task.Delay(settings.SendInterval);
+        }
+        // ReSharper disable once FunctionNeverReturns
     }
 
     private async Task SendAllDataAsync()

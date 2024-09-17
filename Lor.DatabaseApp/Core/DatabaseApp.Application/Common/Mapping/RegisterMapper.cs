@@ -19,13 +19,13 @@ public class RegisterMapper : IRegister
             .Map(dest => dest.GroupName, src => src.Name);
         config.NewConfig<Domain.Models.Queue, QueueDto>()
             .Map(dest => dest.ClassId, src => src.ClassId)
-            .Map(dest => dest.FullName, src => src.User.FullName)
-            .Map(dest => dest.QueueNum, src => src.QueueNum);
+            .Map(dest => dest.FullName, src => src.User.FullName);
         config.NewConfig<Domain.Models.Subscriber, SubscriberDto>()
             .Map(dest => dest.TelegramId, src => src.User.TelegramId)
             .Map(dest => dest.GroupId, src => src.User.GroupId);
         config.NewConfig<Domain.Models.User, UserDto>()
             .Map(dest => dest.FullName, src => src.FullName)
+            .Map(dest => dest.GroupId, src => src.GroupId)
             .Map(dest => dest.GroupName, src => src.Group.Name);
     }
 }

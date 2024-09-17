@@ -16,12 +16,12 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
         public const string TableBody = "schedule__table-body";
         public const string TableBodyRow = "schedule__table-row";
         public const string ClassRow = "schedule__table-item";
-        public const string ClassDate = "schedule__table-day";
+        public const string ClassDate = "schedule__table-date";
         public const string GroupName = "schedule__title-h1";
     }
     
-    // Week fetch interval
-    private TimeSpan ScheduleFetchInterval => TimeSpan.FromDays(7);
+    // TODO: DI
+    private TimeSpan ScheduleFetchDateOffset => TimeSpan.FromDays(7);
     
     private readonly ChromeDriver _chromeDriver;
     private readonly IEnumerable<string> _urls;
@@ -76,7 +76,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={++weekNumber}");
             classesData.AddRange(ParseForWeek());
             
-            // classesData = classesData.Where(d => d.Date >= Today() && d.Date <= Today() + ScheduleFetchInterval).ToList(); TODO: uncomment on production
+            classesData = classesData.Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchDateOffset).ToList();
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));
         }
@@ -103,7 +103,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
             if (classNames.Count == 0) continue;
             
             string dateRaw = row.FindElement(By.ClassName(Constants.ClassDate)).Text;
-            DateTime date = DateTime.ParseExact($"{dateRaw[2..]}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
+            DateTime date = DateTime.ParseExact($"{dateRaw}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
             foreach (string className in classNames)
             {
@@ -121,8 +121,6 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        text = "1 неделя"; // TODO: Testing
-        
         const string pattern = @"\d+";
         Match match = Regex.Match(text, pattern);
         

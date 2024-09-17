@@ -23,7 +23,7 @@ public class DefaultAppPipeline : IAppPipeline
             .ConfigureServices((builder, services) => services
                 .AddCommunicators(builder.Configuration)
                 .AddScheduleProvider(builder.Configuration)
-                .AddSenderService())
+                .AddSenderService(builder.Configuration))
             .Build();
 
         IDatabaseUpdaterCommunicationClient communicationClient = host.Services.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
@@ -33,10 +33,7 @@ public class DefaultAppPipeline : IAppPipeline
             communicationClient
         ]);
         
-        await sendService.Start();
-        
-        CancellationTokenSource cancellationToken = new();
-        await Task.Delay(Timeout.Infinite, cancellationToken.Token);
+        await sendService.RunAsync();
     }
     
     private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)

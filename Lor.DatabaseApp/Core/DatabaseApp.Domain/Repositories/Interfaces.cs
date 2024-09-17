@@ -17,17 +17,17 @@ public interface IRepository;
 
 public interface IClassRepository : IRepository
 {
-    public Task AddAsync(Class someClass, CancellationToken cancellationToken);
+    public Task AddAsync(Class @class, CancellationToken cancellationToken);
 
     public Task<bool> CheckClass(string className, DateOnly date, CancellationToken cancellationToken);
 
-    public void Delete(Class someClass);
+    public void Delete(Class @class);
 
     public Task<Class?> GetClassById(int classId, CancellationToken cancellationToken);
 
     public Task<List<Class>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
 
-    public Task<List<int>?> GetOutdatedClassesId(CancellationToken cancellationToken);
+    public Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken);
 }
 
 public interface IGroupRepository : IRepository
@@ -44,12 +44,10 @@ public interface IGroupRepository : IRepository
 public interface IQueueRepository : IRepository
 {
     public Task AddAsync(Queue queue, CancellationToken cancellationToken);
-
-    public Task<bool> CheckQueue(int userId, int groupId, int classId, CancellationToken cancellationToken);
     
     public void Delete(Queue queue);
 
-    public Task<int> GetCurrentQueueNum(int groupId, int classId, CancellationToken cancellationToken);
+    public Task<int> GetCurrentQueueNum(int classId);
     
     public Task<List<Queue>?> GetQueueByClassId(int classId, CancellationToken cancellationToken);
 
