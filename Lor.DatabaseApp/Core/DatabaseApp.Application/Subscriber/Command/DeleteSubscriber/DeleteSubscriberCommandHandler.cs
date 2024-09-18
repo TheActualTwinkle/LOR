@@ -19,7 +19,7 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork)
 
         unitOfWork.SubscriberRepository.Delete(subscriber);
 
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

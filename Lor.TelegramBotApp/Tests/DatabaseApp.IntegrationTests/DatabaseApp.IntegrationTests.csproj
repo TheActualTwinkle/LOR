@@ -7,6 +7,7 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <RootNamespace>TelegramBotApp.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,6 +16,7 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+        <PackageReference Include="Npgsql" Version="8.0.3" />
         <PackageReference Include="NUnit" Version="3.14.0"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
@@ -29,15 +31,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.Persistence\DatabaseApp.Persistence.csproj" />
-      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\DatabaseApp.WebApi.csproj" />
-      <ProjectReference Include="..\..\Presentation\TelegramBotApp.Api\TelegramBotApp.Api.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="appsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\DatabaseApp.WebApi.csproj" />
+      <ProjectReference Include="..\..\..\Lor.GroupScheduleApp\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
     </ItemGroup>
 
 </Project>

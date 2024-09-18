@@ -29,7 +29,7 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork)
             await unitOfWork.ClassRepository.AddAsync(@class, cancellationToken);
         }
         
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -24,7 +24,7 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork)
 
         await unitOfWork.SubscriberRepository.AddAsync(newSubscriber, cancellationToken);
 
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

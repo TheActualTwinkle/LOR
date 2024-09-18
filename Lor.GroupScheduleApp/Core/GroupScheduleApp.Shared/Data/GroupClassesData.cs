@@ -1,7 +1,7 @@
 ﻿namespace GroupScheduleApp.Shared;
 
-public readonly struct GroupClassesData(string groupName, List<ClassData> classes)
+public readonly struct GroupClassesData(string groupName, IEnumerable<ClassData> classes)
 {
     public string GroupName { get; } = groupName;
-    public List<ClassData> Classes { get; } = classes;
+    public IEnumerable<ClassData> Classes { get; } = classes;
 }

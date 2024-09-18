@@ -1,9 +1,9 @@
 ﻿using TelegramBotApp.AppCommunication;
 using TelegramBotApp.AppCommunication.Interfaces;
 
-namespace TelegramBotApp.Tests.TestContext;
+namespace DatabaseApp.Tests.TestContext;
 
-public class TelegramBotAppFactory
+public class TelegramAppFactory
 {
     public IDatabaseCommunicationClient DatabaseCommunicationClient { get; private set; } = null!;
     

@@ -21,7 +21,7 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork)
             }
         }
         
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         return Result.Ok();
     }

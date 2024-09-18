@@ -7,12 +7,8 @@ namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
 public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<CreateQueueCommand, Result>
 {
-    private readonly SemaphoreSlim _semaphoreSlim = new(1);
-
     public async Task<Result> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
     {
-        await _semaphoreSlim.WaitAsync(cancellationToken);
-        
         Domain.Models.User? user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
@@ -46,9 +42,7 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         
         await unitOfWork.QueueRepository.AddAsync(queue, cancellationToken);
 
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
-
-        _semaphoreSlim.Release();
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
         return Result.Ok();
     }
