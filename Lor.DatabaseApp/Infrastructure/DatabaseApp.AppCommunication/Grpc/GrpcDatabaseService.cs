@@ -25,7 +25,7 @@ using MediatR;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) : DatabaseApi.DatabaseBase
+public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) : Database.DatabaseBase
 {
     public override async Task<GetUserInfoReply> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
     {

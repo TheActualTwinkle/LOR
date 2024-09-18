@@ -9,7 +9,7 @@ namespace TelegramBotApp.AppCommunication;
 
 public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClient
 {
-    private DatabaseApi.DatabaseClient? _client;
+    private Database.DatabaseClient? _client;
     
     public async Task StartAsync()
     {
@@ -18,7 +18,7 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
         await channel.ConnectAsync();
         Console.WriteLine("Successfully connected to the gRPC service.");
         
-        _client = new DatabaseApi.DatabaseClient(channel);
+        _client = new Database.DatabaseClient(channel);
     }
 
     public Task StopAsync()
