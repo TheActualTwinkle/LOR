@@ -20,7 +20,7 @@ public class CreateGroupCommandHandler(IUnitOfWork unitOfWork)
 
         await unitOfWork.GroupRepository.AddAsync(group, cancellationToken);
 
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
         return Result.Ok();
     }

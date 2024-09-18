@@ -3,4 +3,6 @@
 public interface ICommunicationClient
 {
     Task StartAsync();
+    
+    Task StopAsync();
 }

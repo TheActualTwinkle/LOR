@@ -40,7 +40,7 @@ public class DefaultAppPipeline : IAppPipeline
     {
         foreach (ICommunicationClient appCommunicator in communicators)
         {
-            await appCommunicator.Start();
+            await appCommunicator.StartAsync();
         }
     }
 }

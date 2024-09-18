@@ -60,6 +60,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8326BF46
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Tests", "Lor.DatabaseApp\Tests\DatabaseApp.Tests\DatabaseApp.Tests.csproj", "{BAE7811D-8652-4428-800C-A7373B0F5896}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.IntegrationTests", "Lor.TelegramBotApp\Tests\DatabaseApp.IntegrationTests\DatabaseApp.IntegrationTests.csproj", "{A15EFBB5-BA4E-4B70-9B21-F0F63550E7CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,7 @@ Global
 		{6CEC4A02-DF4E-4061-9569-699C0F869D5D} = {2FF3A2CE-3E30-4A09-86D5-6D18FB9DB914}
 		{8326BF46-ACE4-426F-B1E6-D65317643C30} = {3E36A9F0-EEF9-48E1-B82C-F4A2629BD1E0}
 		{BAE7811D-8652-4428-800C-A7373B0F5896} = {8326BF46-ACE4-426F-B1E6-D65317643C30}
+		{A15EFBB5-BA4E-4B70-9B21-F0F63550E7CC} = {8326BF46-ACE4-426F-B1E6-D65317643C30}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C3D4568A-A822-4003-BD64-A01BC16F69F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -163,5 +166,9 @@ Global
 		{BAE7811D-8652-4428-800C-A7373B0F5896}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAE7811D-8652-4428-800C-A7373B0F5896}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAE7811D-8652-4428-800C-A7373B0F5896}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A15EFBB5-BA4E-4B70-9B21-F0F63550E7CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A15EFBB5-BA4E-4B70-9B21-F0F63550E7CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A15EFBB5-BA4E-4B70-9B21-F0F63550E7CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A15EFBB5-BA4E-4B70-9B21-F0F63550E7CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -9,7 +9,7 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
 {
     private DatabaseUpdater.DatabaseUpdaterClient? _client;
     
-    public async Task Start()
+    public async Task StartAsync()
     {
         Console.WriteLine("Connecting to the gRPC service...");
         GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
@@ -17,6 +17,14 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterComm
         Console.WriteLine("Successfully connected to the gRPC service.");
         
         _client = new DatabaseUpdater.DatabaseUpdaterClient(channel);
+    }
+
+    public Task StopAsync()
+    {
+        Console.WriteLine("Disconnecting from the gRPC service...");
+        _client = null;
+        Console.WriteLine("Successfully disconnected from the gRPC service.");
+        return Task.CompletedTask;
     }
 
     public async Task SetAvailableGroups(IEnumerable<string> availableGroupNames)

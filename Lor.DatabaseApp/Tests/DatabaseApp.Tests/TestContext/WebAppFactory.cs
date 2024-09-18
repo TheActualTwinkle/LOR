@@ -1,5 +1,6 @@
 ﻿using System.Data.Common;
 using DatabaseApp.Persistence.DatabaseContext;
+using DatabaseApp.WebApi;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;

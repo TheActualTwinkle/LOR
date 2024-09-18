@@ -18,7 +18,7 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
             unitOfWork.ClassRepository.Delete(@class);
         }
         
-        await Task.Run(async () => await unitOfWork.SaveDbChangesAsync(cancellationToken), cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         return Result.Ok();
     }
