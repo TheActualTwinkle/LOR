@@ -13,7 +13,7 @@ using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.Application;
 
-public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions, IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService) : ITelegramBot
+public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions, IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService) : ITelegramBot
 {
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
@@ -27,10 +27,13 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
 
-    public async Task SendMessageAsync(long telegramId, string message, IReplyMarkup replyMarkup, CancellationToken cancellationToken = default) => 
+    public async Task SendMessageAsync(long telegramId, string message, IReplyMarkup? replyMarkup, CancellationToken cancellationToken = default)
+    {
+        replyMarkup ??= TelegramCommandFactory.GetCommandButtonsReplyMarkup(); 
+            
         await telegramBot.SendTextMessageAsync(telegramId, message, replyMarkup: replyMarkup, cancellationToken: cancellationToken); 
-
-
+    }
+    
     public Task<User> GetMeAsync() => telegramBot.GetMeAsync();
     
     private Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
@@ -55,7 +58,7 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
             
             if (message.ReplyToMessage is not null && message.ReplyToMessage.From?.Id == bot.BotId)
             {
-                await HandleMessageReply(bot, message, chatId, cts.Token);
+                await HandleMessageReply(message, chatId, cts.Token);
                 return;
             }
             
@@ -84,7 +87,7 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
         return Task.CompletedTask;
     }
 
-    private async Task SendErrorMessage(long chatIdInner, Exception exception, IReplyMarkup replyMarkup, CancellationToken cancellationToken)
+    private async Task SendErrorMessage(long chatIdInner, Exception exception, IReplyMarkup? replyMarkup, CancellationToken cancellationToken)
     {
         await SendMessageAsync(chatIdInner, exception.Message, replyMarkup, cancellationToken);
     }
@@ -128,13 +131,13 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
         await bot.AnswerCallbackQueryAsync(callbackQuery.Id, cancellationToken: cancellationToken);
     }
     
-    private async Task HandleMessageReply(ITelegramBotClient bot, Message message, long chatId, CancellationToken cancellationToken)
+    private async Task HandleMessageReply(Message message, long chatId, CancellationToken cancellationToken)
     {
         if (message.ReplyToMessage is not {} reply) return;
         if (reply.Text is not {} replyText) return;
         if (message.Text is not {} text) return;
 
-        Match commandMatch = TelegramCommand().Match(replyText);
+        Match commandMatch = TelegramCommandFactory.TelegramCommand().Match(replyText);
         if (commandMatch.Success == false)
         {
             Console.WriteLine("Can`t handle message reply: ReplyToMessage has no command");
@@ -162,7 +165,4 @@ public partial class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions
             Console.WriteLine($"HandleMessageReply Error: {e.Message}");
         }
     }
-
-    [GeneratedRegex(@"\/\w+\s")]
-    private static partial Regex TelegramCommand();
 }
