@@ -8,6 +8,8 @@ services:
       - PGPORT=31400
     ports:
       - "31400:31400"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
 
   databaseapp:
     build:
