@@ -3,7 +3,7 @@ LOR - application for organizing queues for students laboratory work
 
 <p align="center">
 	<img src=".github/images/compiles-sometimes.svg" alt="Compiles sometimes"></br>
-	<img src=".github/images/logo-white.png" alt="Logo" style="width: 50%">
+	<img src=".github/images/logo-white.png" alt="Logo" style="width: 30%">
 </p>
 
 ## Architecture
