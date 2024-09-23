@@ -20,7 +20,7 @@ using TelegramBotApp.AppCommunication.Consumers.Data;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IBus bus, ProjectConfig projectConfig) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IBus bus) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -34,7 +34,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
         
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: new CancellationTokenSource(projectConfig.DefaultCancellationTimeout).Token);
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: context.CancellationToken);
         
         return new Empty();
     }
@@ -94,7 +94,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         if (classes.IsFailed) return new Empty();
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: new CancellationTokenSource(projectConfig.DefaultCancellationTimeout).Token);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: context.CancellationToken);
 
         List<ClassDto> newClasses = classes.Value.Except(oldClasses.Value).ToList();
         
@@ -105,7 +105,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             GroupId = groupDto.Value.Id,
             Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
         };
-        await bus.Publish(newClassesMessage, cancellationToken: new CancellationTokenSource(projectConfig.DefaultCancellationTimeout).Token);
+        await bus.Publish(newClassesMessage, cancellationToken: context.CancellationToken);
         
         return new Empty();
     }
