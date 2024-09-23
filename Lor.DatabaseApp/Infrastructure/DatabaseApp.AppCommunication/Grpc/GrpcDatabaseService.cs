@@ -45,7 +45,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             return new GetUserInfoReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: context.CancellationToken);
 
         return new GetUserInfoReply { FullName = userDto.Value.FullName, GroupName = userDto.Value.GroupName };
     }
@@ -70,7 +70,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
 
         if (groupDto.IsFailed) return new GetAvailableGroupsReply();
         
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, groupDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groupDto.Value, cancellationToken: context.CancellationToken);
 
         foreach (var item in groupDto.Value)
         {
@@ -97,7 +97,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                     { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
             await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, 
-                cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+                cancellationToken: context.CancellationToken);
 
             userCache = userDto.Value;
         }
@@ -134,7 +134,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
         });
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + userCache.GroupId, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + userCache.GroupId, classDto.Value, cancellationToken: context.CancellationToken);
 
         return new GetAvailableLabClassesReply { ClassInformation = { classInformation }};
     }
@@ -161,7 +161,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             return new TrySetGroupReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: context.CancellationToken);
 
         return new TrySetGroupReply { FullName = await request.FullName.FormatFio(), GroupName = userDto.Value.GroupName };
     }
@@ -198,7 +198,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                 return new TryEnqueueInClassReply
                     { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-            await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+            await cacheService.SetAsync(Constants.UserPrefix + request.UserId, userDto.Value, cancellationToken: context.CancellationToken);
 
             user = userDto.Value;
         }
@@ -216,7 +216,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
                 return new TryEnqueueInClassReply
                     { IsFailed = true, ErrorMessage = classDto.Errors.First().Message };
         
-            await cacheService.SetAsync(Constants.AvailableClassesPrefix + user.GroupId, classDto.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+            await cacheService.SetAsync(Constants.AvailableClassesPrefix + user.GroupId, classDto.Value, cancellationToken: context.CancellationToken);
 
             classes = classDto.Value;
         }
@@ -269,7 +269,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
             FullName = user.FullName
         });
 
-        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueCache, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueCache, cancellationToken: context.CancellationToken);
 
         return new TryEnqueueInClassReply
         {
@@ -311,7 +311,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
         cachedSubscriptions.Add(new SubscriberDto { TelegramId = request.SubscriberId, GroupId = groupDto.Value.Id});
         
-        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: context.CancellationToken);
         
         return new AddSubscriberReply();
     }
@@ -330,7 +330,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
         List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey) ?? [];
         
         await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions.Where(x => x.TelegramId != request.SubscriberId),
-            cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+            cancellationToken: context.CancellationToken);
         
         return new DeleteSubscriberReply();
     }
@@ -349,7 +349,7 @@ public class GrpcDatabaseService(ISender mediator, ICacheService cacheService) :
 
             subscriberDto = subscribersResult.Value;
             
-            await cacheService.SetAsync(Constants.AllSubscribersKey, subscriberDto, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+            await cacheService.SetAsync(Constants.AllSubscribersKey, subscriberDto, cancellationToken: context.CancellationToken);
         }
 
         RepeatedField<SubscriberInformation> repeatedField = await subscriberDto.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation

@@ -3,6 +3,7 @@ using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
+using DatabaseApp.Application.Common;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
@@ -33,7 +34,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
         
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: context.CancellationToken);
         
         return new Empty();
     }
@@ -93,7 +94,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         if (classes.IsFailed) return new Empty();
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: context.CancellationToken);
 
         List<ClassDto> newClasses = classes.Value.Except(oldClasses.Value).ToList();
         
@@ -104,7 +105,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             GroupId = groupDto.Value.Id,
             Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
         };
-        await bus.Publish(newClassesMessage, cancellationToken: new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI
+        await bus.Publish(newClassesMessage, cancellationToken: context.CancellationToken);
         
         return new Empty();
     }
