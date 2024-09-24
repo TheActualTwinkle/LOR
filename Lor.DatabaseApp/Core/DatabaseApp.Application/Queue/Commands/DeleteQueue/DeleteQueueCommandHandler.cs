@@ -9,20 +9,34 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result> Handle(DeleteQueueCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.OutdatedClassList)
+        List<Domain.Models.Queue>? listQueue;
+        
+        if (request.UserId is null && request.ClassId is null)  //TODO: потестить!
         {
-            List<Domain.Models.Queue>? listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(item, cancellationToken);
-
-            if (listQueue is null) return Result.Fail("Очередь не найдена");
-            
-            foreach (Domain.Models.Queue queue in listQueue)
+            foreach (var classId in request.OutdatedClassList!)
             {
-                unitOfWork.QueueRepository.Delete(queue);
+                listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
+
+                if (listQueue is null) return Result.Fail("Очередь не найдена");
+            
+                foreach (var queue in listQueue)
+                {
+                    unitOfWork.QueueRepository.Delete(queue);
+                }
             }
         }
+        else if (request.OutdatedClassList is null)
+        {
+            listQueue = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(request.ClassId!.Value, cancellationToken);
+            
+            if (listQueue is null) return Result.Fail("Очередь не найдена");
         
+            Domain.Models.Queue queue = listQueue.First(x => x.UserId == request.UserId);
+        
+            unitOfWork.QueueRepository.Delete(queue);
+        }
+
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
-        
         return Result.Ok();
     }
 }
