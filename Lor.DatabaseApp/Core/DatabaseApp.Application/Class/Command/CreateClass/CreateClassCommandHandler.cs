@@ -1,10 +1,13 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Class.Command.CreateClass;
 
-public class CreateClassesCommandHandler(IUnitOfWork unitOfWork)
+public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateClassesCommand, Result>
 {
     public async Task<Result> Handle(CreateClassesCommand request, CancellationToken cancellationToken)
@@ -30,7 +33,13 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork)
         }
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
+        
+        List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
 
+        List<ClassDto> classDtos = mapper.From(classes).AdaptToType<List<ClassDto>>();
+
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, classDtos, cancellationToken: cancellationToken);
+        
         return Result.Ok();
     }
 }

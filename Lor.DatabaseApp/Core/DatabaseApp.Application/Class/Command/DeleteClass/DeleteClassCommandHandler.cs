@@ -1,10 +1,13 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Class.Command.DeleteClass;
 
-public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
+public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<DeleteClassCommand, Result>
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
@@ -18,7 +21,21 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork)
             unitOfWork.ClassRepository.Delete(@class);
         }
         
-        await unitOfWork.SaveDbChangesAsync(cancellationToken);
+        await unitOfWork.SaveDbChangesAsync(cancellationToken); //TODO: кеш
+        
+        List<Domain.Models.Group>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+
+        if (groups is null) return Result.Fail("Группы не найдены.");
+
+        foreach (var group in groups)
+        {
+            List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
+
+            if (classes is null) continue;
+            
+            await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, mapper.From(classes)
+                .AdaptToType<List<ClassDto>>(), cancellationToken: cancellationToken);
+        }
         
         return Result.Ok();
     }
