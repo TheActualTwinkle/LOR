@@ -3,11 +3,9 @@ using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
-using DatabaseApp.Application.Common;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
-using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
@@ -24,17 +22,10 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
-        foreach (string? groupName in request.GroupNames.ToList())
+        await mediator.Send(new CreateGroupCommand
         {
-            await mediator.Send(new CreateGroupCommand
-            {
-                GroupName = groupName
-            });
-        }
-        
-        Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
-        
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: context.CancellationToken);
+            GroupNames = request.GroupNames.ToList()
+        }, context.CancellationToken);
         
         return new Empty();
     }
@@ -44,7 +35,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         Result<List<ClassDto>> oldClasses = await mediator.Send(new GetClassesQuery
         {
             GroupName = request.GroupName
-        });
+        }, context.CancellationToken);
         
         if (oldClasses.IsFailed) return new Empty();
         
@@ -57,7 +48,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
                     c => c.Key,
                     c => DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(c.Value).DateTime)
                 )
-            });
+            }, context.CancellationToken);
         }
         catch (Exception e)
         {
@@ -72,18 +63,18 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             await mediator.Send(new DeleteQueueCommand
             {
                 OutdatedClassList = outdatedClassList.Value
-            });
+            }, context.CancellationToken);
         
             await mediator.Send(new DeleteClassCommand
             {
                 ClassesId = outdatedClassList.Value
-            });
+            }, context.CancellationToken);
         }
         
         Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
         {
             GroupName = request.GroupName
-        });
+        }, context.CancellationToken);
         
         if (classes.IsFailed) return new Empty();
         
@@ -105,6 +96,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             GroupId = groupDto.Value.Id,
             Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
         };
+        
         await bus.Publish(newClassesMessage, cancellationToken: context.CancellationToken);
         
         return new Empty();

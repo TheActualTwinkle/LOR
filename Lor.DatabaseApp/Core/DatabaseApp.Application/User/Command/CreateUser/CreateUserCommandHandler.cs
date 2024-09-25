@@ -1,10 +1,13 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.User.Command.CreateUser;
 
-public class CreateUserCommandHandler(IUnitOfWork unitOfWork)
+public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateUserCommand, Result>
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -27,6 +30,9 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork)
         await unitOfWork.UserRepository.AddAsync(newUser, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
+        
+        await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, 
+            mapper.From(newUser).AdaptToType<UserDto>(), cancellationToken: cancellationToken);
 
         return Result.Ok();
     }
