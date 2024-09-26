@@ -34,28 +34,3 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         base.OnModelCreating(modelBuilder);
     }
 }
-
-// ReSharper disable once UnusedType.Global
-public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
-{
-    public ApplicationDbContext CreateDbContext(string[] args)
-    {
-        DbContextOptionsBuilder<ApplicationDbContext> optionsBuilder = new();
- 
-        ConfigurationBuilder builder = new();
-        builder.SetBasePath(Directory.GetCurrentDirectory());
-        builder.AddJsonFile("appsettings.json");
-        IConfigurationRoot config = builder.Build();
- 
-        string connectionString = config.GetConnectionString("DefaultConnection")!;
-        optionsBuilder.UseNpgsql(connectionString);
-        return new ApplicationDbContext(optionsBuilder.Options)
-        {
-            Classes = null!,
-            Groups = null!,
-            Queues = null!,
-            Subscribers = null!,
-            Users = null!
-        };
-    }
-}

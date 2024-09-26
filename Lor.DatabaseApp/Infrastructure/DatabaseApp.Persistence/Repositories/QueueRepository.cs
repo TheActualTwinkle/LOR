@@ -19,7 +19,11 @@ public class QueueRepository(IDatabaseContext context)
             return null;
         }
         
-        return await _context.Queues.Where(q => q.ClassId == classId).OrderBy(q => q.QueueNum).ToListAsync(cancellationToken);
+        return await _context.Queues
+            .Include(q => q.User)
+            .Where(q => q.ClassId == classId)
+            .OrderBy(q => q.QueueNum)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken) =>
