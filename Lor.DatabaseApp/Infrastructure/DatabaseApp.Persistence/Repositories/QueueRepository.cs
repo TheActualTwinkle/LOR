@@ -32,10 +32,10 @@ public class QueueRepository(IDatabaseContext context)
             .ToListAsync(cancellationToken);
 
     public async Task<uint> GetUserQueueNum(long telegramId, int classId, CancellationToken cancellationToken) =>
-        await Task.FromResult(Convert.ToUInt32(_context.Queues
-            .Include(x => x.User)
+        await _context.Queues
             .Where(x => x.User.TelegramId == telegramId && x.ClassId == classId)
-            .Select(x => x.QueueNum)));
+            .Select(x => x.QueueNum)
+            .FirstOrDefaultAsync(cancellationToken);
     public async Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken) => 
         await _context.Queues
         .AnyAsync(q => q.UserId == userId && q.ClassId == classId, cancellationToken);

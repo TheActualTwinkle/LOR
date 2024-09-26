@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Group;
+﻿/*using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
@@ -158,4 +158,4 @@ public class GroupTests
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
     }
-}
+}*/

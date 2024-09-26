@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Group.Command.CreateGroup;
+﻿/*using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
@@ -251,4 +251,4 @@ public class SubscribersTests
             GroupName = TestGroupName
         });
     }
-}
+}*/

@@ -50,3 +50,44 @@ public class EnqueueCallbackQuery : ICallbackQuery
         return new ExecutionResult(Result.Ok(message.ToString()));
     }
 }
+
+[Export(typeof(ICallbackQuery))]
+[ExportMetadata(nameof(Query), $"{TelegramCommandQueryFactory.CommandQueryPrefix}dehop")]
+public class DequeueCallbackQuery : ICallbackQuery
+{
+    public string Query => $"{TelegramCommandQueryFactory.CommandQueryPrefix}dehop";
+    
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {        
+        List<string> argumentsList = arguments.ToList();
+        if (argumentsList.Count != 1)
+        {
+            throw new ArgumentException("DequeueCallbackQuery: Неверное количество аргументов");
+        }
+        
+        if (int.TryParse(argumentsList.First(), out int classId) == false)
+        {
+            throw new ArgumentException($"DequeueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
+        }
+        
+        Result<DequeueFromClassResult> result = await factory.DatabaseCommunicator.DequeueFromClass(classId, chatId, cancellationToken);
+        
+        if (result.IsFailed)
+        {
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
+        }
+
+        var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
+        string messageHeader = result.Value.WasAlreadyDequeued ? 
+            $"Вы не были записаны в очередь {classData}\n" : $"Вы успешно выписаны из очереди {classData}\nОчередь:\n";
+        
+        StringBuilder message = new(messageHeader);
+        for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
+        {
+            string labClass = result.Value.StudentsQueue.ElementAt(i);
+            message.AppendLine($"{i+1}. {labClass}");
+        }
+        
+        return new ExecutionResult(Result.Ok(message.ToString()));
+    }
+}

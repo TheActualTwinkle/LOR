@@ -12,13 +12,11 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
 {
     public async Task<Result> Handle(DeleteQueueCommand request, CancellationToken cancellationToken)
     {
-        List<Domain.Models.Queue>? outdatedQueueList;
-        
         if (request.OutdatedClassList is not null)
         {
             foreach (var classId in request.OutdatedClassList!)
             {
-                outdatedQueueList = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
+                List<Domain.Models.Queue>? outdatedQueueList = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
 
                 if (outdatedQueueList is null) return Result.Fail("Очередь не найдена");
             
@@ -35,23 +33,22 @@ public class DeleteQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
         }
         else if (request.TelegramId is not null && request.ClassId is not null)
         {
-            outdatedQueueList = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(request.ClassId!.Value, cancellationToken);
+            List<Domain.Models.Queue>? queueOfClass = await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId!.Value, cancellationToken);
             
-            if (outdatedQueueList is null) return Result.Fail("Очередь не найдена");
+            if (queueOfClass is null) return Result.Fail("Очередь не найдена");
 
             uint userQueueNum = await unitOfWork.QueueRepository.GetUserQueueNum(request.TelegramId.Value, request.ClassId!.Value, cancellationToken);
             
-            Domain.Models.Queue queue = outdatedQueueList.First(x => x.QueueNum == userQueueNum);
+            Domain.Models.Queue queue = queueOfClass.First(x => x.QueueNum == userQueueNum);
         
             unitOfWork.QueueRepository.Delete(queue);
             
             await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId.Value, 
-                mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId.Value, cancellationToken))
+                mapper.From(queueOfClass.Select(x => x.QueueNum != userQueueNum))
                     .AdaptToType<List<QueueDto>>(), cancellationToken: cancellationToken);
         }
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
-        
         
         return Result.Ok();
     }

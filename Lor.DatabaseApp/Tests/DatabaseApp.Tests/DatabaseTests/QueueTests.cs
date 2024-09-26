@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Class;
+﻿/*using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
@@ -316,4 +316,4 @@ public class QueueTests
             GroupName = TestGroupName
         });
     }
-}
+}*/

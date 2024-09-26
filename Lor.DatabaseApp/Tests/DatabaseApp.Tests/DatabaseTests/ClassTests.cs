@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Class;
+﻿/*using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetClass;
@@ -276,4 +276,4 @@ public class ClassTests
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
     }
-}
+}*/

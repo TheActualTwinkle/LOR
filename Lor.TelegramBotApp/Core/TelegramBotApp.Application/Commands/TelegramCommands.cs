@@ -191,7 +191,6 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
         }
         
-        
         IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
         return new ExecutionResult(Result.Fail("Выберите пару"), replyMarkup);
     }
@@ -203,6 +202,49 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         {
             DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
             InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop {classInformation.ClassId}");
+            buttons.Add([button]);
+        }
+
+        return Task.FromResult<IReplyMarkup>(new InlineKeyboardMarkup(buttons));
+    }
+}
+
+[Export(typeof(ITelegramCommand))]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}dehop")]
+[ExportMetadata(nameof(Description), "- выписывает из очереди на лабораторную работу")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Выписаться  из очереди на лаб. работу \ud83d\udeb7")]
+public class DequeueTelegramCommand : ITelegramCommand
+{
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}dehop";
+    public string Description => "- выписывает из очереди на лабораторную работу";
+    public string ButtonDescriptionText => "Выписаться  из очереди на лаб. работу \ud83d\udeb7";
+    
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
+        Result<UserInfo> result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        if (result.IsFailed)
+        {
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
+        }
+
+        Result<IEnumerable<ClassInformation>> availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        if (availableLabClassesResult.IsFailed)
+        {
+            return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
+        }
+        
+        IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        return new ExecutionResult(Result.Fail("Выберите пару"), replyMarkup);
+    }
+    
+    private Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<ClassInformation> classes)
+    {
+        List<InlineKeyboardButton[]> buttons = [];
+        foreach (ClassInformation classInformation in classes)
+        {
+            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}dehop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 

@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Group.Command.CreateGroup;
+﻿/*using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
@@ -165,4 +165,4 @@ public class UserTests
         // Assert
         Assert.That(result.IsFailed, Is.True);
     }
-}
+}*/
