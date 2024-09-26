@@ -96,7 +96,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             TelegramId = request.UserId,
             FullName = request.FullName,
             GroupName = request.GroupName
-        });
+        }, context.CancellationToken);
 
         if (result.IsFailed)
             return new TrySetGroupReply
@@ -105,7 +105,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
         {
             TelegramId = request.UserId
-        });
+        }, context.CancellationToken);
 
         if (userDto.IsFailed)
             return new TrySetGroupReply
@@ -124,7 +124,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         Result<List<ClassDto>> classDtos = await mediator.Send(new GetClassesQuery
         {
-            GroupName = userDto.Value.GroupName
+            GroupName = userDto.Value.GroupName,
+            GroupId = userDto.Value.GroupId
         }, context.CancellationToken);
         
         ClassDto @class;
@@ -166,7 +167,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
         {
             TelegramId = request.UserId
-        });
+        }, context.CancellationToken);
 
         if (userDto.IsFailed)
             return new DequeueReply
@@ -193,8 +194,9 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         Result<List<ClassDto>> classDtos = await mediator.Send(new GetClassesQuery
         {
-            GroupName = userDto.Value.GroupName
-        });
+            GroupName = userDto.Value.GroupName,
+            GroupId = userDto.Value.GroupId
+        }, context.CancellationToken);
 
         if (classDtos.IsFailed || classDtos.Value.Count == 0)
             return new DequeueReply
@@ -213,7 +215,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         Result<List<QueueDto>> queueDto = await mediator.Send(new GetClassQueueQuery
         {
             ClassId = request.ClassId
-        });
+        }, context.CancellationToken);
 
         if (queueDto.IsFailed)
             return new DequeueReply 

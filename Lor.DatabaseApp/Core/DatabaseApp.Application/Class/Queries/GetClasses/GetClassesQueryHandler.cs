@@ -12,9 +12,11 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
 {
     public async Task<Result<List<ClassDto>>> Handle(GetClassesQuery request, CancellationToken cancellationToken)
     {
+        List<ClassDto>? cachedClasses;
+            
         if (request.GroupId is not null)
         {
-            List<ClassDto>? cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + request.GroupId, cancellationToken: cancellationToken); //TODO: !!!
+            cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + request.GroupId, cancellationToken: cancellationToken); //TODO: !!!
         
             if (cachedClasses is not null) return Result.Ok(cachedClasses);
         }
@@ -22,15 +24,21 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
         Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не найдена.");
-
-        List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
+            
+        cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + group.Id, cancellationToken: cancellationToken); //TODO: !!!
+        
+        if (cachedClasses is not null) return Result.Ok(cachedClasses);
+        
+        List<Domain.Models.Class>? classes = request.GroupId is not null 
+            ? await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId.Value, cancellationToken) 
+            : await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
         
         if (classes is null) return Result.Fail("Пары не найдены.");
-
+            
         List<ClassDto> classDtos = mapper.From(classes).AdaptToType<List<ClassDto>>();
         
         await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classDtos, cancellationToken: cancellationToken);
-
+            
         return Result.Ok(classDtos);
     }
 }

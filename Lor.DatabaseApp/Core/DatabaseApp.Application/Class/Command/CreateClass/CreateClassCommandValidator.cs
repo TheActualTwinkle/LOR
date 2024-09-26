@@ -10,7 +10,7 @@ public class CreateClassesCommandValidator : AbstractValidator<CreateClassesComm
         RuleFor(x => x.Classes)
             .NotEmpty()
             .NotNull()
-            .Must(HaveValidClasses).WithMessage("Неверные данные в словаре классов.");
+            .Must(HaveValidClasses);
     }
 
     private bool HaveValidClasses(Dictionary<string, DateOnly> classes)

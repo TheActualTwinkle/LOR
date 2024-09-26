@@ -21,7 +21,7 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
             unitOfWork.ClassRepository.Delete(@class);
         }
         
-        await unitOfWork.SaveDbChangesAsync(cancellationToken); //TODO: кеш
+        await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         List<Domain.Models.Group>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
 
