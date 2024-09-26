@@ -27,7 +27,7 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
 
         if (groups is null) return Result.Fail("Группы не найдены.");
 
-        foreach (var group in groups)
+        foreach (Domain.Models.Group? group in groups)
         {
             List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
 

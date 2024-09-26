@@ -1,9 +1,12 @@
-﻿/*using DatabaseApp.Application.Class;
+﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
+using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
+using DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
 using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
@@ -57,9 +60,9 @@ public class QueueTests
     public async Task CreateQueue_WhenQueueNotExistAndOtherDataValid_ShouldReturnSuccess()
     {
         // Arrange
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
         
         await _sender.Send(new CreateUserCommand
@@ -75,7 +78,9 @@ public class QueueTests
             GroupName = TestGroupName
         });
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         // Act
         Result createResult = await _sender.Send(new CreateQueueCommand
@@ -84,12 +89,13 @@ public class QueueTests
             ClassId = getClassesResult.Value.First().Id
         });
 
-        Result<List<QueueDto>> queue = await _sender.Send(new GetClassQueueQuery() { ClassId = getClassesResult.Value.First().Id });
+        Result<List<QueueDto>> queue = await _sender.Send(new GetClassQueueQuery { ClassId = getClassesResult.Value.First().Id });
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queue.Value, Has.Count.EqualTo(1));
         });
     }
@@ -98,9 +104,9 @@ public class QueueTests
     public async Task CreateQueue_WhenUserNotExist_ShouldReturnFail()
     {
         // Arrange
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         await _sender.Send(new CreateClassesCommand
@@ -108,8 +114,10 @@ public class QueueTests
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
             GroupName = TestGroupName
         });
+        
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         // Act
         Result createResult = await _sender.Send(new CreateQueueCommand
@@ -124,6 +132,7 @@ public class QueueTests
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsFailed, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queue.Value, Has.Count.EqualTo(0));
         });
     }
@@ -132,9 +141,9 @@ public class QueueTests
     public async Task CreateQueue_WhenClassNotExist_ShouldReturnFail()
     {
         // Arrange
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         await _sender.Send(new CreateUserCommand
@@ -161,7 +170,9 @@ public class QueueTests
         // Arrange
         await CreateUserAndClasses();
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         await _sender.Send(new CreateQueueCommand
         {
@@ -182,6 +193,7 @@ public class QueueTests
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsFailed, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queue.Value, Has.Count.EqualTo(1));
         });
     }
@@ -192,20 +204,21 @@ public class QueueTests
         // Arrange
         await CreateUserAndClasses();
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         await _sender.Send(new CreateQueueCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
         });
-
-        Result<List<QueueDto>> queue = await _sender.Send(new GetClassQueueQuery { ClassId = getClassesResult.Value.First().Id });
-
+        
         // Act
-        Result deleteResult = await _sender.Send(new DeleteQueueCommand
+        Result deleteResult = await _sender.Send(new DeleteUserFromQueueCommand
         {
-            OutdatedClassList = queue.Value.Select(x => x.ClassId).ToList()
+            TelegramId = TestTelegramId,
+            ClassId = getClassesResult.Value.First().Id
         });
 
         Result<List<QueueDto>> queueAfterDelete = await _sender.Send(new GetClassQueueQuery { ClassId = getClassesResult.Value.First().Id });
@@ -214,17 +227,59 @@ public class QueueTests
         Assert.Multiple(() =>
         {
             Assert.That(deleteResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queueAfterDelete.Value, Has.Count.EqualTo(0));
         });
     }
 
+    [Test]
+    public async Task DeleteOutdatedQueues_WhenQueueOutdated_ShouldReturnNonOutdatedQueuesAfterDelete()
+    {
+        // Arrange
+        await CreateUserAndClasses();
+        
+        await _sender.Send(new CreateClassesCommand
+        {
+            Classes = new Dictionary<string, DateOnly> { { TestClassName + "_outdated", DateOnly.FromDateTime(DateTime.Now.AddDays(-1)) } },
+            GroupName = TestGroupName
+        });
+
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        int outdatedClassId = getClassesResult.Value.Last().Id;
+        
+        await _sender.Send(new CreateQueueCommand
+        {
+            TelegramId = TestTelegramId,
+            ClassId = outdatedClassId
+        });
+        
+        // Act
+        Result<List<QueueDto>> queueBeforeDelete = await _sender.Send(new GetClassQueueQuery { ClassId = outdatedClassId });
+        
+        Result deleteResult = await _sender.Send(new DeleteQueuesForClassesCommand {ClassesId = [outdatedClassId]});
+        
+        Result<List<QueueDto>> queueAfterDelete = await _sender.Send(new GetClassQueueQuery { ClassId = outdatedClassId });
+        
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(deleteResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
+            Assert.That(queueAfterDelete.Value, Has.Count.EqualTo(queueBeforeDelete.Value.Count - 1));
+        });
+    }
+    
     [Test]
     public async Task GetClassQueue_WhenClassExist_ShouldReturnQueue()
     {
         // Arrange
         await CreateUserAndClasses();
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         await _sender.Send(new CreateQueueCommand
         {
@@ -236,7 +291,11 @@ public class QueueTests
         Result<List<QueueDto>> queue = await _sender.Send(new GetClassQueueQuery { ClassId = getClassesResult.Value.First().Id });
         
         // Assert
-        Assert.That(queue.Value, Has.Count.EqualTo(1));
+        Assert.Multiple(() =>
+        {
+            Assert.That(getGroupResult.IsSuccess, Is.True);
+            Assert.That(queue.Value, Has.Count.EqualTo(1));
+        });
     }
     
     [Test]
@@ -257,8 +316,10 @@ public class QueueTests
     {
         // Arrange
         await CreateUserAndClasses();
+        
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         await _sender.Send(new CreateQueueCommand
         {
@@ -274,7 +335,11 @@ public class QueueTests
         });
         
         // Assert
-        Assert.That(isUserInQueue.Value, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(getGroupResult.IsSuccess, Is.True);
+            Assert.That(isUserInQueue.Value, Is.Not.Null);
+        });
     }
     
     [Test]
@@ -283,7 +348,9 @@ public class QueueTests
         // Arrange
         await CreateUserAndClasses();
 
-        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         // Act
         Result<UserDto?> isUserInQueue = await _sender.Send(new GetUserInQueueQuery
@@ -298,9 +365,9 @@ public class QueueTests
 
     private async Task CreateUserAndClasses()
     {
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         await _sender.Send(new CreateUserCommand
@@ -316,4 +383,4 @@ public class QueueTests
             GroupName = TestGroupName
         });
     }
-}*/
+}

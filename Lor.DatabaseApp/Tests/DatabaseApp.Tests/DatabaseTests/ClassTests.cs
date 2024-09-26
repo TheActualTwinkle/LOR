@@ -1,10 +1,12 @@
-﻿/*using DatabaseApp.Application.Class;
+﻿using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
+using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using FluentResults;
@@ -37,9 +39,9 @@ public class ClassTests
     [SetUp]
     public async Task Setup()
     {
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
     }
     
@@ -66,12 +68,15 @@ public class ClassTests
             GroupName = TestGroupName
         });
 
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+
+        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(1));
             Assert.That(getResult.Value.First().Name, Is.EqualTo(TestClassName));
         });
@@ -94,13 +99,16 @@ public class ClassTests
             GroupName = TestGroupName
         });
         
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult1.IsSuccess, Is.True);
             Assert.That(createResult2.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(1));
             Assert.That(getResult.Value.First().Name, Is.EqualTo(TestClassName));
         });
@@ -116,7 +124,9 @@ public class ClassTests
             GroupName = TestGroupName
         });
         
-        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Act
         Result deleteResult = await _sender.Send(new DeleteClassCommand
@@ -124,13 +134,14 @@ public class ClassTests
             ClassesId = [classes.Value.First().Id]
         });
         
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
             Assert.That(deleteResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
@@ -159,7 +170,9 @@ public class ClassTests
             GroupName = TestGroupName
         });
         
-        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Act
         Result<ClassDto> result = await _sender.Send(new GetClassQuery
@@ -171,6 +184,7 @@ public class ClassTests
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value.Name, Is.EqualTo(TestClassName));
         });
@@ -185,12 +199,15 @@ public class ClassTests
             ClassId = 99999985
         });
         
-        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailed, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(classes.Value, Has.Count.EqualTo(0));
         });
     }
@@ -211,13 +228,16 @@ public class ClassTests
             GroupName = TestGroupName
         });
         
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
         // Act
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(getResult.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(2));
         });
     }
@@ -225,12 +245,15 @@ public class ClassTests
     [Test]
     public async Task GetClasses_WhenClassesNotExist_ShouldReturnEmptyList()
     {
+        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
         // Act
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
+        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Assert
         Assert.Multiple(() =>
         {
+            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
@@ -276,4 +299,4 @@ public class ClassTests
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
     }
-}*/
+}

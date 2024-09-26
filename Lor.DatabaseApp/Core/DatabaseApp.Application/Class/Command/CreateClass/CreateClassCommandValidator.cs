@@ -20,7 +20,7 @@ public class CreateClassesCommandValidator : AbstractValidator<CreateClassesComm
             return false;
         }
 
-        foreach (var (className, date) in classes)
+        foreach ((string? className, DateOnly date) in classes)
         {
             if (string.IsNullOrEmpty(className.Trim()))
             {

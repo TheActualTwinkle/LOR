@@ -58,7 +58,7 @@ public class HelpTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}groups")]
 [ExportMetadata(nameof(Description), "- выводит поддерживаемые группы")]
-[ExportMetadata(nameof(ButtonDescriptionText), "Доступные группы \ud83d\ude4b\u200d\u2642\ufe0f\ud83d\ude4b\u200d\u2640\ufe0f")]
+// [ExportMetadata(nameof(ButtonDescriptionText), "Доступные группы \ud83d\ude4b\u200d\u2642\ufe0f\ud83d\ude4b\u200d\u2640\ufe0f")]
 public class GroupsTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}groups";
@@ -86,53 +86,9 @@ public class GroupsTelegramCommand : ITelegramCommand
 }
 
 [Export(typeof(ITelegramCommand))]
-[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}auth")]
-[ExportMetadata(nameof(Description), "- авторизует пользователя")]
-[ExportMetadata(nameof(ButtonDescriptionText), "Авторизация \ud83d\udd11")]
-public class AuthorizationTelegramCommand : ITelegramCommand
-{
-    public string Command => $"{TelegramCommandFactory.CommandPrefix}auth";
-    public string Description => "- авторизует пользователя";
-    public string ButtonDescriptionText => "Авторизация \ud83d\udd11";
-
-    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
-    {
-        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
-        if (result.IsSuccess == true)
-        {
-            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value.GroupName} как {result.Value.FullName}"));
-        }
-
-        IEnumerable<string> argumentsList = arguments.ToList();
-        
-        if (argumentsList.Any() == false)
-        {
-            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОтветом на это сообщение введите, пожалуйста, ФИО для авторизации"), new ForceReplyMarkup());
-        }
-        
-        if (argumentsList.Count() != 2 && argumentsList.Count() != 3)
-        {
-            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"), new ForceReplyMarkup());
-        }
-        
-        string fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
-        Result<AuthorizationReply> authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
-        
-        if (authorizeResult.IsFailed)
-        {
-            return new ExecutionResult(Result.Fail(authorizeResult.Errors.First()));
-        }
-
-        Result<string> setGroupResult = await factory.DatabaseCommunicator.TrySetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
-
-        return setGroupResult.IsFailed ? new ExecutionResult(Result.Fail(setGroupResult.Errors.First())) : new ExecutionResult(Result.Ok(setGroupResult.Value));
-    }
-}
-
-[Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}labs")]
 [ExportMetadata(nameof(Description), "- выводит доступные лабораторные работы")]
-[ExportMetadata(nameof(ButtonDescriptionText), "Доступные лаб. работы \ud83d\udc68\u200d\ud83d\udd2c\ud83d\udc69\u200d\ud83d\udd2c")]
+// [ExportMetadata(nameof(ButtonDescriptionText), "Доступные лаб. работы \ud83d\udc68\u200d\ud83d\udd2c\ud83d\udc69\u200d\ud83d\udd2c")]
 public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}labs";
@@ -192,7 +148,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         }
         
         IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
-        return new ExecutionResult(Result.Fail("Выберите пару"), replyMarkup);
+        return new ExecutionResult(Result.Fail("Выберите пару для ЗАПИСИ \u270d\ufe0f"), replyMarkup);
     }
     
     private Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<ClassInformation> classes)
@@ -212,12 +168,12 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
 [Export(typeof(ITelegramCommand))]
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}dehop")]
 [ExportMetadata(nameof(Description), "- выписывает из очереди на лабораторную работу")]
-[ExportMetadata(nameof(ButtonDescriptionText), "Выписаться  из очереди на лаб. работу \ud83d\udeb7")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Отменить запись \ud83d\udeb7")]
 public class DequeueTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}dehop";
     public string Description => "- выписывает из очереди на лабораторную работу";
-    public string ButtonDescriptionText => "Выписаться  из очереди на лаб. работу \ud83d\udeb7";
+    public string ButtonDescriptionText => "Отменить запись \ud83d\udeb7";
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
@@ -235,7 +191,7 @@ public class DequeueTelegramCommand : ITelegramCommand
         }
         
         IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
-        return new ExecutionResult(Result.Fail("Выберите пару"), replyMarkup);
+        return new ExecutionResult(Result.Fail("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
     }
     
     private Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<ClassInformation> classes)
@@ -283,5 +239,49 @@ public class DeleteSubscriberTelegramCommand : ITelegramCommand
     {
         Result result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Вы отписаны от уведомлений о новых лабораторных работах"));
+    }
+}
+
+[Export(typeof(ITelegramCommand))]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}auth")]
+[ExportMetadata(nameof(Description), "- авторизует пользователя")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Авторизация \ud83d\udd11")]
+public class AuthorizationTelegramCommand : ITelegramCommand
+{
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}auth";
+    public string Description => "- авторизует пользователя";
+    public string ButtonDescriptionText => "Авторизация \ud83d\udd11";
+
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        if (result.IsSuccess == true)
+        {
+            return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value.GroupName} как {result.Value.FullName}"));
+        }
+
+        IEnumerable<string> argumentsList = arguments.ToList();
+        
+        if (argumentsList.Any() == false)
+        {
+            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОтветом на это сообщение введите, пожалуйста, ФИО для авторизации"), new ForceReplyMarkup());
+        }
+        
+        if (argumentsList.Count() != 2 && argumentsList.Count() != 3)
+        {
+            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"), new ForceReplyMarkup());
+        }
+        
+        string fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
+        Result<AuthorizationReply> authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
+        
+        if (authorizeResult.IsFailed)
+        {
+            return new ExecutionResult(Result.Fail(authorizeResult.Errors.First()));
+        }
+
+        Result<string> setGroupResult = await factory.DatabaseCommunicator.TrySetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
+
+        return setGroupResult.IsFailed ? new ExecutionResult(Result.Fail(setGroupResult.Errors.First())) : new ExecutionResult(Result.Ok(setGroupResult.Value));
     }
 }

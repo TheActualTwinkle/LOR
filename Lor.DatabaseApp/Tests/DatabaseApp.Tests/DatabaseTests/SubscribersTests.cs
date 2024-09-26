@@ -1,4 +1,4 @@
-﻿/*using DatabaseApp.Application.Group.Command.CreateGroup;
+﻿using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
@@ -239,9 +239,9 @@ public class SubscribersTests
     
     private async Task CreateUserAndGroup()
     {
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         await _sender.Send(new CreateUserCommand
@@ -251,4 +251,4 @@ public class SubscribersTests
             GroupName = TestGroupName
         });
     }
-}*/
+}

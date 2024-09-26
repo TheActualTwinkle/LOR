@@ -1,4 +1,4 @@
-﻿/*using DatabaseApp.Application.Group;
+﻿using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
@@ -47,9 +47,9 @@ public class GroupTests
     public async Task CreateGroup_WhenGroupNotExist_ShouldReturnSuccess()
     {
         // Act
-        Result createResult = await _sender.Send(new CreateGroupCommand
+        Result createResult = await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         Result<GroupDto> getResult = await _sender.Send(new GetGroupQuery
@@ -69,22 +69,27 @@ public class GroupTests
     public async Task CreateGroup_WhenGroupExist_ShouldReturnFail()
     {
         // Arrange
-        Result firstResult = await _sender.Send(new CreateGroupCommand
+        Result firstResult = await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         // Act
-        Result secondResult = await _sender.Send(new CreateGroupCommand
+        Result secondResult = await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
-
+        
         // Assert
+
+        Result<List<GroupDto>> getGroups = await _sender.Send(new GetGroupsQuery());
+
         Assert.Multiple(() =>
         {
             Assert.That(firstResult.IsSuccess, Is.True);
-            Assert.That(secondResult.IsFailed, Is.True);
+            Assert.That(secondResult.IsSuccess, Is.True);
+            Assert.That(getGroups.IsSuccess, Is.True);
+            Assert.That(getGroups.Value, Has.Count.EqualTo(1));
         });
     }
     
@@ -92,9 +97,9 @@ public class GroupTests
     public async Task GetGroup_WhenGroupExist_ShouldReturnGroup()
     {
         // Arrange
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
         
         // Act
@@ -125,13 +130,9 @@ public class GroupTests
     public async Task GetGroups_WhenGroupsExist_ShouldReturnListOfGroups()
     {
         // Arrange
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
-        });
-        await _sender.Send(new CreateGroupCommand
-        {
-            GroupName = TestGroupName + "_1"
+            GroupNames = [TestGroupName, TestGroupName  + "_1"]
         });
         
         // Act
@@ -158,4 +159,4 @@ public class GroupTests
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
     }
-}*/
+}

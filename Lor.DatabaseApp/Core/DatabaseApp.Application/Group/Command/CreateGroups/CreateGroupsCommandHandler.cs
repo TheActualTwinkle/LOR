@@ -7,12 +7,12 @@ using MediatR;
 
 namespace DatabaseApp.Application.Group.Command.CreateGroup;
 
-public class CreateGroupCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
-    : IRequestHandler<CreateGroupCommand, Result>
+public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+    : IRequestHandler<CreateGroupsCommand, Result>
 {
-    public async Task<Result> Handle(CreateGroupCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CreateGroupsCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.GroupNames)
+        foreach (string? item in request.GroupNames)
         {
             Domain.Models.Group? groupName = await unitOfWork.GroupRepository.GetGroupByGroupName(item, cancellationToken);
 

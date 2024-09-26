@@ -12,7 +12,6 @@ public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cac
 {
     public async Task<Result<List<QueueDto>>> Handle(GetClassQueueQuery request, CancellationToken cancellationToken)
     {
-        cancellationToken =new CancellationToken();
         List<QueueDto>? queueCache = await cacheService.GetAsync<List<QueueDto>>(Constants.QueuePrefix + request.ClassId, cancellationToken);
         
         if (queueCache is not null) return Result.Ok(queueCache);

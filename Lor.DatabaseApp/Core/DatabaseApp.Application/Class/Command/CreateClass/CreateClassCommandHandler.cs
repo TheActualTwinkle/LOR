@@ -16,7 +16,7 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
         
         if (group is null) return Result.Fail("Группа не найдена.");
 
-        foreach (var item in request.Classes)
+        foreach (KeyValuePair<string, DateOnly> item in request.Classes)
         {
             bool classExist = await unitOfWork.ClassRepository.CheckClass(item.Key, item.Value, cancellationToken);
 
