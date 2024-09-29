@@ -24,7 +24,7 @@ public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheSer
         
         unitOfWork.QueueRepository.Delete(queue);
         
-        List<Domain.Models.Queue>? queueAfterDelete = queueOfClass.Where(x => x.QueueNum > userQueueNum).ToList();
+        List<Domain.Models.Queue> queueAfterDelete = queueOfClass.Where(x => x.QueueNum > userQueueNum).ToList();
 
         foreach (var item in queueAfterDelete)
         {

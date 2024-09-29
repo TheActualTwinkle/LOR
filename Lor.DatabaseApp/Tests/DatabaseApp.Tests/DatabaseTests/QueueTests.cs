@@ -30,6 +30,7 @@ public class QueueTests
     private const long TestTelegramId = 123456789;
     private const string TestFullName = "John Doe";
     private const string TestGroupName = "ОО-АА";
+    private const int TestGroupId = 1;
     private const string TestClassName = "Math";
     
     [OneTimeSetUp]
@@ -75,7 +76,7 @@ public class QueueTests
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
 
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -112,7 +113,7 @@ public class QueueTests
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -241,7 +242,7 @@ public class QueueTests
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_outdated", DateOnly.FromDateTime(DateTime.Now.AddDays(-1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
 
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -380,7 +381,7 @@ public class QueueTests
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
     }
 }

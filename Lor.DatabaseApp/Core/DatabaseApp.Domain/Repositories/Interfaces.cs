@@ -57,7 +57,7 @@ public interface IQueueRepository : IRepository
     
     public Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken);
     
-    void Update(Queue queue);
+    public void Update(Queue queue);
 }
 
 public interface ISubscriberRepository : IRepository

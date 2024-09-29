@@ -23,6 +23,7 @@ public class ClassTests
     private IUnitOfWork _unitOfWork;
     
     private const string TestGroupName = "ОО-АА";
+    private const int TestGroupId = 1;
     private const string TestClassName = "Math";
     
     [OneTimeSetUp]
@@ -65,7 +66,7 @@ public class ClassTests
         Result createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
 
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -89,14 +90,14 @@ public class ClassTests
         Result createResult1 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
 
         // Act
         Result createResult2 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -121,7 +122,7 @@ public class ClassTests
         Result createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -167,7 +168,7 @@ public class ClassTests
         Result createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -219,13 +220,13 @@ public class ClassTests
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_1", DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -266,13 +267,13 @@ public class ClassTests
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(-2)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_1", DateOnly.FromDateTime(DateTime.Now.AddDays(2)) } },
-            GroupName = TestGroupName
+            GroupId = TestGroupId
         });
         
         // Act
