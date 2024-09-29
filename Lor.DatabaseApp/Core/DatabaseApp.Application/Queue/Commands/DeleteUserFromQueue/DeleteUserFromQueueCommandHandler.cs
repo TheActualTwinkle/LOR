@@ -24,11 +24,19 @@ public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheSer
         
         unitOfWork.QueueRepository.Delete(queue);
         
-        // TODO: Change all queueNum after deleted queue entry
+        List<Domain.Models.Queue>? queueAfterDelete = queueOfClass.Where(x => x.QueueNum > userQueueNum).ToList();
 
+        foreach (var item in queueAfterDelete)
+        {
+            item.QueueNum = item.QueueNum-1;
+            
+            unitOfWork.QueueRepository.Update(item);
+        }
+        
         List<QueueDto> newQueue = mapper.From(queueOfClass.Where(x => x.QueueNum != userQueueNum).ToList()).AdaptToType<List<QueueDto>>();
+        
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, newQueue, cancellationToken: cancellationToken);
-
+        
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         return Result.Ok();

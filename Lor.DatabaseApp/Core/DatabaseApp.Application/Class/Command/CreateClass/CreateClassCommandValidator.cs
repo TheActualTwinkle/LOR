@@ -6,11 +6,8 @@ public class CreateClassesCommandValidator : AbstractValidator<CreateClassesComm
 {
     public CreateClassesCommandValidator()
     {
-        RuleFor(x => x.GroupName).NotEmpty().NotNull();
-        RuleFor(x => x.Classes)
-            .NotEmpty()
-            .NotNull()
-            .Must(HaveValidClasses);
+        RuleFor(x => x.GroupId).GreaterThan(0);
+        RuleFor(x => x.Classes).NotNull().NotEmpty().Must(HaveValidClasses);
     }
 
     private bool HaveValidClasses(Dictionary<string, DateOnly> classes)

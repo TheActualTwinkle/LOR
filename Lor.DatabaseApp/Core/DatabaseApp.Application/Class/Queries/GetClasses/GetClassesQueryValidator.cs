@@ -6,6 +6,6 @@ public class GetClassesQueryValidator : AbstractValidator<GetClassesQuery>
 {
     public GetClassesQueryValidator()
     {
-        RuleFor(x => x.GroupId).NotNull().GreaterThan(0);
+        RuleFor(x => x.GroupId).GreaterThan(0);
     }
 }

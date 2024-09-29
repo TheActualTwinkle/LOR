@@ -56,6 +56,8 @@ public interface IQueueRepository : IRepository
     public Task<uint> GetUserQueueNum(long telegramId, int classId, CancellationToken cancellationToken);
     
     public Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken);
+    
+    void Update(Queue queue);
 }
 
 public interface ISubscriberRepository : IRepository

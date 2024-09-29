@@ -6,6 +6,6 @@ public class DeleteQueuesForClassesCommandValidator : AbstractValidator<DeleteQu
 {
     public DeleteQueuesForClassesCommandValidator()
     { 
-        RuleFor(x => x.ClassesId).NotEmpty().NotNull();
+        RuleFor(x => x.ClassesId).NotNull().NotEmpty().Must(x => x.Count > 0);
     }
 }

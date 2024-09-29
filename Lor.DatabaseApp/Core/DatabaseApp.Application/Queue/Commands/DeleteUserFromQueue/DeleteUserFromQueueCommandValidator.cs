@@ -6,7 +6,7 @@ public class DeleteUserFromQueueCommandValidator : AbstractValidator<DeleteUserF
 {
     public DeleteUserFromQueueCommandValidator()
     {
-        RuleFor(x => x.TelegramId).NotEmpty().NotNull().GreaterThan(0);
-        RuleFor(x => x.ClassId).NotEmpty().NotNull().GreaterThan(0);
+        RuleFor(x => x.TelegramId).GreaterThan(0);
+        RuleFor(x => x.ClassId).GreaterThan(0);
     }
 }

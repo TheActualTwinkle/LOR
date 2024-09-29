@@ -12,10 +12,6 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
 {
     public async Task<Result> Handle(CreateClassesCommand request, CancellationToken cancellationToken)
     {
-        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
-        
-        if (group is null) return Result.Fail("Группа не найдена.");
-
         foreach (KeyValuePair<string, DateOnly> item in request.Classes)
         {
             bool classExist = await unitOfWork.ClassRepository.CheckClass(item.Key, item.Value, cancellationToken);
@@ -24,7 +20,7 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
             
             Domain.Models.Class @class = new()
             {
-                GroupId = group.Id,
+                GroupId = request.GroupId,
                 Name = item.Key,
                 Date = item.Value
             };
@@ -34,11 +30,11 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
+        List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId, cancellationToken);
 
         List<ClassDto> classDtos = mapper.From(classes).AdaptToType<List<ClassDto>>();
 
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, classDtos, cancellationToken: cancellationToken);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classDtos, cancellationToken: cancellationToken);
         
         return Result.Ok();
     }

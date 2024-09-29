@@ -50,7 +50,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         {
             await mediator.Send(new CreateClassesCommand
             {
-                GroupName = request.GroupName,
+                GroupId = getGroupResult.Value.Id,
                 Classes = request.Classes.ToDictionary(
                     c => c.Key,
                     c => DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(c.Value).DateTime)
