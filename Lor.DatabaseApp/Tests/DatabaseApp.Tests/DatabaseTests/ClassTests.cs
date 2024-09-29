@@ -23,7 +23,6 @@ public class ClassTests
     private IUnitOfWork _unitOfWork;
     
     private const string TestGroupName = "ОО-АА";
-    private const int TestGroupId = 1;
     private const string TestClassName = "Math";
     
     [OneTimeSetUp]
@@ -62,11 +61,15 @@ public class ClassTests
     [Test]
     public async Task CreateClasses_WhenClassNotExist_ShouldReturnListOfClasses()
     {
+        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        {
+            GroupName = TestGroupName
+        });
         // Act
         Result createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
 
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -86,18 +89,23 @@ public class ClassTests
     [Test]
     public async Task CreateClasses_WhenClassExist_ShouldReturnDistinctClasses()
     {
+        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        {
+            GroupName = TestGroupName
+        });
+        
         // Arrange
         Result createResult1 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
 
         // Act
         Result createResult2 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -118,11 +126,16 @@ public class ClassTests
     [Test]
     public async Task DeleteClass_WhenClassExist_ShouldReturnSuccessAndDatabaseContainEmptyClasses()
     {
+        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        {
+            GroupName = TestGroupName
+        });
+        
         // Arrange
         Result createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -164,11 +177,16 @@ public class ClassTests
     [Test]
     public async Task GetClass_WhenClassExist_ShouldReturnClass()
     {
+        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        {
+            GroupName = TestGroupName
+        });
+        
         // Arrange
         Result createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -216,17 +234,22 @@ public class ClassTests
     [Test]
     public async Task GetClasses_WhenClassesExist_ShouldReturnListOfClasses()
     {
+        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        {
+            GroupName = TestGroupName
+        });
+        
         // Arrange
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_1", DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
@@ -263,17 +286,22 @@ public class ClassTests
     [Test]
     public async Task GetOutdatedClasses_WhenOutdatedClassesExist_ShouldReturnListOfClasses()
     {
+        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        {
+            GroupName = TestGroupName
+        });
+        
         // Arrange
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(-2)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_1", DateOnly.FromDateTime(DateTime.Now.AddDays(2)) } },
-            GroupId = TestGroupId
+            GroupId = groupDto.Value.Id
         });
         
         // Act
