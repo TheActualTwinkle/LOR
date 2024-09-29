@@ -17,4 +17,7 @@ public abstract class RepositoryBase<TEntity>(IDatabaseContext context)
 
     public void Delete(TEntity entity) =>
         _context.SetEntity<TEntity>().Remove(entity);
+    
+    public void Update(TEntity entity) =>
+        _context.SetEntity<TEntity>().Update(entity);
 }

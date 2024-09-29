@@ -71,6 +71,19 @@ public class GrpcDatabaseClient(string serviceUrl) : IDatabaseCommunicationClien
             ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
         });
     }
+    
+    public async Task<Result<DequeueFromClassResult>> DequeueFromClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    {
+        DequeueReply reply = await _client!.DequeueAsync(new DequeueRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassResult
+        {
+            WasAlreadyDequeued = reply.WasAlreadyDequeued,
+            StudentsQueue = reply.StudentsQueue,
+            ClassName = reply.ClassName,
+            ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
+        });
+    }
 
     public async Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default)
     {

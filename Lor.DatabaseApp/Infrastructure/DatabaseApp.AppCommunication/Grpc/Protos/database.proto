@@ -12,6 +12,7 @@ service Database {
 
   rpc TrySetGroup (TrySetGroupRequest) returns (TrySetGroupReply);
   rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
+  rpc Dequeue (DequeueRequest) returns (DequeueReply);
   
   rpc AddSubscriber (AddSubscriberRequest) returns (AddSubscriberReply);
   rpc DeleteSubscriber (DeleteSubscriberRequest) returns (DeleteSubscriberReply);
@@ -71,6 +72,20 @@ message TryEnqueueInClassReply {
   string className = 2;
   int64 classDateUnixTimestamp = 3;
   bool wasAlreadyEnqueued = 4;
+  bool isFailed = 5;
+  string errorMessage = 6;
+}
+
+message DequeueRequest {
+  int64 userId = 1;
+  int32 classId = 2;
+}
+
+message DequeueReply {
+  repeated string studentsQueue = 1;
+  string className = 2;
+  int64 classDateUnixTimestamp = 3;
+  bool wasAlreadyDequeued = 4;
   bool isFailed = 5;
   string errorMessage = 6;
 }

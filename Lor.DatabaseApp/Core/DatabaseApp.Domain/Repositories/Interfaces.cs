@@ -53,7 +53,11 @@ public interface IQueueRepository : IRepository
 
     public Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);
     
+    public Task<uint> GetUserQueueNum(long telegramId, int classId, CancellationToken cancellationToken);
+    
     public Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken);
+    
+    public void Update(Queue queue);
 }
 
 public interface ISubscriberRepository : IRepository
@@ -62,7 +66,7 @@ public interface ISubscriberRepository : IRepository
     
     public void Delete(Subscriber subscriber);
 
-    public Task<List<Subscriber>> GetAllSubscribers(CancellationToken cancellationToken);
+    public Task<List<Subscriber>?> GetAllSubscribers(CancellationToken cancellationToken);
     
     public Task<Subscriber?> GetSubscriberByUserId(int userId, CancellationToken cancellationToken);
 }
