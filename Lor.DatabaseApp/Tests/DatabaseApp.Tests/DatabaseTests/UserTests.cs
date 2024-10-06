@@ -35,9 +35,9 @@ public class UserTests
     [SetUp]
     public async Task Setup()
     {
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
     }
     

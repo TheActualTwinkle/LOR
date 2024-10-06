@@ -22,8 +22,7 @@ public class SubscribersTests
     private const long TestTelegramId = 123456789;
     private const string TestFullName = "John Doe";
     private const string TestGroupName = "ОО-АА";
-    private const string TestClassName = "Math";
-    
+
     [OneTimeSetUp]
     public async Task OneTimeSetup()
     {
@@ -239,9 +238,9 @@ public class SubscribersTests
     
     private async Task CreateUserAndGroup()
     {
-        await _sender.Send(new CreateGroupCommand
+        await _sender.Send(new CreateGroupsCommand
         {
-            GroupName = TestGroupName
+            GroupNames = [TestGroupName]
         });
 
         await _sender.Send(new CreateUserCommand

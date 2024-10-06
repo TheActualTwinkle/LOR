@@ -1,10 +1,13 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
 
-public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
+public class CreateQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateQueueCommand, Result>
 {
     public async Task<Result> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
@@ -43,6 +46,10 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork)
         await unitOfWork.QueueRepository.AddAsync(queue, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
+        
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, 
+            mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken))
+                .AdaptToType<List<QueueDto>>(), cancellationToken: cancellationToken);
 
         return Result.Ok();
     }

@@ -3,12 +3,10 @@ using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
-using DatabaseApp.Application.Common;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
-using DatabaseApp.Application.Group.Queries.GetGroups;
-using DatabaseApp.Application.Queue.Commands.DeleteQueue;
+using DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
 using FluentResults;
@@ -24,27 +22,27 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
-        foreach (string? groupName in request.GroupNames.ToList())
+        await mediator.Send(new CreateGroupsCommand
         {
-            await mediator.Send(new CreateGroupCommand
-            {
-                GroupName = groupName
-            });
-        }
-        
-        Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery());
-        
-        await cacheService.SetAsync(Constants.AvailableGroupsKey, groups.Value, cancellationToken: context.CancellationToken);
+            GroupNames = request.GroupNames.ToList()
+        }, context.CancellationToken);
         
         return new Empty();
     }
 
     public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request, ServerCallContext context)
     {
-        Result<List<ClassDto>> oldClasses = await mediator.Send(new GetClassesQuery
+        Result<GroupDto> getGroupResult = await mediator.Send(new GetGroupQuery
         {
             GroupName = request.GroupName
-        });
+        }, context.CancellationToken);
+
+        if (getGroupResult.IsFailed) return new Empty();
+        
+        Result<List<ClassDto>> oldClasses = await mediator.Send(new GetClassesQuery
+        {
+            GroupId = getGroupResult.Value.Id
+        }, context.CancellationToken);
         
         if (oldClasses.IsFailed) return new Empty();
         
@@ -52,12 +50,12 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         {
             await mediator.Send(new CreateClassesCommand
             {
-                GroupName = request.GroupName,
+                GroupId = getGroupResult.Value.Id,
                 Classes = request.Classes.ToDictionary(
                     c => c.Key,
                     c => DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(c.Value).DateTime)
                 )
-            });
+            }, context.CancellationToken);
         }
         catch (Exception e)
         {
@@ -69,21 +67,21 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
 
         if (outdatedClassList.IsSuccess && outdatedClassList.Value.Count != 0)
         {
-            await mediator.Send(new DeleteQueueCommand
+            await mediator.Send(new DeleteQueuesForClassesCommand
             {
-                OutdatedClassList = outdatedClassList.Value
-            });
+                ClassesId = outdatedClassList.Value
+            }, context.CancellationToken);
         
             await mediator.Send(new DeleteClassCommand
             {
                 ClassesId = outdatedClassList.Value
-            });
+            }, context.CancellationToken);
         }
         
         Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
         {
-            GroupName = request.GroupName
-        });
+            GroupId = getGroupResult.Value.Id
+        }, context.CancellationToken);
         
         if (classes.IsFailed) return new Empty();
         
@@ -105,6 +103,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
             GroupId = groupDto.Value.Id,
             Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
         };
+        
         await bus.Publish(newClassesMessage, cancellationToken: context.CancellationToken);
         
         return new Empty();

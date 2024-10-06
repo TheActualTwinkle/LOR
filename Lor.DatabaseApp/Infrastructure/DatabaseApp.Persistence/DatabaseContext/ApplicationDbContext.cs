@@ -1,9 +1,7 @@
 ﻿using DatabaseApp.Domain.Models;
 using DatabaseApp.Persistence.EntityTypeConfiguration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Configuration;
 
 namespace DatabaseApp.Persistence.DatabaseContext;
 

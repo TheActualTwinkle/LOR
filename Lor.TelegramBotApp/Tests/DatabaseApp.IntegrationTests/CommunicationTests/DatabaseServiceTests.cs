@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GroupScheduleApp.Shared;
 using TelegramBotApp.AppCommunication.Data;
+// ReSharper disable SuggestVarOrType_Elsewhere
 
 namespace DatabaseApp.Tests.CommunicationTests;
 
@@ -8,7 +9,7 @@ namespace DatabaseApp.Tests.CommunicationTests;
 public class DatabaseServiceTests
 {
     private const string GroupName = "АУЕ-228";
-    private readonly ClassData[] _classesData = [new("Феня", DateTime.Today.AddDays(1)), new("Качалка", DateTime.Today.AddDays(2))];
+    private readonly ClassData[] _classesData = [new("Рубка леса", DateTime.Today.AddDays(1)), new("Качалка", DateTime.Today.AddDays(2))];
 
     private const long DefaultUserId = 1;
     private const string DefaultUserFullName = "Мистер Бист Младший";

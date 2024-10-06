@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\Infrastructure\DatabaseApp.Caching\DatabaseApp.Caching.csproj" />
         <ProjectReference Include="..\DatabaseApp.Domain\DatabaseApp.Domain.csproj"/>
         <ProjectReference Include="..\..\Infrastructure\DatabaseApp.Persistence\DatabaseApp.Persistence.csproj"/>
     </ItemGroup>

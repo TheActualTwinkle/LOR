@@ -1,10 +1,12 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using DatabaseApp.Caching;
+using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MediatR;
 
 namespace DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 
-public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork)
+public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<CreateSubscriberCommand, Result>
 {
     public async Task<Result> Handle(CreateSubscriberCommand request, CancellationToken cancellationToken)
@@ -25,7 +27,13 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork)
         await unitOfWork.SubscriberRepository.AddAsync(newSubscriber, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
+        
+        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken: cancellationToken) ?? [];
+        
+        cachedSubscriptions.Add(new SubscriberDto { TelegramId = request.TelegramId, GroupId = user.GroupId });
 
+        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions, cancellationToken: cancellationToken);
+        
         return Result.Ok();
     }
 }

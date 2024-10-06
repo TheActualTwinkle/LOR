@@ -5,13 +5,14 @@ using TelegramBotApp.AppCommunication.Interfaces;
 namespace DatabaseApp.Tests.CommunicationTests;
 
 [SetUpFixture]
-public record IntegrationTestSharedContext
+public class IntegrationTestSharedContext
 {
-    public static GroupScheduleAppFactory ScheduleAppFactory { get; } = new();
-    public static TelegramAppFactory TelegramAppFactory { get; } = new();
+    private static GroupScheduleAppFactory ScheduleAppFactory { get; } = new();
+    private static TelegramAppFactory TelegramAppFactory { get; } = new();
     public static DatabaseAppFactory DatabaseAppFactory { get; } = new();
-    public static IDatabaseCommunicationClient DatabaseCommunication { get; set; } = null!;
-    public static IDatabaseUpdaterCommunicationClient DatabaseUpdaterCommunicationClient { get; set; } = null!;
+    
+    public static IDatabaseCommunicationClient DatabaseCommunication { get; private set; } = null!;
+    public static IDatabaseUpdaterCommunicationClient DatabaseUpdaterCommunicationClient { get; private set; } = null!;
 
     [OneTimeSetUp]
     public async Task Setup()

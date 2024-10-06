@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Respawn;
 using Testcontainers.PostgreSql;
 
@@ -26,16 +28,41 @@ public class WebAppFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
-            ServiceDescriptor? descriptor = services.FirstOrDefault(d =>
+            ServiceDescriptor? dbContextDescriptor = services.FirstOrDefault(d =>
                 d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
 
-            if (descriptor != null)
+            if (dbContextDescriptor != null)
             {
-                services.Remove(descriptor);
+                services.Remove(dbContextDescriptor);
             }
 
             services.AddDbContext<IDatabaseContext, ApplicationDbContext>(options =>
                 options.UseNpgsql(_dbContainer.GetConnectionString()));
+            
+            // Find ICacheService and Moq it. Every GetAsync should return null.
+            ServiceDescriptor? cacheServiceDescriptor = services.FirstOrDefault(d =>
+                d.ServiceType == typeof(ICacheService));
+
+            if (cacheServiceDescriptor != null)
+            {
+                services.Remove(cacheServiceDescriptor);
+            }
+            
+            services.AddScoped<ICacheService>(_ =>
+            {
+                Mock<ICacheService> mockCache = new();
+
+                // TODO: Shouldn`t be string for <T?>, but Moq is bad with generics on return value.
+                mockCache
+                    .Setup(m => m.GetAsync<string>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync((string _, CancellationToken _) => null);
+
+                mockCache
+                    .Setup(m => m.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<CancellationToken>()))
+                    .Returns(Task.CompletedTask);
+
+                return mockCache.Object;
+            });
         });
     }
 
