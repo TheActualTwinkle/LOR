@@ -6,7 +6,7 @@ using TelegramBotApp.Authorization.Interfaces;
 
 namespace TelegramBotApp.Authorization;
 
-public class NstuAuthorizationService : IAuthorizationService
+public partial class NstuAuthorizationService : IAuthorizationService
 {
     public async Task<Result<AuthorizationReply>> TryAuthorize(AuthorizationRequest request)
     {
@@ -54,8 +54,7 @@ public class NstuAuthorizationService : IAuthorizationService
             string fullnameAndInfo = fullnameAndInfoElement.GetString()!;
             
             fullnameAndInfo = fullnameAndInfo.Replace(fullName, string.Empty).Trim();
-            const string pattern = @"\((.*?)(?:,\s|\))";
-            Match match = Regex.Match(fullnameAndInfo, pattern);
+            Match match = NstuFullNameAndInfoRegex().Match(fullnameAndInfo);
             if (match.Success)
             {
                 string groupName = match.Groups[1].Value.Split(' ').Last();
@@ -75,4 +74,7 @@ public class NstuAuthorizationService : IAuthorizationService
         
         return Result.Fail($"Не удалось получить информацию о студенте {fullName}");
     }
+
+    [GeneratedRegex(@"\((.*?)(?:,\s|\))")]
+    private static partial Regex NstuFullNameAndInfoRegex();
 }

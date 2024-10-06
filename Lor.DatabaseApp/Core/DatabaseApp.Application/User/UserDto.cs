@@ -2,7 +2,7 @@
 
 public record UserDto
 {
-    public required string FullName { get; set; }
-    public required int GroupId { get; set; }
-    public required string GroupName { get; set; }
+    public required string FullName { get; init; }
+    public required int GroupId { get; init; }
+    public required string GroupName { get; init; }
 }

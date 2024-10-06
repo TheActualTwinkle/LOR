@@ -14,7 +14,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        TypeAdapterConfig? config = new TypeAdapterConfig();
+        TypeAdapterConfig config = new();
         new RegisterMapper().Register(config);
 
         services.AddSingleton(config);

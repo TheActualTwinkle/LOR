@@ -2,6 +2,6 @@
 
 public record SubscriberDto
 {
-    public required long TelegramId { get; set; }
-    public required int GroupId { get; set; }
+    public required long TelegramId { get; init; }
+    public required int GroupId { get; init; }
 }

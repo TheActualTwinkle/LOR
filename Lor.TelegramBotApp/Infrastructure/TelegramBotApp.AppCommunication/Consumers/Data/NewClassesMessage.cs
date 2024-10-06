@@ -10,6 +10,6 @@ public record NewClassesMessage
 public record Class
 {
     public int Id { get; set; }
-    public required string Name { get; set; }
-    public required DateOnly Date { get; set; }
+    public required string Name { get; init; }
+    public required DateOnly Date { get; init; }
 }

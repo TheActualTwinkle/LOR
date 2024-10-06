@@ -7,7 +7,7 @@ using OpenQA.Selenium.Chrome;
 
 namespace GroupScheduleApp.ScheduleProviding;
 
-public class NstuHtmlScheduleProvider : IScheduleProvider
+public partial class NstuHtmlScheduleProvider : IScheduleProvider
 {
     private static class Constants
     {
@@ -122,8 +122,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        const string pattern = @"\d+";
-        Match match = Regex.Match(text, pattern);
+        Match match = WeekNumberRegex().Match(text);
         
         return match.Success ? int.Parse(match.Value) : null;
     }
@@ -132,4 +131,7 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
     {
         return DateTime.Now.Date;
     }
+
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex WeekNumberRegex();
 }

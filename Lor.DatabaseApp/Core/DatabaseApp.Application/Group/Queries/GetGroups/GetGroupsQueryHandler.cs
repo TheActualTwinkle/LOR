@@ -12,7 +12,7 @@ public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheSe
 {
     public async Task<Result<List<GroupDto>>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
     {
-        List<GroupDto>? cachedGroups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey);
+        List<GroupDto>? cachedGroups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey, cancellationToken);
 
         if (cachedGroups is not null) return Result.Ok(cachedGroups);
         
