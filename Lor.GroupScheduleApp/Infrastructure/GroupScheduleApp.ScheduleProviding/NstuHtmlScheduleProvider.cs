@@ -31,14 +31,15 @@ public class NstuHtmlScheduleProvider : IScheduleProvider
         _urls = urls;
         
         ChromeOptions options = new();
-        options.AddArgument("--headless");
-        options.AddArgument("start-maximized"); // open Browser in maximized mode
-        options.AddArgument("disable-infobars"); // disabling info bars
-        options.AddArgument("--disable-extensions"); // disabling extensions
-        options.AddArgument("--disable-gpu"); // applicable to Windows os only
-        options.AddArgument("--disable-dev-shm-usage"); // overcome limited resource problems
+        options.AddArgument("--headless"); // Ensure headless mode is enabled
+        options.AddArgument("disable-infobars"); // Disabling info bars
+        options.AddArgument("--disable-extensions"); // Disabling extensions
+        options.AddArgument("--disable-gpu"); // Applicable to Windows OS only
+        options.AddArgument("--disable-dev-shm-usage"); // Overcome limited resource problems
         options.AddArgument("--no-sandbox"); // Bypass OS security model
         options.AddArgument("--log-level=3");
+        options.AddArgument("--window-size=1,1"); // set window size
+        
         _chromeDriver = new ChromeDriver(options);
     }
 

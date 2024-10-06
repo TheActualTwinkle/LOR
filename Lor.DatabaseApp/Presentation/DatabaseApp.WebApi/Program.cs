@@ -17,6 +17,7 @@ public class Program
         builder.Configuration.AddJsonFile("appsettings.json", false, true).AddEnvironmentVariables();
         
         builder.Services.AddGrpc();
+        builder.Services.AddGrpcReflection();
         builder.Services.AddApplication();
         builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
@@ -37,6 +38,12 @@ public class Program
 
         app.MapGrpcService<GrpcDatabaseService>();
         app.MapGrpcService<GrpcDatabaseUpdaterService>();
+        
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapGrpcReflectionService();
+        }
+        
         app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
         await app.RunAsync();
