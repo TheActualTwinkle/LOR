@@ -14,11 +14,12 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MassTransit;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using TelegramBotApp.AppCommunication.Consumers.Data;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IBus bus) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheService, IBus bus, ILogger<GrpcDatabaseUpdaterService> logger) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -59,7 +60,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogCritical("Fatal on CreateClassesCommand: {message}", e.Message);
             throw;
         }
         

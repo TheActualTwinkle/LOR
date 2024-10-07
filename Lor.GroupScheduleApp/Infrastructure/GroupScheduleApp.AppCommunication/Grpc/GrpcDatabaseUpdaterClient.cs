@@ -2,28 +2,29 @@
 using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.Shared;
 using Grpc.Net.Client;
+using Microsoft.Extensions.Logging;
 
 namespace GroupScheduleApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseUpdaterClient(string serviceUrl) : IDatabaseUpdaterCommunicationClient
+public class GrpcDatabaseUpdaterClient(string serviceUrl, ILogger<GrpcDatabaseUpdaterClient> logger) : IDatabaseUpdaterCommunicationClient
 {
     private DatabaseUpdater.DatabaseUpdaterClient? _client;
     
     public async Task StartAsync()
     {
-        Console.WriteLine("Connecting to the gRPC service...");
+        logger.LogInformation("Connecting to the Database gRPC service...");
         GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
         await channel.ConnectAsync();
-        Console.WriteLine("Successfully connected to the gRPC service.");
+        logger.LogInformation("Successfully connected to the Database gRPC service.");
         
         _client = new DatabaseUpdater.DatabaseUpdaterClient(channel);
     }
 
     public Task StopAsync()
     {
-        Console.WriteLine("Disconnecting from the gRPC service...");
+        logger.LogInformation("Disconnecting from the Database gRPC service...");
         _client = null;
-        Console.WriteLine("Successfully disconnected from the gRPC service.");
+        logger.LogInformation("Successfully disconnected from the Database gRPC service.");
         return Task.CompletedTask;
     }
 

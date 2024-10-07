@@ -5,6 +5,7 @@ using DatabaseApp.Caching;
 using DatabaseApp.Persistence;
 using DatabaseApp.Persistence.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace DatabaseApp.WebApi;
 
@@ -15,6 +16,9 @@ public class Program
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
         
         builder.Configuration.AddJsonFile("appsettings.json", false, true).AddEnvironmentVariables();
+        
+        builder.Host.UseSerilog((context, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration));
         
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
@@ -33,7 +37,8 @@ public class Program
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error: {e.Message}");
+            Log.Fatal("Error on DB migration: {message}", e.Message);
+            throw;
         }
 
         app.MapGrpcService<GrpcDatabaseService>();

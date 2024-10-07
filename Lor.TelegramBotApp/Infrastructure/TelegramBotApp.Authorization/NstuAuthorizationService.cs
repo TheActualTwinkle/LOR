@@ -1,12 +1,13 @@
 ﻿using System.Text.Json;
 using System.Text.RegularExpressions;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 using TelegramBotApp.Authorization.Dto;
 using TelegramBotApp.Authorization.Interfaces;
 
 namespace TelegramBotApp.Authorization;
 
-public partial class NstuAuthorizationService : IAuthorizationService
+public partial class NstuAuthorizationService(ILogger<NstuAuthorizationService> logger) : IAuthorizationService
 {
     public async Task<Result<AuthorizationReply>> TryAuthorize(AuthorizationRequest request)
     {
@@ -65,11 +66,11 @@ public partial class NstuAuthorizationService : IAuthorizationService
                 });
             }
             
-            Console.WriteLine("Pattern not found in the fullname_and_info.");
+            logger.LogError("Pattern not found in the fullname_and_info.");
         }
         else
         {
-            Console.WriteLine("Property 'fullname_and_info' not found in the response.");
+            logger.LogError("Property 'fullname_and_info' not found in the response.");
         }
         
         return Result.Fail($"Не удалось получить информацию о студенте {fullName}");
