@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;
@@ -9,7 +10,7 @@ using TelegramBotApp.Domain.Interfaces;
 namespace TelegramBotApp.AppCommunication.Consumers;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient communicationClient) : IConsumer<NewClassesMessage>
+public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient communicationClient, ILogger<NewClassesConsumer> logger) : IConsumer<NewClassesMessage>
 {
     public async Task Consume(ConsumeContext<NewClassesMessage> context)
     {
@@ -17,7 +18,7 @@ public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient c
 
         if (result.IsFailed)
         {
-            Console.WriteLine($"NewClassesConsumer Error: Failed to get subscribers id: {result.Errors.First()}");
+            logger.LogError("Failed to get subscribers id: {error}", result.Errors.First());
             return;
         }
 

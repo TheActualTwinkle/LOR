@@ -1,5 +1,7 @@
 ﻿using GroupScheduleApp.AppCommunication.Grpc;
 using GroupScheduleApp.AppCommunication.Interfaces;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 
 namespace DatabaseApp.Tests.TestContext;
 
@@ -9,7 +11,7 @@ public class GroupScheduleAppFactory
     
     public async Task StartAsync()
     {
-        DatabaseUpdaterCommunicationClient = new GrpcDatabaseUpdaterClient("http://localhost:31401");
+        DatabaseUpdaterCommunicationClient = new GrpcDatabaseUpdaterClient("http://localhost:31401", Substitute.For<ILogger<GrpcDatabaseUpdaterClient>>());
         await DatabaseUpdaterCommunicationClient.StartAsync();
     }
     

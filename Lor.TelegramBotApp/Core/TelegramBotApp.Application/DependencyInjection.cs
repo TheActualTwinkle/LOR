@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization.Interfaces;
@@ -15,13 +16,15 @@ public static class DependencyInjection
         
         services.AddSingleton<ITelegramBot>(s =>
         {
+            ILogger<TelegramBot> logger = s.GetRequiredService<ILogger<TelegramBot>>();
+
             ITelegramBotInitializer botInitializer = s.GetRequiredService<ITelegramBotInitializer>();
             IDatabaseCommunicationClient databaseCommunicator = s.GetRequiredService<IDatabaseCommunicationClient>();
             IAuthorizationService authorizationService = s.GetRequiredService<IAuthorizationService>();
             
             return botInitializer.CreateBot(configuration.GetSection("TelegramSettings:BotToken").Value ??
                                             throw new InvalidOperationException("Bot token is not set."),
-                botInitializer.CreateReceiverOptions(), databaseCommunicator, authorizationService);
+                botInitializer.CreateReceiverOptions(), databaseCommunicator, authorizationService, logger);
         });
 
         return services;

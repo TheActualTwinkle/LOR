@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Telegram.Bot.Types;
 using TelegramBotApp.Api.AppPipeline.Interfaces;
 using TelegramBotApp.AppCommunication;
@@ -18,13 +19,17 @@ public class DefaultAppPipeline : IAppPipeline
         try
         {
             using IHost host = Host.CreateDefaultBuilder()
+                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
                 .ConfigureAppConfiguration(config =>
-                    config.AddJsonFile("appsettings.json", false, true))
-                .ConfigureAppConfiguration(config => 
-                    config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true).AddEnvironmentVariables())
+                    {
+                        config.AddJsonFile("appsettings.json", false, true);
+                        config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true);
+                        config.AddEnvironmentVariables();
+                    })
                 
                 // Order of services registration is important!!!
                 .ConfigureServices((builder, services) => services
+                    .AddLogging() // TODO: Check if needed
                     .AddCommunicators(builder.Configuration)
                     .AddAuthorization()                  
                     .AddApplication(builder.Configuration)
@@ -43,13 +48,13 @@ public class DefaultAppPipeline : IAppPipeline
             botClient.StartReceiving(cancellationToken.Token);
 
             User me = await botClient.GetMeAsync();
-            Console.WriteLine($"Start listening for @{me.Username}");
+            Log.Information("Start listening for @{username}", me.Username);
 
             await host.RunAsync(cancellationToken.Token);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Fatal(e.Message);
             throw;
         }
     }

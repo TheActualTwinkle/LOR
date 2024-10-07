@@ -2,10 +2,15 @@
 using GroupScheduleApp.Shared;
 using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.ScheduleUpdating.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace GroupScheduleApp.ScheduleUpdating;
 
-public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient, ScheduleSendServiceSettings settings) : IScheduleSendService
+public class ScheduleSendService(
+    IScheduleProvider scheduleProvider,
+    IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient,
+    ScheduleSendServiceSettings settings,
+    ILogger<ScheduleSendService> logger) : IScheduleSendService
 {
     public async Task RunAsync()
     {
@@ -17,7 +22,7 @@ public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUp
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                logger.LogError("Error: {message}", e.Message);
             }
 
             await Task.Delay(settings.SendInterval);
@@ -37,6 +42,6 @@ public class ScheduleSendService(IScheduleProvider scheduleProvider, IDatabaseUp
             await databaseUpdaterCommunicationClient.SetAvailableLabClasses(classesData);
         }
 
-        Console.WriteLine("Groups and classes data sent to database.");
+        logger.LogInformation("Groups and classes data sent to database.");
     }
 }

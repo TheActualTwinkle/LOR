@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -13,7 +14,12 @@ using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.Application;
 
-public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receiverOptions, IDatabaseCommunicationClient databaseCommunicator, IAuthorizationService authorizationService) : ITelegramBot
+public class TelegramBot(
+    ITelegramBotClient telegramBot,
+    ReceiverOptions receiverOptions,
+    IDatabaseCommunicationClient databaseCommunicator,
+    IAuthorizationService authorizationService,
+    ILogger<TelegramBot> logger) : ITelegramBot
 {
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
     private TelegramCommandFactory _telegramCommandFactory = null!;
@@ -101,7 +107,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
             _ => exception.ToString()
         };
 
-        Console.WriteLine(errorMessage);
+        logger.LogError("Error: {message}", errorMessage);
 
         return Task.CompletedTask;
     }
@@ -125,7 +131,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error: {e.Message}");
+            logger.LogError("Error: {message}", e.Message);
         }
         
         await bot.AnswerCallbackQueryAsync(callbackQuery.Id, cancellationToken: cancellationToken);
@@ -140,7 +146,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         Match commandMatch = TelegramCommandFactory.TelegramCommandRegex().Match(replyText);
         if (commandMatch.Success == false)
         {
-            Console.WriteLine("Can`t handle message reply: ReplyToMessage has no command");
+            logger.LogError("Can`t handle message reply: ReplyToMessage has no command");
             return;
         }
         
@@ -162,7 +168,7 @@ public class TelegramBot(ITelegramBotClient telegramBot, ReceiverOptions receive
         }
         catch (Exception e)
         {
-            Console.WriteLine($"HandleMessageReply Error: {e.Message}");
+            logger.LogError("Error: {message}", e.Message);
         }
     }
 }
