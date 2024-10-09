@@ -13,11 +13,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Grpc\Protos\database.proto" GrpcServices="Server"/>
-        <Protobuf Include="Grpc\Protos\databaseUpdater.proto" GrpcServices="Server"/>
+        <Protobuf Include="Grpc\Protos\**\*.proto" GrpcServices="Server" ProtoRoot="Grpc\Protos\" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\Lor.TelegramBotApp\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
         <ProjectReference Include="..\..\Core\DatabaseApp.Application\DatabaseApp.Application.csproj"/>
         <ProjectReference Include="..\DatabaseApp.Caching\DatabaseApp.Caching.csproj"/>
     </ItemGroup>

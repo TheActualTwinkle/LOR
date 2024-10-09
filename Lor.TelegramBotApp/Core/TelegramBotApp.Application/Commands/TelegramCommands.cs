@@ -280,7 +280,7 @@ public class AuthorizationTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Fail(authorizeResult.Errors.First()));
         }
 
-        Result<string> setGroupResult = await factory.DatabaseCommunicator.TrySetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
+        Result<string> setGroupResult = await factory.DatabaseCommunicator.SetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
 
         return setGroupResult.IsFailed ? new ExecutionResult(Result.Fail(setGroupResult.Errors.First())) : new ExecutionResult(Result.Ok(setGroupResult.Value));
     }

@@ -42,7 +42,7 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl, ILogger<GrpcDatabaseUp
             classes.Add(classData.Name, dateTimeOffset.ToUnixTimeSeconds());
         }
         
-        await _client!.SetAvailableLabClassesAsync(new SetAvailableLabClassesRequest
+        await _client!.SetAvailableClassesAsync(new SetAvailableClassesRequest
         {
             GroupName = groupClassesData.GroupName,
             Classes = { classes }

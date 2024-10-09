@@ -23,14 +23,9 @@
     </ItemGroup>
     
     <ItemGroup>
-      <Protobuf Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\Grpc\Protos\database.proto">
-        <Link>Grpc\Protos\database.proto</Link>
-        <Generator>MSBuild:Compile</Generator>
+      <Protobuf Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\Grpc\Protos\**\*.proto" GrpcServices="Client">
+          <Link>Grpc\Protos\%(RecursiveDir)%(Filename)%(Extension)</Link>
       </Protobuf>
-    </ItemGroup>
-    
-    <ItemGroup>
-      <ProjectReference Include="..\..\Core\TelegramBotApp.Domain\TelegramBotApp.Domain.csproj" />
     </ItemGroup>
     
     <ItemGroup>

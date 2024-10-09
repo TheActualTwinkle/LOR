@@ -31,7 +31,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         return new Empty();
     }
 
-    public override async Task<Empty> SetAvailableLabClasses(SetAvailableLabClassesRequest request, ServerCallContext context)
+    public override async Task<Empty> SetAvailableClasses(SetAvailableClassesRequest request, ServerCallContext context)
     {
         Result<GroupDto> getGroupResult = await mediator.Send(new GetGroupQuery
         {

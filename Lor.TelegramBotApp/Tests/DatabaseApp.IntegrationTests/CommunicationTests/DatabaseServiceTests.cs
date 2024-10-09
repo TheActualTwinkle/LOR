@@ -20,7 +20,7 @@ public class DatabaseServiceTests
         await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableGroups([GroupName]);
         await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableLabClasses(new GroupClassesData(GroupName, _classesData));
         
-        await IntegrationTestSharedContext.DatabaseCommunication.TrySetGroup(DefaultUserId, GroupName, DefaultUserFullName);
+        await IntegrationTestSharedContext.DatabaseCommunication.SetGroup(DefaultUserId, GroupName, DefaultUserFullName);
     }
     
     [TearDown]
@@ -62,8 +62,8 @@ public class DatabaseServiceTests
         // Add two more users to the group
         Assert.Multiple(async () =>
         {
-            Assert.That((await IntegrationTestSharedContext.DatabaseCommunication.TrySetGroup(DefaultUserId + 1, GroupName, secondUserFullName)).IsSuccess, Is.True);
-            Assert.That((await IntegrationTestSharedContext.DatabaseCommunication.TrySetGroup(DefaultUserId + 2, GroupName, thirdUserFullName)).IsSuccess, Is.True);
+            Assert.That((await IntegrationTestSharedContext.DatabaseCommunication.SetGroup(DefaultUserId + 1, GroupName, secondUserFullName)).IsSuccess, Is.True);
+            Assert.That((await IntegrationTestSharedContext.DatabaseCommunication.SetGroup(DefaultUserId + 2, GroupName, thirdUserFullName)).IsSuccess, Is.True);
         });
 
         var classesResult = await IntegrationTestSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
