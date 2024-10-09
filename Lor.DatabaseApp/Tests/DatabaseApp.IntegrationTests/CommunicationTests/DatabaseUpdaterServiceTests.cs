@@ -41,7 +41,7 @@ public class DatabaseUpdaterServiceTests
         await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableGroups([GroupName]);
         await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableLabClasses(new GroupClassesData(GroupName, _classesData));
 
-        await IntegrationTestSharedContext.DatabaseCommunication.TrySetGroup(DefaultUserId, GroupName, DefaultUserFullName);
+        await IntegrationTestSharedContext.DatabaseCommunication.SetGroup(DefaultUserId, GroupName, DefaultUserFullName);
         
         var classes = await IntegrationTestSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         

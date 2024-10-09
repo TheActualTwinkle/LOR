@@ -1,0 +1,49 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
+
+message GetAvailableClassesRequest {
+  int64 userId = 1;
+}
+
+message GetAvailableClassesReply {
+  repeated ClassInformation classInformation = 1;
+  bool isFailed = 2;
+  string errorMessage = 3;
+}
+message ClassInformation {
+  int32 classId = 1;
+  string className = 2;
+  int64 classDateUnixTimestamp = 3;
+}
+
+message EnqueueInClassRequest {
+  int64 userId = 1;
+  int32 classId = 2;
+}
+message EnqueueInClassReply {
+  repeated string studentsQueue = 1;
+  string className = 2;
+  int64 classDateUnixTimestamp = 3;
+  bool wasAlreadyEnqueued = 4;
+  bool isFailed = 5;
+  string errorMessage = 6;
+}
+
+message DequeueFromClassRequest {
+  int64 userId = 1;
+  int32 classId = 2;
+}
+message DequeueFromClassReply {
+  repeated string studentsQueue = 1;
+  string className = 2;
+  int64 classDateUnixTimestamp = 3;
+  bool wasAlreadyDequeuedFromClass = 4;
+  bool isFailed = 5;
+  string errorMessage = 6;
+}
+
+message SetAvailableClassesRequest {
+  string groupName = 1;
+  map<string, int64> classes = 2;
+}

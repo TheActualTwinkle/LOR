@@ -1,0 +1,31 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
+
+message AddSubscriberRequest {
+  int64 subscriberId = 1;
+}
+
+message AddSubscriberReply {
+  bool isFailed = 1;
+  string errorMessage = 2;
+}
+
+message DeleteSubscriberRequest {
+  int64 subscriberId = 1;
+}
+
+message DeleteSubscriberReply {
+  bool isFailed = 1;
+  string errorMessage = 2;
+}
+
+message GetSubscribersReply {
+  repeated SubscriberInformation subscribers = 1;
+  bool isFailed = 2;
+  string errorMessage = 3;
+}
+message SubscriberInformation {
+  int64 userId = 1;
+  int32 groupId = 2;
+}
