@@ -38,9 +38,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\DatabaseApp.WebApi.csproj" />
       <ProjectReference Include="..\..\..\Lor.GroupScheduleApp\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj" />
-      <ProjectReference Include="..\..\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\..\Lor.TelegramBotApp\Infrastructure\TelegramBotApp.AppCommunication\TelegramBotApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\Presentation\DatabaseApp.WebApi\DatabaseApp.WebApi.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using GroupScheduleApp.Shared;
 using TelegramBotApp.AppCommunication.Data;
+
 // ReSharper disable SuggestVarOrType_Elsewhere
 
 namespace DatabaseApp.Tests.CommunicationTests;
