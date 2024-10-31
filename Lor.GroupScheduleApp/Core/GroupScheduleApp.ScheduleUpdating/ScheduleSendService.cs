@@ -37,9 +37,7 @@ public class ScheduleSendService(
         await databaseUpdaterCommunicationClient.SetAvailableGroups(availableGroups);
 
         foreach (var classesData in groupClassesData)
-        {
             await databaseUpdaterCommunicationClient.SetAvailableLabClasses(classesData);
-        }
 
         logger.LogInformation("Groups and classes data sent to database.");
     }

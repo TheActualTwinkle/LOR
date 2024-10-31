@@ -42,7 +42,7 @@ public class GroupTests
     }
     
     [Test]
-    public async Task CreateGroup_WhenGroupNotExist_ShouldReturnSuccess()
+    public async Task CreateGroup_WhenGroupNotExist_Success()
     {
         // Act
         var createResult = await _sender.Send(new CreateGroupsCommand
@@ -64,7 +64,7 @@ public class GroupTests
     }
     
     [Test]
-    public async Task CreateGroup_WhenGroupExist_ShouldReturnFail()
+    public async Task CreateGroup_WhenGroupExist_Fail()
     {
         // Arrange
         var firstResult = await _sender.Send(new CreateGroupsCommand
@@ -92,7 +92,7 @@ public class GroupTests
     }
     
     [Test]
-    public async Task GetGroup_WhenGroupExist_ShouldReturnGroup()
+    public async Task GetGroup_WhenGroupExist_Group()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -111,7 +111,7 @@ public class GroupTests
     }
     
     [Test]
-    public async Task GetGroup_WhenGroupNotExist_ShouldReturnFail()
+    public async Task GetGroup_WhenGroupNotExist_Fail()
     {
         // Act
         var getResult = await _sender.Send(new GetGroupQuery
@@ -125,7 +125,7 @@ public class GroupTests
     
     
     [Test]
-    public async Task GetGroups_WhenGroupsExist_ShouldReturnListOfGroups()
+    public async Task GetGroups_WhenGroupsExist_ListOfGroups()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -145,7 +145,7 @@ public class GroupTests
     }
     
     [Test]
-    public async Task GetGroups_WhenGroupsNotExist_ShouldReturnEmptyList()
+    public async Task GetGroups_WhenGroupsNotExist_EmptyList()
     {
         // Act
         var getResult = await _sender.Send(new GetGroupsQuery());

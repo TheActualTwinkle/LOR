@@ -61,9 +61,7 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
         var query = GetQuery(queryString.Split(' ').FirstOrDefault()!);
         
         if (query == null)
-        {
             return new ExecutionResult(Result.Fail("CallbackQuery: {queryString} - не найден"));
-        }
 
         return await query.Execute(chatId, this, GetArguments(queryString), cancellationToken);
     }

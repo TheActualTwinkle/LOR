@@ -32,10 +32,8 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
             await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
 
         if (queueExist)
-        {
             return Result.Fail($"Ваша запись на пару \"{@class.Name} - {@class.Date:dd.MM}\" уже создана.");
-        }
-            
+
         Domain.Models.Queue queue = new()
         {
             UserId = user.Id,

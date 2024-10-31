@@ -32,9 +32,7 @@ public class WebAppFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
 
             if (dbContextDescriptor != null)
-            {
                 services.Remove(dbContextDescriptor);
-            }
 
             services.AddDbContext<IDatabaseContext, ApplicationDbContext>(options =>
                 options.UseNpgsql(_dbContainer.GetConnectionString()));
@@ -44,10 +42,8 @@ public class WebAppFactory : WebApplicationFactory<Program>
                 d.ServiceType == typeof(ICacheService));
 
             if (cacheServiceDescriptor != null)
-            {
                 services.Remove(cacheServiceDescriptor);
-            }
-            
+
             services.AddScoped<ICacheService>(_ =>
             {
                 Mock<ICacheService> mockCache = new();

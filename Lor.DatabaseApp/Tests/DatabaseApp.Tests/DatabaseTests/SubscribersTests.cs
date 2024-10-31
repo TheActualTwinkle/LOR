@@ -46,7 +46,7 @@ public class SubscribersTests
     }
 
     [Test]
-    public async Task CreateSubscriber_WhenUserExistAndNotSubscribed_ShouldReturnSuccess()
+    public async Task CreateSubscriber_WhenUserExistAndNotSubscribed_Success()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -69,7 +69,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task CreateSubscriber_WhenUserExistAndAlreadySubscribed_ShouldReturnFailure()
+    public async Task CreateSubscriber_WhenUserExistAndAlreadySubscribed_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -97,7 +97,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task CreateSubscriber_WhenUserNotExist_ShouldReturnFailure()
+    public async Task CreateSubscriber_WhenUserNotExist_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -119,7 +119,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task DeleteSubscriber_WhenUserExistAndSubscribed_ShouldReturnSuccess()
+    public async Task DeleteSubscriber_WhenUserExistAndSubscribed_Success()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -146,7 +146,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task DeleteSubscriber_WhenUserExistAndNotSubscribed_ShouldReturnFailure()
+    public async Task DeleteSubscriber_WhenUserExistAndNotSubscribed_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -168,7 +168,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task DeleteSubscriber_WhenUserNotExist_ShouldReturnFailure()
+    public async Task DeleteSubscriber_WhenUserNotExist_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -195,7 +195,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task GetAllSubscribers_WhenSubscribersExist_ShouldReturnSuccess()
+    public async Task GetAllSubscribers_WhenSubscribersExist_Success()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -218,7 +218,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task GetAllSubscribers_WhenSubscribersIsEmpty_ShouldReturnSuccess()
+    public async Task GetAllSubscribers_WhenSubscribersIsEmpty_Success()
     {
         // Arrange
         await CreateUserAndGroup();

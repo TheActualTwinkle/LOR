@@ -12,9 +12,7 @@ public static class RepeatedFiledObjectConverter
         RepeatedField<T> repeatedField = new();
 
         foreach (var item in source)
-        {
             repeatedField.Add(mapper(item));
-        }
 
         return Task.FromResult(repeatedField);
     }

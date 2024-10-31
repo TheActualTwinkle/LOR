@@ -53,7 +53,7 @@ public class UserTests
     }
     
     [Test]
-    public async Task CreateUser_WhenUserNotExist_ShouldReturnUser()
+    public async Task CreateUser_WhenUserNotExist_User()
     {
         // Arrange
         
@@ -75,7 +75,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task CreateUser_WhenUserExist_ShouldReturnFail()
+    public async Task CreateUser_WhenUserExist_Fail()
     {
         // Arrange
         var firstResult = await _sender.Send(new CreateUserCommand
@@ -102,7 +102,7 @@ public class UserTests
     }
     
     [Test]
-    public async Task CreateUser_WhenGroupNotExist_ShouldReturnFail()
+    public async Task CreateUser_WhenGroupNotExist_Fail()
     {
         // Act
         var createResult = await _sender.Send(new CreateUserCommand
@@ -126,7 +126,7 @@ public class UserTests
     }
 
     [Test]
-    public async Task GetUserInfo_WhenUserExist_ShouldReturnUser()
+    public async Task GetUserInfo_WhenUserExist_User()
     {
         // Arrange
         var createUserResult = await _sender.Send(new CreateUserCommand
@@ -152,7 +152,7 @@ public class UserTests
     }
     
     [Test]
-    public async Task GetUserInfo_WhenUserNotExist_ShouldReturnFail()
+    public async Task GetUserInfo_WhenUserNotExist_Fail()
     {
         // Act
         var result = await _sender.Send(new GetUserInfoQuery

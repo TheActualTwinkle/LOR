@@ -17,9 +17,7 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
             var groupName = await unitOfWork.GroupRepository.GetGroupByGroupName(item, cancellationToken);
 
             if (groupName is not null)
-            {
                 continue;
-            }
 
             Domain.Models.Group group = new()
             {

@@ -8,9 +8,7 @@ public static class FioFormatter
             @"^(?<lastName>\p{L}+)\s+(?<firstName>\p{L}+)(\s+(?<middleName>\p{L}+))?$");
 
         if (!match.Success)
-        {
             throw new ArgumentException("Некорректное ФИО");
-        }
 
         var lastName = match.Groups["lastName"].Value;
         var firstName = match.Groups["firstName"].Value;

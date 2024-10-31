@@ -1,5 +1,4 @@
-﻿using FluentResults;
-using GroupScheduleApp.Shared;
+﻿using GroupScheduleApp.Shared;
 
 // ReSharper disable SuggestVarOrType_Elsewhere
 
@@ -17,15 +16,15 @@ public class DatabaseUpdaterServiceTests
     [TearDown]
     public async Task TearDown()
     {
-        await IntegrationTestSharedContext.DatabaseAppFactory.ResetDatabaseAsync();
+        await IntegrationTestsSharedContext.DatabaseAppFactory.ResetDatabaseAsync();
     }
     
     [Test]
     public async Task UpdateAvailableGroups()
     {
-        await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableGroups([GroupName]);
+        await IntegrationTestsSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableGroups([GroupName]);
 
-        Result<Dictionary<int,string>> availableGroups = await IntegrationTestSharedContext.DatabaseCommunication.GetAvailableGroups();
+        var availableGroups = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableGroups();
         
         Assert.Multiple(() =>
         {
@@ -38,19 +37,19 @@ public class DatabaseUpdaterServiceTests
     [Test]
     public async Task UpdateAvailableLabClasses()
     {
-        await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableGroups([GroupName]);
-        await IntegrationTestSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableLabClasses(new GroupClassesData(GroupName, _classesData));
+        await IntegrationTestsSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableGroups([GroupName]);
+        await IntegrationTestsSharedContext.DatabaseUpdaterCommunicationClient.SetAvailableLabClasses(new GroupClassesData(GroupName, _classesData));
 
-        await IntegrationTestSharedContext.DatabaseCommunication.SetGroup(DefaultUserId, GroupName, DefaultUserFullName);
+        await IntegrationTestsSharedContext.DatabaseCommunication.SetGroup(DefaultUserId, GroupName, DefaultUserFullName);
         
-        var classes = await IntegrationTestSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
+        var classes = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         
         Assert.Multiple(() =>
         {
             Assert.That(classes.IsSuccess, Is.True);
             Assert.That(classes.Value.ToList(), Has.Count.EqualTo(_classesData.Length));
-            Assert.That(classes.Value.Select(x => x.ClassName), Is.EqualTo(_classesData.Select(x => x.Name)));
-            Assert.That(classes.Value.Select(x => DateTimeOffset.FromUnixTimeSeconds(x.ClassDateUnixTimestamp).DateTime), Is.EqualTo(_classesData.Select(x => x.Date)));
+            Assert.That(classes.Value.Select(x => x.Name), Is.EqualTo(_classesData.Select(x => x.Name)));
+            Assert.That(classes.Value.Select(x => x.Date.ToDateTime(TimeOnly.MinValue)), Is.EqualTo(_classesData.Select(x => x.Date)));
         });
     }
 }

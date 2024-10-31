@@ -52,7 +52,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task CreateQueue_WhenQueueNotExistAndOtherDataValid_ShouldReturnSuccess()
+    public async Task CreateQueue_WhenQueueNotExistAndOtherDataValid_Success()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -101,7 +101,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task CreateQueue_WhenUserNotExist_ShouldReturnFail()
+    public async Task CreateQueue_WhenUserNotExist_Fail()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -143,7 +143,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task CreateQueue_WhenClassNotExist_ShouldReturnFail()
+    public async Task CreateQueue_WhenClassNotExist_Fail()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -170,7 +170,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task CreateQueue_WhenUserAlreadyInQueue_ShouldReturnFail()
+    public async Task CreateQueue_WhenUserAlreadyInQueue_Fail()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -204,7 +204,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task DeleteQueue_WhenQueueExist_ShouldReturnSuccess()
+    public async Task DeleteQueue_WhenQueueExist_Success()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -238,7 +238,7 @@ public class QueueTests
     }
 
     [Test]
-    public async Task DeleteOutdatedQueues_WhenQueueOutdated_ShouldReturnNonOutdatedQueuesAfterDelete()
+    public async Task DeleteOutdatedQueues_WhenQueueOutdated_NonOutdatedQueuesAfterDelete()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -282,7 +282,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task GetClassQueue_WhenClassExist_ShouldReturnQueue()
+    public async Task GetClassQueue_WhenClassExist_Queue()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -309,7 +309,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task GetClassQueue_WhenClassNotExist_ShouldReturnFail()
+    public async Task GetClassQueue_WhenClassNotExist_Fail()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -322,7 +322,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task IsUserInQueue_WhenUserInQueue_ShouldReturnTrue()
+    public async Task IsUserInQueue_WhenUserInQueue_True()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -353,7 +353,7 @@ public class QueueTests
     }
     
     [Test]
-    public async Task IsUserInQueue_WhenUserNotInQueue_ShouldReturnFalse()
+    public async Task IsUserInQueue_WhenUserNotInQueue_False()
     {
         // Arrange
         await CreateUserAndClasses();

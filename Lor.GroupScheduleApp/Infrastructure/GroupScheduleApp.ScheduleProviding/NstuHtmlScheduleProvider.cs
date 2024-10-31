@@ -89,7 +89,7 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
         List<ClassData> classesData = [];
         
         var body = _chromeDriver.FindElement(By.ClassName(Constants.TableBody));
-        List<IWebElement> rows = body.FindElements(By.XPath($"./div[contains(@class, '{Constants.TableBodyRow}')]")).ToList();
+        var rows = body.FindElements(By.XPath($"./div[contains(@class, '{Constants.TableBodyRow}')]")).ToList();
         
         foreach (var row in rows.Where(r => string.IsNullOrEmpty(r.Text) == false))
         {
@@ -106,9 +106,7 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
             var date = DateTime.ParseExact($"{dateRaw}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
             foreach (var className in classNames)
-            {
                 classesData.Add(new ClassData(className, date));
-            }
         }
 
         return classesData.AsEnumerable();

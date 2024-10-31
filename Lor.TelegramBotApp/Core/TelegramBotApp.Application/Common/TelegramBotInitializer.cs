@@ -7,7 +7,7 @@ using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
 
-namespace TelegramBotApp.Application;
+namespace TelegramBotApp.Application.Common;
 
 public class TelegramBotInitializer : ITelegramBotInitializer
 {

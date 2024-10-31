@@ -5,7 +5,7 @@ using TelegramBotApp.AppCommunication.Interfaces;
 namespace DatabaseApp.Tests.CommunicationTests;
 
 [SetUpFixture]
-public class IntegrationTestSharedContext
+public class IntegrationTestsSharedContext
 {
     private static GroupScheduleAppFactory ScheduleAppFactory { get; } = new();
     private static TelegramAppFactory TelegramAppFactory { get; } = new();

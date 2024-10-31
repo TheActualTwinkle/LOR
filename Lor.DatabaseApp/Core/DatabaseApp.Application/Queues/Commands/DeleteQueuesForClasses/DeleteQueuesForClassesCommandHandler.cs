@@ -19,9 +19,7 @@ public class DeleteQueuesForClassesCommandHandler(IUnitOfWork unitOfWork, ICache
             if (outdatedQueueList is null) return Result.Fail($"Очередь для {classId} не найдена");
         
             foreach (var queue in outdatedQueueList)
-            {
                 unitOfWork.QueueRepository.Delete(queue);
-            }
 
             var queues = mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(classId, cancellationToken)).AdaptToType<List<QueueDto>>();
             

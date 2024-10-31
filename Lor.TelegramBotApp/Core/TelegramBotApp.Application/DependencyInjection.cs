@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application.Common;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization.Interfaces;
 using TelegramBotApp.Domain.Interfaces;

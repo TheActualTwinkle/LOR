@@ -61,8 +61,6 @@ public class DefaultAppPipeline : IAppPipeline
     private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)
     {
         foreach (var appCommunicator in communicators)
-        {
             await appCommunicator.StartAsync();
-        }
     }
 }

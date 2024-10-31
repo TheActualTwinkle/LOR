@@ -2,7 +2,9 @@
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
+using MapsterMapper;
 using Microsoft.Extensions.Logging;
+using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 
@@ -27,6 +29,7 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         logger.LogInformation("Disconnecting from the Database gRPC service...");
         _client = null;
         logger.LogInformation("Successfully disconnected from the Database gRPC service.");
+        
         return Task.CompletedTask;
     }
 
@@ -41,16 +44,22 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
     {
         var reply = await _client!.GetAvailableGroupsAsync(new Empty(), cancellationToken: cancellationToken);
         var groups = reply.IdGroupsMap.ToDictionary(pair => pair.Key, pair => pair.Value);
+        
         return Result.Ok(groups);
     }
 
-    public async Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<Class>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
     {
         var reply = await _client!.GetAvailableClassesAsync(new GetAvailableClassesRequest { UserId = userId }, cancellationToken: cancellationToken);
         
         if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
 
-        return reply.ClassInformation.ToList();
+        return Result.Ok(reply.ClassInformation.Select(x => new Class
+        {
+            Id = x.ClassId,
+            Name = x.ClassName,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(x.ClassDateUnixTimestamp).DateTime)
+        }));
     }
 
     public async Task<Result<string>> SetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
@@ -108,9 +117,7 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
 
         List<SubscriberInfo> subscribers = [];
         foreach (var subscriber in reply.Subscribers.ToList())
-        {
             subscribers.Add(new SubscriberInfo { TelegramId = subscriber.UserId, GroupId = subscriber.GroupId });
-        }
 
         return subscribers;
     }

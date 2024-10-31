@@ -12,8 +12,6 @@ public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheSer
 {
     public async Task<Result> Handle(DeleteUserFromQueueCommand request, CancellationToken cancellationToken)
     {
-        cancellationToken =new CancellationToken();
-        
         var queueOfClass = await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken);
             
         if (queueOfClass is null) return Result.Fail("Запись в очереди не найдена");
@@ -24,20 +22,22 @@ public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheSer
         
         unitOfWork.QueueRepository.Delete(queue);
         
-        var queueAfterDelete = queueOfClass.Where(x => x.QueueNum > userQueueNum).ToList();
+        var queueAfterDeletedEntry = queueOfClass.Where(x => x.QueueNum > userQueueNum);
 
-        foreach (var item in queueAfterDelete)
+        foreach (var item in queueAfterDeletedEntry)
         {
             item.QueueNum -= 1;
             
             unitOfWork.QueueRepository.Update(item);
         }
+
+        queueOfClass.Remove(queue);
         
-        var newQueue = mapper.From(queueOfClass.Where(x => x.QueueNum != userQueueNum).ToList()).AdaptToType<List<QueueDto>>();
-        
-        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, newQueue, cancellationToken: cancellationToken);
+        var newQueue = mapper.From(queueOfClass).AdaptToType<List<QueueDto>>();
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
+        
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, newQueue, cancellationToken: cancellationToken);
         
         return Result.Ok();
     }

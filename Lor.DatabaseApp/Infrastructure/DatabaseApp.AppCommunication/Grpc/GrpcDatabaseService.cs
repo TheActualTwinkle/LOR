@@ -44,9 +44,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         if (groups.IsFailed) return new GetAvailableGroupsReply();
         
         foreach (var item in groups.Value)
-        {
             reply.IdGroupsMap.Add(item.Id, item.GroupName);
-        }
 
         return reply;
     }
@@ -136,7 +134,6 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         // If user already in queue
         if (userInQueue.Value is not null)
-        {
             return new EnqueueInClassReply
             {
                 WasAlreadyEnqueued = true,
@@ -144,8 +141,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
                 ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
                 StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
             };
-        }
-        
+
         // If we have to ACTUALLY enqueue user
         var result = await mediator.Send(new CreateQueueCommand
         {
@@ -206,7 +202,6 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         // If user is not in queue
         if (userInQueue.Value is null)
-        {
             return new DequeueFromClassReply
             {
                 WasAlreadyDequeuedFromClass = true,
@@ -214,7 +209,6 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
                 ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
                 StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
             };
-        }
 
         // If we have to ACTUALLY DequeueFromClass user
         var result = await mediator.Send(new DeleteUserFromQueueCommand

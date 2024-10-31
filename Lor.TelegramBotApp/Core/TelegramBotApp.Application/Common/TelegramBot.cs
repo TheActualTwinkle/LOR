@@ -10,7 +10,7 @@ using TelegramBotApp.Application.Settings;
 using TelegramBotApp.Authorization.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
 
-namespace TelegramBotApp.Application;
+namespace TelegramBotApp.Application.Common;
 
 public class TelegramBot(
     ITelegramBotClient telegramBot,
@@ -43,14 +43,12 @@ public class TelegramBot(
     private Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
     {
         if (update.CallbackQuery is not null)
-        {
             Task.Run(async () =>
             {
                 using CancellationTokenSource cts = new(_settings.Timeout);
                 await HandleCallbackQuery(bot, update.CallbackQuery, cts.Token);
             }, cancellationToken);
-        }
-        
+
         if (update.Message is not { } message) return Task.CompletedTask;
         if (message.Text is not { } userMessageText) return Task.CompletedTask;
         
@@ -119,13 +117,9 @@ public class TelegramBot(
             var chatId = callbackQuery.Message!.Chat.Id;
             
             if (result.Result.IsFailed)
-            {
                 await SendErrorMessage(chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
-            }
             else
-            {
                 await SendMessageAsync(chatId, result.Result.Value, result.ReplyMarkup, cancellationToken);
-            }
         }
         catch (Exception e)
         {
@@ -156,13 +150,9 @@ public class TelegramBot(
             var result = await _telegramCommandFactory.StartCommand(wholeCommandString, chatId, cancellationToken);
             
             if (result.Result.IsFailed)
-            {
                 await SendErrorMessage(chatId, new Exception(result.Result.Errors.FirstOrDefault()?.Message ?? "Неизвестная ошибка"), result.ReplyMarkup, cancellationToken);
-            }
             else
-            {
                 await SendMessageAsync(chatId, result.Result.Value, result.ReplyMarkup, cancellationToken);
-            }
         }
         catch (Exception e)
         {

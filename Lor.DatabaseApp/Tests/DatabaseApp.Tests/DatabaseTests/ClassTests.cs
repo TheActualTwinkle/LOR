@@ -56,7 +56,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task CreateClasses_WhenClassNotExist_ShouldReturnListOfClasses()
+    public async Task CreateClasses_WhenClassNotExist_ListOfClasses()
     {
         var groupDto = await _sender.Send(new GetGroupQuery
         {
@@ -84,7 +84,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task CreateClasses_WhenClassExist_ShouldReturnDistinctClasses()
+    public async Task CreateClasses_WhenClassExist_DistinctClasses()
     {
         var groupDto = await _sender.Send(new GetGroupQuery
         {
@@ -121,7 +121,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task DeleteClass_WhenClassExist_ShouldReturnSuccessAndDatabaseContainEmptyClasses()
+    public async Task DeleteClass_WhenClassExist_SuccessAndDatabaseContainEmptyClasses()
     {
         var groupDto = await _sender.Send(new GetGroupQuery
         {
@@ -159,7 +159,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task DeleteClass_WhenClassNotExist_ShouldReturnFail()
+    public async Task DeleteClass_WhenClassNotExist_Fail()
     {
         // Act
         var deleteResult = await _sender.Send(new DeleteClassCommand
@@ -172,7 +172,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClass_WhenClassExist_ShouldReturnClass()
+    public async Task GetClass_WhenClassExist_Class()
     {
         var groupDto = await _sender.Send(new GetGroupQuery
         {
@@ -207,7 +207,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClass_WhenClassNotExist_ShouldReturnFail()
+    public async Task GetClass_WhenClassNotExist_Fail()
     {
         // Act
         var result = await _sender.Send(new GetClassQuery
@@ -229,7 +229,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClasses_WhenClassesExist_ShouldReturnListOfClasses()
+    public async Task GetClasses_WhenClassesExist_ListOfClasses()
     {
         var groupDto = await _sender.Send(new GetGroupQuery
         {
@@ -264,7 +264,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClasses_WhenClassesNotExist_ShouldReturnEmptyList()
+    public async Task GetClasses_WhenClassesNotExist_EmptyList()
     {
         var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
@@ -281,7 +281,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetOutdatedClasses_WhenOutdatedClassesExist_ShouldReturnListOfClasses()
+    public async Task GetOutdatedClasses_WhenOutdatedClassesExist_ListOfClasses()
     {
         var groupDto = await _sender.Send(new GetGroupQuery
         {
@@ -313,7 +313,7 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetOutdatedClasses_WhenOutdatedClassesNotExist_ShouldReturnEmptyList()
+    public async Task GetOutdatedClasses_WhenOutdatedClassesNotExist_EmptyList()
     {
         // Act
         var getResult = await _sender.Send(new GetOutdatedClassesQuery());

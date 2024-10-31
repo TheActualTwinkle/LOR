@@ -1,5 +1,5 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
-using FluentResults;
+﻿using FluentResults;
+using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;
 
 namespace TelegramBotApp.AppCommunication.Interfaces;
@@ -10,7 +10,7 @@ public interface IDatabaseCommunicationClient : ICommunicationClient
     
     Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default);
     
-    Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<Class>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default);
     
     Task<Result<string>> SetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default);
     

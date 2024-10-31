@@ -19,21 +19,15 @@ public class EnqueueCallbackQuery : ICallbackQuery
     {        
         var argumentsList = arguments.ToList();
         if (argumentsList.Count != 1)
-        {
             throw new ArgumentException("EnqueueCallbackQuery: Неверное количество аргументов");
-        }
-        
+
         if (int.TryParse(argumentsList.First(), out var classId) == false)
-        {
             throw new ArgumentException($"EnqueueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
-        }
-        
+
         var result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
-        {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
-        }
 
         var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
         var messageHeader = result.Value.WasAlreadyEnqueued ? 
@@ -60,21 +54,15 @@ public class DequeueCallbackQuery : ICallbackQuery
     {        
         var argumentsList = arguments.ToList();
         if (argumentsList.Count != 1)
-        {
             throw new ArgumentException("DequeueCallbackQuery: Неверное количество аргументов");
-        }
-        
+
         if (int.TryParse(argumentsList.First(), out var classId) == false)
-        {
             throw new ArgumentException($"DequeueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
-        }
-        
+
         var result = await factory.DatabaseCommunicator.DequeueFromClass(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
-        {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
-        }
 
         var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
         var messageHeader = result.Value.WasAlreadyDequeued ? 

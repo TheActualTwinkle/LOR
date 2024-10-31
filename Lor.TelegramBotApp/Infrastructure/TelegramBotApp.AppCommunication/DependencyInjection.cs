@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using MapsterMapper;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,9 +15,12 @@ public static class DependencyInjection
         services.AddSingleton<IDatabaseCommunicationClient, GrpcDatabaseClient>(s =>
         {
             var logger = s.GetRequiredService<ILogger<GrpcDatabaseClient>>();
+            
             var url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            
             return new GrpcDatabaseClient(url, logger);
         });
+        
         return services;
     }
     

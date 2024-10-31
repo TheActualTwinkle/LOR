@@ -54,16 +54,12 @@ public partial class TelegramCommandFactory(IDatabaseCommunicationClient databas
     {
         var match = TelegramCommandRegex().Match(commandString);
         if (match.Success == false)
-        {
             return new ExecutionResult(Result.Fail($"Команда не найдена\nДля получения списка команд введите {CommandPrefix}help"));
-        }
-        
+
         var command = GetCommand(match.Value.Trim());
         
         if (command == null)
-        {
             return new ExecutionResult(Result.Fail($"Команда не найдена\nДля получения списка команд введите {CommandPrefix}help"));
-        }
 
         return await command.Execute(chatId, this, GetArguments(commandString), token);
     }

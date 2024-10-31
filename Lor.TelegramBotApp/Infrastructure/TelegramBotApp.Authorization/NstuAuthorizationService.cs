@@ -69,10 +69,8 @@ public partial class NstuAuthorizationService(ILogger<NstuAuthorizationService> 
             logger.LogError("Pattern not found in the fullname_and_info.");
         }
         else
-        {
             logger.LogError("Property 'fullname_and_info' not found in the response.");
-        }
-        
+
         return Result.Fail($"Не удалось получить информацию о студенте {fullName}");
     }
 
