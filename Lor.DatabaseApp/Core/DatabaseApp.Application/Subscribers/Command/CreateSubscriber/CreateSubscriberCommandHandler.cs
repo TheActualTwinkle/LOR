@@ -11,11 +11,11 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result> Handle(CreateSubscriberCommand request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
-        Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
+        var subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
         if (subscriber is not null) return Result.Fail("Вы уже подписаны");
         
@@ -28,7 +28,7 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken: cancellationToken) ?? [];
+        var cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken: cancellationToken) ?? [];
         
         cachedSubscriptions.Add(new SubscriberDto { TelegramId = request.TelegramId, GroupId = user.GroupId });
 

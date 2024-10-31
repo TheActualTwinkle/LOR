@@ -1,5 +1,4 @@
-﻿using GroupScheduleApp.AppCommunication.Grpc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TelegramBotApp.AppCommunication;
 using TelegramBotApp.AppCommunication.Interfaces;

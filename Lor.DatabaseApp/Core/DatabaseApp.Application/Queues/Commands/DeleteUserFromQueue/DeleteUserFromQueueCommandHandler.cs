@@ -14,26 +14,26 @@ public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheSer
     {
         cancellationToken =new CancellationToken();
         
-        List<Domain.Models.Queue>? queueOfClass = await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken);
+        var queueOfClass = await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken);
             
         if (queueOfClass is null) return Result.Fail("Запись в очереди не найдена");
 
-        uint userQueueNum = await unitOfWork.QueueRepository.GetUserQueueNum(request.TelegramId, request.ClassId, cancellationToken);
+        var userQueueNum = await unitOfWork.QueueRepository.GetUserQueueNum(request.TelegramId, request.ClassId, cancellationToken);
             
-        Domain.Models.Queue queue = queueOfClass.First(x => x.QueueNum == userQueueNum);
+        var queue = queueOfClass.First(x => x.QueueNum == userQueueNum);
         
         unitOfWork.QueueRepository.Delete(queue);
         
-        List<Domain.Models.Queue> queueAfterDelete = queueOfClass.Where(x => x.QueueNum > userQueueNum).ToList();
+        var queueAfterDelete = queueOfClass.Where(x => x.QueueNum > userQueueNum).ToList();
 
-        foreach (Domain.Models.Queue item in queueAfterDelete)
+        foreach (var item in queueAfterDelete)
         {
             item.QueueNum -= 1;
             
             unitOfWork.QueueRepository.Update(item);
         }
         
-        List<QueueDto> newQueue = mapper.From(queueOfClass.Where(x => x.QueueNum != userQueueNum).ToList()).AdaptToType<List<QueueDto>>();
+        var newQueue = mapper.From(queueOfClass.Where(x => x.QueueNum != userQueueNum).ToList()).AdaptToType<List<QueueDto>>();
         
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, newQueue, cancellationToken: cancellationToken);
         

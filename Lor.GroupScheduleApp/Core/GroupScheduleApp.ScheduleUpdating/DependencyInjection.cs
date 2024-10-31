@@ -13,15 +13,16 @@ public static class DependencyInjection
     {
         services.AddSingleton<IScheduleSendService>(s =>
         {
-            ILogger<ScheduleSendService> logger = s.GetRequiredService<ILogger<ScheduleSendService>>();
+            var logger = s.GetRequiredService<ILogger<ScheduleSendService>>();
             
-            IScheduleProvider scheduleProvider = s.GetRequiredService<IScheduleProvider>();
-            IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient = s.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
+            var scheduleProvider = s.GetRequiredService<IScheduleProvider>();
+            var databaseUpdaterCommunicationClient = s.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
 
-            string intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalMinutes").Value!;
-            TimeSpan pollingInterval = TimeSpan.FromMinutes(int.Parse(intervalString));
+            var intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalMinutes").Value!;
+            var pollingInterval = TimeSpan.FromMinutes(int.Parse(intervalString));
 
             ScheduleSendServiceSettings settings = new(pollingInterval);
+            
             return new ScheduleSendService(scheduleProvider, databaseUpdaterCommunicationClient, settings, logger);
         });
         return services;

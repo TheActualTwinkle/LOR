@@ -11,11 +11,11 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result> Handle(DeleteSubscriberCommand request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
-        Domain.Models.Subscriber? subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
+        var subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
         if (subscriber is null) return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
 
@@ -23,7 +23,7 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        List<SubscriberDto> cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken: cancellationToken) ?? [];
+        var cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken: cancellationToken) ?? [];
         
         await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions.Where(x => x.TelegramId != request.TelegramId),
             cancellationToken: cancellationToken);

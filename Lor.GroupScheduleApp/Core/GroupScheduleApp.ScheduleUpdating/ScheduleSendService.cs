@@ -1,5 +1,4 @@
 ﻿using GroupScheduleApp.ScheduleProviding.Interfaces;
-using GroupScheduleApp.Shared;
 using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.ScheduleUpdating.Settings;
 using Microsoft.Extensions.Logging;
@@ -32,12 +31,12 @@ public class ScheduleSendService(
 
     private async Task SendAllDataAsync()
     {
-        IEnumerable<string> availableGroups = await scheduleProvider.GetAvailableGroupsAsync();
-        IEnumerable<GroupClassesData> groupClassesData = await scheduleProvider.GetGroupClassesDataAsync();
+        var availableGroups = await scheduleProvider.GetAvailableGroupsAsync();
+        var groupClassesData = await scheduleProvider.GetGroupClassesDataAsync();
 
         await databaseUpdaterCommunicationClient.SetAvailableGroups(availableGroups);
 
-        foreach (GroupClassesData classesData in groupClassesData)
+        foreach (var classesData in groupClassesData)
         {
             await databaseUpdaterCommunicationClient.SetAvailableLabClasses(classesData);
         }

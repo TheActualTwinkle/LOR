@@ -11,12 +11,12 @@ public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
 {
     public async Task<Result<UserDto?>> Handle(GetUserInQueueQuery request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user =
+        var user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken); 
 
         if (user is null) return Result.Fail("Пользователь не найден.");
         
-        bool isUserInQueue =
+        var isUserInQueue =
             await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
         return isUserInQueue == true ? Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) : Result.Ok<UserDto?>(null);

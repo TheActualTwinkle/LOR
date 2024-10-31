@@ -12,11 +12,11 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user = await unitOfWork.UserRepository.CheckUser(request.TelegramId, await request.FullName.FormatFio(), cancellationToken);
+        var user = await unitOfWork.UserRepository.CheckUser(request.TelegramId, await request.FullName.FormatFio(), cancellationToken);
 
         if (user is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
 
-        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        var group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не найдена.");
 

@@ -12,9 +12,9 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
 {
     public async Task<Result> Handle(CreateClassesCommand request, CancellationToken cancellationToken)
     {
-        foreach (KeyValuePair<string, DateOnly> item in request.Classes)
+        foreach (var item in request.Classes)
         {
-            bool classExist = await unitOfWork.ClassRepository.CheckClass(item.Key, item.Value, cancellationToken);
+            var classExist = await unitOfWork.ClassRepository.CheckClass(item.Key, item.Value, cancellationToken);
 
             if (classExist) continue;
             
@@ -30,11 +30,11 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId, cancellationToken);
+        var classes = await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId, cancellationToken);
 
-        List<ClassDto> classDtos = mapper.From(classes).AdaptToType<List<ClassDto>>();
+        var classesDto = mapper.From(classes).AdaptToType<List<ClassDto>>();
 
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classDtos, cancellationToken: cancellationToken);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classesDto, cancellationToken: cancellationToken);
         
         return Result.Ok();
     }

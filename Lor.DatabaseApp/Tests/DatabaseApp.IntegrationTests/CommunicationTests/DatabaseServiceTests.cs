@@ -70,7 +70,7 @@ public class DatabaseServiceTests
         var classesResult = await IntegrationTestSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         Assert.That(classesResult.IsSuccess, Is.True);
 
-        int classId = classesResult.Value.First().ClassId;
+        var classId = classesResult.Value.First().ClassId;
         Result<EnqueueInClassResult> result1 = await IntegrationTestSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
         Result<EnqueueInClassResult> result2 = await IntegrationTestSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 1);
         Result<EnqueueInClassResult> result3 = await IntegrationTestSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 2);
@@ -93,7 +93,7 @@ public class DatabaseServiceTests
         var classesResult = await IntegrationTestSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         Assert.That(classesResult.IsSuccess, Is.True);
 
-        int classId = classesResult.Value.First().ClassId;
+        var classId = classesResult.Value.First().ClassId;
         Result<EnqueueInClassResult> result1 = await IntegrationTestSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
         Result<EnqueueInClassResult> result2 = await IntegrationTestSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
         
@@ -110,8 +110,8 @@ public class DatabaseServiceTests
     [Test]
     public async Task AddSubscriber()
     {
-        Result result1 = await IntegrationTestSharedContext.DatabaseCommunication.AddSubscriber(DefaultUserId);
-        Result result2 = await IntegrationTestSharedContext.DatabaseCommunication.AddSubscriber(DefaultUserId);
+        var result1 = await IntegrationTestSharedContext.DatabaseCommunication.AddSubscriber(DefaultUserId);
+        var result2 = await IntegrationTestSharedContext.DatabaseCommunication.AddSubscriber(DefaultUserId);
         
         Assert.Multiple(() =>
         {
@@ -123,9 +123,9 @@ public class DatabaseServiceTests
     [Test]
     public async Task RemoveSubscriber()
     {
-        Result result1 = await IntegrationTestSharedContext.DatabaseCommunication.AddSubscriber(DefaultUserId);
-        Result result2 = await IntegrationTestSharedContext.DatabaseCommunication.DeleteSubscriber(DefaultUserId);
-        Result result3 = await IntegrationTestSharedContext.DatabaseCommunication.DeleteSubscriber(DefaultUserId);
+        var result1 = await IntegrationTestSharedContext.DatabaseCommunication.AddSubscriber(DefaultUserId);
+        var result2 = await IntegrationTestSharedContext.DatabaseCommunication.DeleteSubscriber(DefaultUserId);
+        var result3 = await IntegrationTestSharedContext.DatabaseCommunication.DeleteSubscriber(DefaultUserId);
         
         Assert.Multiple(() =>
         {

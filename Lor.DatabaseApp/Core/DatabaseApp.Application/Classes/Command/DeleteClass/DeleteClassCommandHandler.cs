@@ -12,9 +12,9 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
     {
-        foreach (int item in request.ClassesId)
+        foreach (var item in request.ClassesId)
         {
-            Domain.Models.Class? @class = await unitOfWork.ClassRepository.GetClassById(item, cancellationToken);
+            var @class = await unitOfWork.ClassRepository.GetClassById(item, cancellationToken);
             
             if (@class is null) return Result.Fail($"Пара {@class?.Name} не найдена.");
             
@@ -23,13 +23,13 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        List<Domain.Models.Group>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
 
         if (groups is null) return Result.Fail("Группы не найдены.");
 
-        foreach (Domain.Models.Group? group in groups)
+        foreach (var group in groups)
         {
-            List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
+            var classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
 
             if (classes is null) continue;
             

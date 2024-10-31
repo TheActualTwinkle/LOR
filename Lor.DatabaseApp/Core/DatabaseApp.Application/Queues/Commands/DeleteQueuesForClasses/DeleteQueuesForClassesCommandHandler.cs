@@ -12,18 +12,19 @@ public class DeleteQueuesForClassesCommandHandler(IUnitOfWork unitOfWork, ICache
 {
     public async Task<Result> Handle(DeleteQueuesForClassesCommand request, CancellationToken cancellationToken)
     {
-        foreach (int classId in request.ClassesId)
+        foreach (var classId in request.ClassesId)
         {
-            List<Domain.Models.Queue>? outdatedQueueList = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
+            var outdatedQueueList = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
         
             if (outdatedQueueList is null) return Result.Fail($"Очередь для {classId} не найдена");
         
-            foreach (Domain.Models.Queue queue in outdatedQueueList)
+            foreach (var queue in outdatedQueueList)
             {
                 unitOfWork.QueueRepository.Delete(queue);
             }
 
-            List<QueueDto> queues = mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(classId, cancellationToken)).AdaptToType<List<QueueDto>>();
+            var queues = mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(classId, cancellationToken)).AdaptToType<List<QueueDto>>();
+            
             await cacheService.SetAsync(Constants.QueuePrefix + classId, queues, cancellationToken: cancellationToken);
         }
 

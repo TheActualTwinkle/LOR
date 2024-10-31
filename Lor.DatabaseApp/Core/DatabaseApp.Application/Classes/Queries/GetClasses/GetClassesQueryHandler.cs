@@ -12,7 +12,7 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
 {
     public async Task<Result<List<ClassDto>>> Handle(GetClassesQuery request, CancellationToken cancellationToken)
     {
-        List<ClassDto>? cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + request.GroupId, cancellationToken: cancellationToken);
+        var cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + request.GroupId, cancellationToken: cancellationToken);
 
         if (cachedClasses is not null) return Result.Ok(cachedClasses);
             
@@ -20,14 +20,14 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
         
         if (cachedClasses is not null) return Result.Ok(cachedClasses);
 
-        List<Domain.Models.Class>? classes = await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId, cancellationToken);
+        var classes = await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId, cancellationToken);
         
         if (classes is null) return Result.Fail("Пары не найдены.");
             
-        List<ClassDto> classDtos = mapper.From(classes).AdaptToType<List<ClassDto>>();
+        var classesDto = mapper.From(classes).AdaptToType<List<ClassDto>>();
         
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classDtos, cancellationToken: cancellationToken);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classesDto, cancellationToken: cancellationToken);
             
-        return Result.Ok(classDtos);
+        return Result.Ok(classesDto);
     }
 }

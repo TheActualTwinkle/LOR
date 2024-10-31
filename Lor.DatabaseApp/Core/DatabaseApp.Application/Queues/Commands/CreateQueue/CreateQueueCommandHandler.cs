@@ -12,23 +12,23 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
 {
     public async Task<Result> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
     {
-        Domain.Models.User? user =
+        var user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден.");
 
-        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        var group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не поддерживается.");
 
-        Domain.Models.Class? @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
         
         if (@class is null) return Result.Fail("Пара не найдена.");
 
-        uint queueNum =
+        var queueNum =
              Convert.ToUInt32(await unitOfWork.QueueRepository.GetCurrentQueueNum(request.ClassId));
 
-        bool queueExist =
+        var queueExist =
             await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
 
         if (queueExist)

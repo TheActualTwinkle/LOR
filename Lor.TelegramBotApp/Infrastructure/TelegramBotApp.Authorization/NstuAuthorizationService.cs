@@ -13,10 +13,10 @@ public partial class NstuAuthorizationService(ILogger<NstuAuthorizationService> 
     {
         try
         {
-            string fullName = request.FullName;
-            DateTime? dateOfBirth = request.DateOfBirth;
+            var fullName = request.FullName;
+            var dateOfBirth = request.DateOfBirth;
 
-            Result<UserDto> result = await ParseUserDto(fullName, dateOfBirth);
+            var result = await ParseUserDto(fullName, dateOfBirth);
             return result.IsSuccess ? Result.Ok(new AuthorizationReply(result.Value.FullName, result.Value.GroupName)) : Result.Fail(result.Errors.First());
         }
         catch (Exception e)
@@ -34,31 +34,31 @@ public partial class NstuAuthorizationService(ILogger<NstuAuthorizationService> 
         formData.Add(new StringContent(dateOfBirth.ToString() ?? string.Empty), "dob");
         formData.Add(new StringContent(string.Empty), "find_user");
 
-        HttpResponseMessage response = await client.PostAsync("https://id.nstu.ru/user_lookup", formData);
+        var response = await client.PostAsync("https://id.nstu.ru/user_lookup", formData);
 
         response.EnsureSuccessStatusCode();
 
-        string responseBody = await response.Content.ReadAsStringAsync();
+        var responseBody = await response.Content.ReadAsStringAsync();
 
-        using JsonDocument document = JsonDocument.Parse(responseBody);
-        if (document.RootElement.TryGetProperty("fullname", out JsonElement fullNameElement))
+        using var document = JsonDocument.Parse(responseBody);
+        if (document.RootElement.TryGetProperty("fullname", out var fullNameElement))
         {
-            string? fullNameFromData = fullNameElement.GetString()?.Trim();
+            var fullNameFromData = fullNameElement.GetString()?.Trim();
 
             if (fullNameFromData == null) return Result.Fail("Can't get fullname from the response.");
             
             fullName = fullNameFromData;
         }
         
-        if (document.RootElement.TryGetProperty("fullname_and_info", out JsonElement fullnameAndInfoElement))
+        if (document.RootElement.TryGetProperty("fullname_and_info", out var fullnameAndInfoElement))
         {
-            string fullnameAndInfo = fullnameAndInfoElement.GetString()!;
+            var fullnameAndInfo = fullnameAndInfoElement.GetString()!;
             
             fullnameAndInfo = fullnameAndInfo.Replace(fullName, string.Empty).Trim();
-            Match match = NstuFullNameAndInfoRegex().Match(fullnameAndInfo);
+            var match = NstuFullNameAndInfoRegex().Match(fullnameAndInfo);
             if (match.Success)
             {
-                string groupName = match.Groups[1].Value.Split(' ').Last();
+                var groupName = match.Groups[1].Value.Split(' ').Last();
                 return Result.Ok(new UserDto
                 {
                     FullName = fullName, 

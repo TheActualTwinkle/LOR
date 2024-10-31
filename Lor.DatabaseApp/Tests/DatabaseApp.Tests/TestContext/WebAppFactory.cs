@@ -28,7 +28,7 @@ public class WebAppFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
-            ServiceDescriptor? dbContextDescriptor = services.FirstOrDefault(d =>
+            var dbContextDescriptor = services.FirstOrDefault(d =>
                 d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
 
             if (dbContextDescriptor != null)
@@ -40,7 +40,7 @@ public class WebAppFactory : WebApplicationFactory<Program>
                 options.UseNpgsql(_dbContainer.GetConnectionString()));
             
             // Find ICacheService and Moq it. Every GetAsync should return null.
-            ServiceDescriptor? cacheServiceDescriptor = services.FirstOrDefault(d =>
+            var cacheServiceDescriptor = services.FirstOrDefault(d =>
                 d.ServiceType == typeof(ICacheService));
 
             if (cacheServiceDescriptor != null)

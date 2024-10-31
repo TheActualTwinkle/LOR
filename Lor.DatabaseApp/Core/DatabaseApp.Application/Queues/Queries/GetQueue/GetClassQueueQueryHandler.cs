@@ -12,16 +12,16 @@ public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cac
 {
     public async Task<Result<List<QueueDto>>> Handle(GetClassQueueQuery request, CancellationToken cancellationToken)
     {
-        List<QueueDto>? queueCache = await cacheService.GetAsync<List<QueueDto>>(Constants.QueuePrefix + request.ClassId, cancellationToken);
+        var queueCache = await cacheService.GetAsync<List<QueueDto>>(Constants.QueuePrefix + request.ClassId, cancellationToken);
         
         if (queueCache is not null) return Result.Ok(queueCache);
         
-        List<Domain.Models.Queue>? queueList =
+        var queueList =
             await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken);
         
         if (queueList is null) return Result.Fail("Очередь не найдена.");
 
-        List<QueueDto> queueDto = mapper.From(queueList).AdaptToType<List<QueueDto>>();
+        var queueDto = mapper.From(queueList).AdaptToType<List<QueueDto>>();
         
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto, cancellationToken: cancellationToken);
 

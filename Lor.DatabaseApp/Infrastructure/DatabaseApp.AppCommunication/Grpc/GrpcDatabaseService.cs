@@ -2,9 +2,7 @@
 using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
-using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Queries.GetGroups;
-using DatabaseApp.Application.Queue;
 using DatabaseApp.Application.Queue.Commands.CreateQueue;
 using DatabaseApp.Application.Queue.Commands.DeleteQueue;
 using DatabaseApp.Application.Queue.Queries.GetQueue;
@@ -13,11 +11,8 @@ using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
 using DatabaseApp.Application.Subscriber.Queries.GetSubscribers;
-using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
-using FluentResults;
-using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MediatR;
@@ -28,7 +23,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 {
     public override async Task<GetUserInfoReply> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
     {
-        Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+        var userDto = await mediator.Send(new GetUserInfoQuery
         {
             TelegramId = request.UserId
         }, context.CancellationToken);
@@ -44,11 +39,11 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         GetAvailableGroupsReply reply = new();
         
-        Result<List<GroupDto>> groups = await mediator.Send(new GetGroupsQuery(), context.CancellationToken);
+        var groups = await mediator.Send(new GetGroupsQuery(), context.CancellationToken);
 
         if (groups.IsFailed) return new GetAvailableGroupsReply();
         
-        foreach (GroupDto item in groups.Value)
+        foreach (var item in groups.Value)
         {
             reply.IdGroupsMap.Add(item.Id, item.GroupName);
         }
@@ -59,7 +54,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     public override async Task<GetAvailableClassesReply> GetAvailableClasses(
         GetAvailableClassesRequest request, ServerCallContext context)
     {
-        Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+        var userDto = await mediator.Send(new GetUserInfoQuery
         {
             TelegramId = request.UserId
         }, context.CancellationToken);
@@ -68,7 +63,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new GetAvailableClassesReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        Result<List<ClassDto>> classes = await mediator.Send(new GetClassesQuery
+        var classes = await mediator.Send(new GetClassesQuery
         {
             GroupId = userDto.Value.GroupId
         }, context.CancellationToken);
@@ -77,7 +72,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new GetAvailableClassesReply
                 { IsFailed = true, ErrorMessage = classes.Errors.First().Message };
 
-        RepeatedField<ClassInformation> classInformation = await classes.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
+        var classInformation = await classes.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
         {
             ClassId = dto.Id,
             ClassName = dto.Name,
@@ -89,7 +84,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
     public override async Task<SetGroupReply> SetGroup(SetGroupRequest request, ServerCallContext context)
     {
-        Result result = await mediator.Send(new CreateUserCommand
+        var result = await mediator.Send(new CreateUserCommand
         {
             TelegramId = request.UserId,
             FullName = request.FullName,
@@ -100,7 +95,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new SetGroupReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
 
-        Result<UserDto> userDto = await mediator.Send(new GetUserInfoQuery
+        var userDto = await mediator.Send(new GetUserInfoQuery
         {
             TelegramId = request.UserId
         }, context.CancellationToken);
@@ -115,12 +110,12 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     public override async Task<EnqueueInClassReply> EnqueueInClass(EnqueueInClassRequest request,
         ServerCallContext context)
     {
-        Result<ClassDto> getClassResult = await mediator.Send(new GetClassQuery
+        var getClassResult = await mediator.Send(new GetClassQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
         
-        Result<UserDto?> userInQueue = await mediator.Send(new GetUserInQueueQuery
+        var userInQueue = await mediator.Send(new GetUserInQueueQuery
         {
             ClassId = request.ClassId,
             TelegramId = request.UserId
@@ -130,7 +125,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new EnqueueInClassReply
                 { IsFailed = true, ErrorMessage = userInQueue.Errors.First().Message };
         
-        Result<List<QueueDto>> queueDto = await mediator.Send(new GetClassQueueQuery
+        var queueDto = await mediator.Send(new GetClassQueueQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
@@ -152,7 +147,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         }
         
         // If we have to ACTUALLY enqueue user
-        Result result = await mediator.Send(new CreateQueueCommand
+        var result = await mediator.Send(new CreateQueueCommand
         {
             TelegramId = request.UserId,
             ClassId = request.ClassId
@@ -181,7 +176,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     
     public override async Task<DequeueFromClassReply> DequeueFromClass(DequeueFromClassRequest request, ServerCallContext context)
     {
-        Result<ClassDto> getClassResult = await mediator.Send(new GetClassQuery
+        var getClassResult = await mediator.Send(new GetClassQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
@@ -190,7 +185,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new DequeueFromClassReply
                 { IsFailed = true, ErrorMessage = getClassResult.Errors.First().Message };
         
-        Result<List<QueueDto>> queueDto = await mediator.Send(new GetClassQueueQuery
+        var queueDto = await mediator.Send(new GetClassQueueQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
@@ -199,7 +194,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new DequeueFromClassReply 
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
         
-        Result<UserDto?> userInQueue = await mediator.Send(new GetUserInQueueQuery
+        var userInQueue = await mediator.Send(new GetUserInQueueQuery
         {
             ClassId = request.ClassId,
             TelegramId = request.UserId
@@ -222,7 +217,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         }
 
         // If we have to ACTUALLY DequeueFromClass user
-        Result result = await mediator.Send(new DeleteUserFromQueueCommand
+        var result = await mediator.Send(new DeleteUserFromQueueCommand
         {
             ClassId = request.ClassId,
             TelegramId = request.UserId
@@ -250,7 +245,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
     public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
     {
-        Result result = await mediator.Send(new CreateSubscriberCommand
+        var result = await mediator.Send(new CreateSubscriberCommand
         {
             TelegramId = request.SubscriberId
         }, context.CancellationToken);
@@ -264,7 +259,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     
     public override async Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
     {
-        Result result = await mediator.Send(new DeleteSubscriberCommand
+        var result = await mediator.Send(new DeleteSubscriberCommand
         {
             TelegramId = request.SubscriberId
         }, context.CancellationToken);
@@ -278,13 +273,13 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
     public override async Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
     {
-        Result<List<SubscriberDto>> subscriberDto = await mediator.Send(new GetAllSubscribersQuery(), context.CancellationToken);
+        var subscriberDto = await mediator.Send(new GetAllSubscribersQuery(), context.CancellationToken);
             
         if (subscriberDto.IsFailed)
             return new GetSubscribersReply
                 { IsFailed = true, ErrorMessage = subscriberDto.Errors.First().Message };
 
-        RepeatedField<SubscriberInformation> repeatedField = await subscriberDto.Value.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
+        var repeatedField = await subscriberDto.Value.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
         {
             UserId = dto.TelegramId,
             GroupId = dto.GroupId

@@ -1,12 +1,10 @@
-﻿using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Interfaces;
-using TelegramBotApp.Application.Commands;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Settings;
 using TelegramBotApp.Authorization.Interfaces;
@@ -56,7 +54,7 @@ public class TelegramBot(
         if (update.Message is not { } message) return Task.CompletedTask;
         if (message.Text is not { } userMessageText) return Task.CompletedTask;
         
-        long chatId = message.Chat.Id; // chat id equals to user telegram id
+        var chatId = message.Chat.Id; // chat id equals to user telegram id
         
         Task.Run(async () =>
         {
@@ -70,7 +68,7 @@ public class TelegramBot(
             
             try
             {
-                ExecutionResult executionResult = await _telegramCommandFactory.StartCommand(userMessageText, chatId, cts.Token);
+                var executionResult = await _telegramCommandFactory.StartCommand(userMessageText, chatId, cts.Token);
 
                 if (executionResult.Result.IsFailed)
                 {
@@ -100,7 +98,7 @@ public class TelegramBot(
     
     private Task HandleError(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
     {
-        string errorMessage = exception switch
+        var errorMessage = exception switch
         {
             ApiRequestException apiRequestException
                 => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
@@ -116,9 +114,9 @@ public class TelegramBot(
     {
         try
         {
-            ExecutionResult result = await _telegramCommandQueryFactory.Handle(callbackQuery, cancellationToken);
+            var result = await _telegramCommandQueryFactory.Handle(callbackQuery, cancellationToken);
 
-            long chatId = callbackQuery.Message!.Chat.Id;
+            var chatId = callbackQuery.Message!.Chat.Id;
             
             if (result.Result.IsFailed)
             {
@@ -143,19 +141,19 @@ public class TelegramBot(
         if (reply.Text is not {} replyText) return;
         if (message.Text is not {} text) return;
 
-        Match commandMatch = TelegramCommandFactory.TelegramCommandRegex().Match(replyText);
+        var commandMatch = TelegramCommandFactory.TelegramCommandRegex().Match(replyText);
         if (commandMatch.Success == false)
         {
             logger.LogError("Can`t handle message reply: ReplyToMessage has no command");
             return;
         }
         
-        string commandString = commandMatch.Value.Trim();
+        var commandString = commandMatch.Value.Trim();
         
         try
         {
             var wholeCommandString = $"{commandString} {text}";
-            ExecutionResult result = await _telegramCommandFactory.StartCommand(wholeCommandString, chatId, cancellationToken);
+            var result = await _telegramCommandFactory.StartCommand(wholeCommandString, chatId, cancellationToken);
             
             if (result.Result.IsFailed)
             {

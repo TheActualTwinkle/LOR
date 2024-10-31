@@ -15,7 +15,7 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
     public async Task StartAsync()
     {
         logger.LogInformation("Connecting to the Database gRPC service...");
-        GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
+        var channel = GrpcChannel.ForAddress(serviceUrl);
         await channel.ConnectAsync();
         logger.LogInformation("Successfully connected to the Database gRPC service.");
         
@@ -32,21 +32,21 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
 
     public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)
     {
-        GetUserInfoReply reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
+        var reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
     }
 
     public async Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default)
     {
-        GetAvailableGroupsReply reply = await _client!.GetAvailableGroupsAsync(new Empty(), cancellationToken: cancellationToken);
-        Dictionary<int, string> groups = reply.IdGroupsMap.ToDictionary(pair => pair.Key, pair => pair.Value);
+        var reply = await _client!.GetAvailableGroupsAsync(new Empty(), cancellationToken: cancellationToken);
+        var groups = reply.IdGroupsMap.ToDictionary(pair => pair.Key, pair => pair.Value);
         return Result.Ok(groups);
     }
 
     public async Task<Result<IEnumerable<ClassInformation>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
     {
-        GetAvailableClassesReply reply = await _client!.GetAvailableClassesAsync(new GetAvailableClassesRequest { UserId = userId }, cancellationToken: cancellationToken);
+        var reply = await _client!.GetAvailableClassesAsync(new GetAvailableClassesRequest { UserId = userId }, cancellationToken: cancellationToken);
         
         if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
 
@@ -55,14 +55,14 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
 
     public async Task<Result<string>> SetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
     {
-        SetGroupReply reply = await _client!.SetGroupAsync(new SetGroupRequest { UserId = userId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
+        var reply = await _client!.SetGroupAsync(new SetGroupRequest { UserId = userId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
     public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
     {
-        EnqueueInClassReply reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult
         {
@@ -75,7 +75,7 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
     
     public async Task<Result<DequeueFromClassResult>> DequeueFromClass(int cassId, long userId, CancellationToken cancellationToken = default)
     {
-        DequeueFromClassReply reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassResult
         {
@@ -88,26 +88,26 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
 
     public async Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default)
     {
-        AddSubscriberReply reply = await _client!.AddSubscriberAsync(new AddSubscriberRequest { SubscriberId = userId }, cancellationToken: cancellationToken);
+        var reply = await _client!.AddSubscriberAsync(new AddSubscriberRequest { SubscriberId = userId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
     }
 
     public async Task<Result> DeleteSubscriber(long userId, CancellationToken cancellationToken = default)
     {
-        DeleteSubscriberReply reply = await _client!.DeleteSubscriberAsync(new DeleteSubscriberRequest { SubscriberId = userId}, cancellationToken: cancellationToken);
+        var reply = await _client!.DeleteSubscriberAsync(new DeleteSubscriberRequest { SubscriberId = userId}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
     }
 
     public async Task<Result<IEnumerable<SubscriberInfo>>> GetSubscribers(CancellationToken cancellationToken = default)
     {
-        GetSubscribersReply reply = await _client!.GetSubscribersAsync(new Empty(), cancellationToken: cancellationToken);
+        var reply = await _client!.GetSubscribersAsync(new Empty(), cancellationToken: cancellationToken);
 
         if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
 
         List<SubscriberInfo> subscribers = [];
-        foreach (SubscriberInformation subscriber in reply.Subscribers.ToList())
+        foreach (var subscriber in reply.Subscribers.ToList())
         {
             subscribers.Add(new SubscriberInfo { TelegramId = subscriber.UserId, GroupId = subscriber.GroupId });
         }

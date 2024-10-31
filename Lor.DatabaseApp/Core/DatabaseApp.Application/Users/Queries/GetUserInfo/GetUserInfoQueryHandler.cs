@@ -12,19 +12,19 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cache
 {
     public async Task<Result<UserDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
-        UserDto? cachedUser = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.TelegramId, cancellationToken);
+        var cachedUser = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.TelegramId, cancellationToken);
 
         if (cachedUser is not null) return Result.Ok(cachedUser);
         
-        Domain.Models.User? user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден.");
 
-        Domain.Models.Group? group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        var group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не найдена.");
 
-        UserDto userDto = mapper.From(new UserDto { FullName = user.FullName, GroupId = user.GroupId, GroupName = group.Name }).AdaptToType<UserDto>();
+        var userDto = mapper.From(new UserDto { FullName = user.FullName, GroupId = user.GroupId, GroupName = group.Name }).AdaptToType<UserDto>();
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, userDto, cancellationToken: cancellationToken);
 

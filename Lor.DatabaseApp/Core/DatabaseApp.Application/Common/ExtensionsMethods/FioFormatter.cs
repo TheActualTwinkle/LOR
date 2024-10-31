@@ -4,7 +4,7 @@ public static class FioFormatter
 {
     public static async Task<string> FormatFio(this string fullName)
     {
-        Match match = Regex.Match(fullName,
+        var match = Regex.Match(fullName,
             @"^(?<lastName>\p{L}+)\s+(?<firstName>\p{L}+)(\s+(?<middleName>\p{L}+))?$");
 
         if (!match.Success)
@@ -12,13 +12,13 @@ public static class FioFormatter
             throw new ArgumentException("Некорректное ФИО");
         }
 
-        string lastName = match.Groups["lastName"].Value;
-        string firstName = match.Groups["firstName"].Value;
-        string middleName = match.Groups["middleName"].Value;
+        var lastName = match.Groups["lastName"].Value;
+        var firstName = match.Groups["firstName"].Value;
+        var middleName = match.Groups["middleName"].Value;
 
-        string formattedLastName = await lastName.FormatPart();
-        string formattedFirstName = await firstName.FormatPart();
-        string formattedMiddleName = string.IsNullOrEmpty(middleName) ? string.Empty : await middleName.FormatPart();
+        var formattedLastName = await lastName.FormatPart();
+        var formattedFirstName = await firstName.FormatPart();
+        var formattedMiddleName = string.IsNullOrEmpty(middleName) ? string.Empty : await middleName.FormatPart();
 
         return $"{formattedLastName} {formattedFirstName} {formattedMiddleName}".Trim();
 

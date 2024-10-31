@@ -46,19 +46,19 @@ public partial class TelegramCommandFactory(IDatabaseCommunicationClient databas
             throw;
         }
         
-        using CompositionHost container = configuration.CreateContainer();
+        using var container = configuration.CreateContainer();
         container.SatisfyImports(Info);   
     }
     
     public async Task<ExecutionResult> StartCommand(string commandString, long chatId, CancellationToken token)
     {
-        Match match = TelegramCommandRegex().Match(commandString);
+        var match = TelegramCommandRegex().Match(commandString);
         if (match.Success == false)
         {
             return new ExecutionResult(Result.Fail($"Команда не найдена\nДля получения списка команд введите {CommandPrefix}help"));
         }
         
-        ITelegramCommand? command = GetCommand(match.Value.Trim());
+        var command = GetCommand(match.Value.Trim());
         
         if (command == null)
         {
@@ -75,12 +75,12 @@ public partial class TelegramCommandFactory(IDatabaseCommunicationClient databas
 
     public static ReplyKeyboardMarkup GetCommandButtonsReplyMarkup()
     {
-        IEnumerable<Lazy<ITelegramCommand, TelegramCommandMetadata>> commandsWithButtonDescription = Info.Commands.Where(x => x.Metadata.ButtonDescriptionText != null);
+        var commandsWithButtonDescription = Info.Commands.Where(x => x.Metadata.ButtonDescriptionText != null);
         
-        IEnumerable<KeyboardButton[]> buttons = commandsWithButtonDescription.Select(x => new[] { new KeyboardButton($"{x.Metadata.ButtonDescriptionText}\n\n({x.Metadata.Command})") });
+        var buttons = commandsWithButtonDescription.Select(x => new[] { new KeyboardButton($"{x.Metadata.ButtonDescriptionText}\n\n({x.Metadata.Command})") });
         
         // Take 2 buttons per row
-        IEnumerable<IEnumerable<KeyboardButton>> buttonsPerRow = buttons.Select((x, i) => new { Index = i, Value = x }).GroupBy(x => x.Index / 2).Select(x => x.Select(v => v.Value).SelectMany(v => v));
+        var buttonsPerRow = buttons.Select((x, i) => new { Index = i, Value = x }).GroupBy(x => x.Index / 2).Select(x => x.Select(v => v.Value).SelectMany(v => v));
         
         ReplyKeyboardMarkup replyKeyboardMarkup = new(buttonsPerRow);
 

@@ -3,8 +3,6 @@ using System.Text;
 using DatabaseApp.AppCommunication.Grpc;
 using FluentResults;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBotApp.AppCommunication.Data;
-using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization;
@@ -46,7 +44,7 @@ public class HelpTelegramCommand : ITelegramCommand
     {
         StringBuilder message = new();
 
-        foreach (string command in TelegramCommandFactory.GetAllCommandsInfo())
+        foreach (var command in TelegramCommandFactory.GetAllCommandsInfo())
         {
             message.AppendLine(command);
         }
@@ -69,14 +67,14 @@ public class GroupsTelegramCommand : ITelegramCommand
     {
         StringBuilder message = new("Поддерживаемые группы:\n");
         
-        Result<Dictionary<int, string>> result = await factory.DatabaseCommunicator.GetAvailableGroups(cancellationToken);
+        var result = await factory.DatabaseCommunicator.GetAvailableGroups(cancellationToken);
         
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
         
-        foreach (KeyValuePair<int, string> idGroupPair in result.Value)
+        foreach (var idGroupPair in result.Value)
         {
             message.AppendLine(idGroupPair.Value);
         }
@@ -97,7 +95,7 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<UserInfo> getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        var getUserGroupResult = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (getUserGroupResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getUserGroupResult.Errors.First()));
@@ -105,16 +103,16 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
         
         StringBuilder message = new("Доступные лабораторные работы:\n");
 
-        Result<IEnumerable<ClassInformation>> getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        var getAvailableLabClassesResult = await factory.DatabaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
         
         if (getAvailableLabClassesResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(getAvailableLabClassesResult.Errors.First()));
         }
         
-        foreach (ClassInformation classInformation in getAvailableLabClassesResult.Value)
+        foreach (var classInformation in getAvailableLabClassesResult.Value)
         {
-            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            var dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
             message.AppendLine($"{classInformation.ClassName} {dateTime:dd.MM}");
         }
 
@@ -134,30 +132,30 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
-        Result<UserInfo> result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        var databaseCommunicator = factory.DatabaseCommunicator;
+        var result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
 
-        Result<IEnumerable<ClassInformation>> availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        var availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
         if (availableLabClassesResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
         }
         
-        IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        var replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
         return new ExecutionResult(Result.Fail("Выберите пару для ЗАПИСИ \u270d\ufe0f"), replyMarkup);
     }
     
     private Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<ClassInformation> classes)
     {
         List<InlineKeyboardButton[]> buttons = [];
-        foreach (ClassInformation classInformation in classes)
+        foreach (var classInformation in classes)
         {
-            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop {classInformation.ClassId}");
+            var dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            var button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 
@@ -177,30 +175,30 @@ public class DequeueTelegramCommand : ITelegramCommand
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        IDatabaseCommunicationClient databaseCommunicator = factory.DatabaseCommunicator;
-        Result<UserInfo> result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        var databaseCommunicator = factory.DatabaseCommunicator;
+        var result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsFailed)
         {
             return new ExecutionResult(Result.Fail(result.Errors.First()));
         }
 
-        Result<IEnumerable<ClassInformation>> availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        var availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
         if (availableLabClassesResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
         }
         
-        IReplyMarkup replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        var replyMarkup = await CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
         return new ExecutionResult(Result.Fail("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
     }
     
     private Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<ClassInformation> classes)
     {
         List<InlineKeyboardButton[]> buttons = [];
-        foreach (ClassInformation classInformation in classes)
+        foreach (var classInformation in classes)
         {
-            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
-            InlineKeyboardButton button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}dehop {classInformation.ClassId}");
+            var dateTime = DateTimeOffset.FromUnixTimeSeconds(classInformation.ClassDateUnixTimestamp).DateTime;
+            var button = InlineKeyboardButton.WithCallbackData($"{classInformation.ClassName} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}dehop {classInformation.ClassId}");
             buttons.Add([button]);
         }
 
@@ -220,7 +218,7 @@ public class AddSubscriberTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result result = await factory.DatabaseCommunicator.AddSubscriber(chatId, cancellationToken);
+        var result = await factory.DatabaseCommunicator.AddSubscriber(chatId, cancellationToken);
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Теперь вы будете получать уведомления о новых лабораторных работах"));
     }
 }
@@ -237,7 +235,7 @@ public class DeleteSubscriberTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);
+        var result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Вы отписаны от уведомлений о новых лабораторных работах"));
     }
 }
@@ -254,7 +252,7 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
-        Result<UserInfo> result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        var result = await factory.DatabaseCommunicator.GetUserInfo(chatId, cancellationToken);
         if (result.IsSuccess == true)
         {
             return new ExecutionResult(Result.Ok($"Вы уже авторизованы в группе {result.Value.GroupName} как {result.Value.FullName}"));
@@ -272,15 +270,15 @@ public class AuthorizationTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"), new ForceReplyMarkup());
         }
         
-        string fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
-        Result<AuthorizationReply> authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
+        var fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
+        var authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
         
         if (authorizeResult.IsFailed)
         {
             return new ExecutionResult(Result.Fail(authorizeResult.Errors.First()));
         }
 
-        Result<string> setGroupResult = await factory.DatabaseCommunicator.SetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
+        var setGroupResult = await factory.DatabaseCommunicator.SetGroup(chatId, authorizeResult.Value.Group, authorizeResult.Value.FullName, cancellationToken);
 
         return setGroupResult.IsFailed ? new ExecutionResult(Result.Fail(setGroupResult.Errors.First())) : new ExecutionResult(Result.Ok(setGroupResult.Value));
     }

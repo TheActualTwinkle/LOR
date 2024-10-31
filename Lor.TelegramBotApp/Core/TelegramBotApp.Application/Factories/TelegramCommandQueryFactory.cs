@@ -43,7 +43,7 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
             throw;
         }
         
-        using CompositionHost container = configuration.CreateContainer();
+        using var container = configuration.CreateContainer();
         container.SatisfyImports(Info);   
     }
     
@@ -55,10 +55,10 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
         
         if (callbackQuery.Message is null) return new ExecutionResult(Result.Fail("CallbackQuery: Не найдено сообщение"));
         
-        long chatId = callbackQuery.Message.Chat.Id;
-        string queryString = callbackQuery.Data;
+        var chatId = callbackQuery.Message.Chat.Id;
+        var queryString = callbackQuery.Data;
             
-        ICallbackQuery? query = GetQuery(queryString.Split(' ').FirstOrDefault()!);
+        var query = GetQuery(queryString.Split(' ').FirstOrDefault()!);
         
         if (query == null)
         {

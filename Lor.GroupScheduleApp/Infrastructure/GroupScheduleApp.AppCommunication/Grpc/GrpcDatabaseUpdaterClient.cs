@@ -13,7 +13,7 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl, ILogger<GrpcDatabaseUp
     public async Task StartAsync()
     {
         logger.LogInformation("Connecting to the Database gRPC service...");
-        GrpcChannel channel = GrpcChannel.ForAddress(serviceUrl);
+        var channel = GrpcChannel.ForAddress(serviceUrl);
         await channel.ConnectAsync();
         logger.LogInformation("Successfully connected to the Database gRPC service.");
         
@@ -36,7 +36,7 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl, ILogger<GrpcDatabaseUp
     public async Task SetAvailableLabClasses(GroupClassesData groupClassesData)
     {
         Dictionary<string, long> classes = new();
-        foreach (ClassData classData in groupClassesData.Classes)
+        foreach (var classData in groupClassesData.Classes)
         {
             DateTimeOffset dateTimeOffset = DateTime.SpecifyKind(classData.Date, DateTimeKind.Utc);
             classes.Add(classData.Name, dateTimeOffset.ToUnixTimeSeconds());

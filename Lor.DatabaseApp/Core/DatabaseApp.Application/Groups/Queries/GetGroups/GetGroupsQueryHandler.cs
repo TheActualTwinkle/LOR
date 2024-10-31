@@ -12,15 +12,15 @@ public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheSe
 {
     public async Task<Result<List<GroupDto>>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
     {
-        List<GroupDto>? cachedGroups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey, cancellationToken);
+        var cachedGroups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey, cancellationToken);
 
         if (cachedGroups is not null) return Result.Ok(cachedGroups);
         
-        List<Domain.Models.Group>? groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
         
         if (groups is null) return Result.Fail("Группы не найдены.");
         
-        List<GroupDto> groupsDto = mapper.From(groups).AdaptToType<List<GroupDto>>();
+        var groupsDto = mapper.From(groups).AdaptToType<List<GroupDto>>();
         
         await cacheService.SetAsync(Constants.AvailableGroupsKey, groupsDto, cancellationToken: cancellationToken);
 
