@@ -132,7 +132,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         if (availableLabClassesResult.IsFailed)
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
 
-        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, Command);
         return new ExecutionResult(Result.Fail("Выберите пару для ЗАПИСИ \u270d\ufe0f"), replyMarkup);
     }
 }
@@ -158,7 +158,7 @@ public class DequeueTelegramCommand : ITelegramCommand
         if (availableLabClassesResult.IsFailed)
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
 
-        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, Command);
         return new ExecutionResult(Result.Fail("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
     }
 }
@@ -235,13 +235,13 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 
 public static class MarkupCreator
 {
-    public static Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<Class> classes)
+    public static Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<Class> classes, string command)
     {
         List<InlineKeyboardButton[]> buttons = [];
         foreach (var classInformation in classes)
         {
             var dateTime = classInformation.Date;
-            var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop {classInformation.Id}");
+            var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}", $"{command} {classInformation.Id}");
             buttons.Add([button]);
         }
 
