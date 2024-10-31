@@ -1,10 +1,8 @@
-﻿using DatabaseApp.Application.Group;
-using DatabaseApp.Application.Group.Command.CreateGroup;
+﻿using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.Group.Queries.GetGroups;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
-using FluentResults;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,7 +22,7 @@ public class GroupTests
     {
         await _factory.InitializeAsync();
 
-        IServiceScope scope = _factory.Services.CreateScope();
+        var scope = _factory.Services.CreateScope();
 
         _sender = scope.ServiceProvider.GetRequiredService<ISender>();
         _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -44,15 +42,15 @@ public class GroupTests
     }
     
     [Test]
-    public async Task CreateGroup_WhenGroupNotExist_ShouldReturnSuccess()
+    public async Task CreateGroup_WhenGroupNotExist_Success()
     {
         // Act
-        Result createResult = await _sender.Send(new CreateGroupsCommand
+        var createResult = await _sender.Send(new CreateGroupsCommand
         {
             GroupNames = [TestGroupName]
         });
 
-        Result<GroupDto> getResult = await _sender.Send(new GetGroupQuery
+        var getResult = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
@@ -66,23 +64,23 @@ public class GroupTests
     }
     
     [Test]
-    public async Task CreateGroup_WhenGroupExist_ShouldReturnFail()
+    public async Task CreateGroup_WhenGroupExist_Fail()
     {
         // Arrange
-        Result firstResult = await _sender.Send(new CreateGroupsCommand
+        var firstResult = await _sender.Send(new CreateGroupsCommand
         {
             GroupNames = [TestGroupName]
         });
 
         // Act
-        Result secondResult = await _sender.Send(new CreateGroupsCommand
+        var secondResult = await _sender.Send(new CreateGroupsCommand
         {
             GroupNames = [TestGroupName]
         });
         
         // Assert
 
-        Result<List<GroupDto>> getGroups = await _sender.Send(new GetGroupsQuery());
+        var getGroups = await _sender.Send(new GetGroupsQuery());
 
         Assert.Multiple(() =>
         {
@@ -94,7 +92,7 @@ public class GroupTests
     }
     
     [Test]
-    public async Task GetGroup_WhenGroupExist_ShouldReturnGroup()
+    public async Task GetGroup_WhenGroupExist_Group()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -103,7 +101,7 @@ public class GroupTests
         });
         
         // Act
-        Result<GroupDto> getResult = await _sender.Send(new GetGroupQuery
+        var getResult = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
@@ -113,10 +111,10 @@ public class GroupTests
     }
     
     [Test]
-    public async Task GetGroup_WhenGroupNotExist_ShouldReturnFail()
+    public async Task GetGroup_WhenGroupNotExist_Fail()
     {
         // Act
-        Result<GroupDto> getResult = await _sender.Send(new GetGroupQuery
+        var getResult = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
@@ -127,7 +125,7 @@ public class GroupTests
     
     
     [Test]
-    public async Task GetGroups_WhenGroupsExist_ShouldReturnListOfGroups()
+    public async Task GetGroups_WhenGroupsExist_ListOfGroups()
     {
         // Arrange
         await _sender.Send(new CreateGroupsCommand
@@ -136,7 +134,7 @@ public class GroupTests
         });
         
         // Act
-        Result<List<GroupDto>> getResult = await _sender.Send(new GetGroupsQuery());
+        var getResult = await _sender.Send(new GetGroupsQuery());
         
         // Assert
         Assert.Multiple(() =>
@@ -147,10 +145,10 @@ public class GroupTests
     }
     
     [Test]
-    public async Task GetGroups_WhenGroupsNotExist_ShouldReturnEmptyList()
+    public async Task GetGroups_WhenGroupsNotExist_EmptyList()
     {
         // Act
-        Result<List<GroupDto>> getResult = await _sender.Send(new GetGroupsQuery());
+        var getResult = await _sender.Send(new GetGroupsQuery());
         
         // Assert
         Assert.Multiple(() =>

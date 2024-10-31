@@ -38,7 +38,6 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
         options.AddArgument("--disable-dev-shm-usage"); // Overcome limited resource problems
         options.AddArgument("--no-sandbox"); // Bypass OS security model
         options.AddArgument("--log-level=3");
-        options.AddArgument("--window-size=1,1"); // set window size
         
         _chromeDriver = new ChromeDriver(options);
     }
@@ -47,10 +46,10 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
     {
         List<string> groups = [];
         
-        foreach (string url in _urls)
+        foreach (var url in _urls)
         {
             await _chromeDriver.Navigate().GoToUrlAsync(url);
-            string groupName = GetGroupName();
+            var groupName = GetGroupName();
             groups.Add(groupName);
         }
 
@@ -61,13 +60,13 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
     {
         List<GroupClassesData> groupClassesData = [];
 
-        foreach (string url in _urls)
+        foreach (var url in _urls)
         {
             List<ClassData> classesData = [];
             
             await _chromeDriver.Navigate().GoToUrlAsync(url);
-            int? weekNumber = GetWeekNumber(_chromeDriver.FindElement(By.ClassName(Constants.WeekHeader)).FindElement(By.ClassName(Constants.WeekHeaderValue)).Text);
-            string groupName = GetGroupName();
+            var weekNumber = GetWeekNumber(_chromeDriver.FindElement(By.ClassName(Constants.WeekHeader)).FindElement(By.ClassName(Constants.WeekHeaderValue)).Text);
+            var groupName = GetGroupName();
 
             if (weekNumber == null) continue;
 
@@ -89,12 +88,12 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
     {
         List<ClassData> classesData = [];
         
-        IWebElement body = _chromeDriver.FindElement(By.ClassName(Constants.TableBody));
-        List<IWebElement> rows = body.FindElements(By.XPath($"./div[contains(@class, '{Constants.TableBodyRow}')]")).ToList();
+        var body = _chromeDriver.FindElement(By.ClassName(Constants.TableBody));
+        var rows = body.FindElements(By.XPath($"./div[contains(@class, '{Constants.TableBodyRow}')]")).ToList();
         
-        foreach (IWebElement row in rows.Where(r => string.IsNullOrEmpty(r.Text) == false))
+        foreach (var row in rows.Where(r => string.IsNullOrEmpty(r.Text) == false))
         {
-            List<string> classNames = row.FindElements(By.ClassName(Constants.ClassRow))
+            var classNames = row.FindElements(By.ClassName(Constants.ClassRow))
                 .Where(e => string.IsNullOrWhiteSpace(e.Text) == false)
                 .Where(e => e.Text.Contains("Лабораторная") == true)
                 .Select(e => new string(e.Text.TakeWhile(x => x != '·').ToArray()))
@@ -103,13 +102,11 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
 
             if (classNames.Count == 0) continue;
             
-            string dateRaw = row.FindElement(By.ClassName(Constants.ClassDate)).Text;
-            DateTime date = DateTime.ParseExact($"{dateRaw}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
+            var dateRaw = row.FindElement(By.ClassName(Constants.ClassDate)).Text;
+            var date = DateTime.ParseExact($"{dateRaw}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
-            foreach (string className in classNames)
-            {
+            foreach (var className in classNames)
                 classesData.Add(new ClassData(className, date));
-            }
         }
 
         return classesData.AsEnumerable();
@@ -122,7 +119,7 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
     
     private int? GetWeekNumber(string text)
     {
-        Match match = WeekNumberRegex().Match(text);
+        var match = WeekNumberRegex().Match(text);
         
         return match.Success ? int.Parse(match.Value) : null;
     }

@@ -13,7 +13,7 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
         
         builder.Configuration.AddJsonFile("appsettings.json", false, true).AddEnvironmentVariables();
         
@@ -27,12 +27,12 @@ public class Program
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddBus(builder.Configuration);
 
-        WebApplication app = builder.Build();
+        var app = builder.Build();
         
         try
         {
-            using IServiceScope scope = app.Services.CreateScope();
-            IDatabaseContext databaseContext = scope.ServiceProvider.GetRequiredService<IDatabaseContext>();
+            using var scope = app.Services.CreateScope();
+            var databaseContext = scope.ServiceProvider.GetRequiredService<IDatabaseContext>();
             await databaseContext.Db.MigrateAsync();
         }
         catch (Exception e)
@@ -45,10 +45,8 @@ public class Program
         app.MapGrpcService<GrpcDatabaseUpdaterService>();
         
         if (app.Environment.IsDevelopment())
-        {
             app.MapGrpcReflectionService();
-        }
-        
+
         app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
         await app.RunAsync();

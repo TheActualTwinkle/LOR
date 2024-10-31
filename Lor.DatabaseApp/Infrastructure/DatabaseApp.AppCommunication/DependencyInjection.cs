@@ -14,10 +14,10 @@ public static class DependencyInjection
             
             x.UsingRabbitMq((context,cfg) =>
             {
-                IConfigurationSection configurationSection = configuration.GetRequiredSection("RabbitMqSettings");
-                string host = configurationSection["Host"]!;
-                string username = configurationSection["Username"]!;
-                string password = configurationSection["Password"]!;
+                var configurationSection = configuration.GetRequiredSection("RabbitMqSettings");
+                var host = configurationSection["Host"]!;
+                var username = configurationSection["Username"]!;
+                var password = configurationSection["Password"]!;
                 
                 cfg.Host(host, h => {
                     h.Username(username);

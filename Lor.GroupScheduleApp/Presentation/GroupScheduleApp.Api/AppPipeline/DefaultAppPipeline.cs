@@ -14,7 +14,7 @@ public class DefaultAppPipeline : IAppPipeline
 {
     public async Task Run()
     {
-        using IHost host = Host.CreateDefaultBuilder()
+        using var host = Host.CreateDefaultBuilder()
             .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
             .ConfigureAppConfiguration(config =>
                 {
@@ -32,8 +32,8 @@ public class DefaultAppPipeline : IAppPipeline
             )
             .Build();
 
-        IDatabaseUpdaterCommunicationClient communicationClient = host.Services.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
-        IScheduleSendService sendService = host.Services.GetRequiredService<IScheduleSendService>();
+        var communicationClient = host.Services.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
+        var sendService = host.Services.GetRequiredService<IScheduleSendService>();
         
         await InitializeAppCommunicators([
             communicationClient
@@ -44,9 +44,7 @@ public class DefaultAppPipeline : IAppPipeline
     
     private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)
     {
-        foreach (ICommunicationClient appCommunicator in communicators)
-        {
+        foreach (var appCommunicator in communicators)
             await appCommunicator.StartAsync();
-        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Telegram.Bot.Polling;
 using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.Application.Common;
 using TelegramBotApp.Authorization.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
 

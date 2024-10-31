@@ -1,10 +1,8 @@
 ﻿using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.User;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Application.User.Queries.GetUserInfo;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
-using FluentResults;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,7 +24,7 @@ public class UserTests
     {
         await _factory.InitializeAsync();
 
-        IServiceScope scope = _factory.Services.CreateScope();
+        var scope = _factory.Services.CreateScope();
 
         _sender = scope.ServiceProvider.GetRequiredService<ISender>();
         _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -55,19 +53,19 @@ public class UserTests
     }
     
     [Test]
-    public async Task CreateUser_WhenUserNotExist_ShouldReturnUser()
+    public async Task CreateUser_WhenUserNotExist_User()
     {
         // Arrange
         
         // Act
-        Result setResult = await _sender.Send(new CreateUserCommand
+        var setResult = await _sender.Send(new CreateUserCommand
         {
             TelegramId = TestTelegramId,
             FullName = TestFullName,
             GroupName = TestGroupName
         });
         
-        Result<UserDto> getResult = await _sender.Send(new GetUserInfoQuery
+        var getResult = await _sender.Send(new GetUserInfoQuery
         {
             TelegramId = TestTelegramId
         });
@@ -77,10 +75,10 @@ public class UserTests
     }
 
     [Test]
-    public async Task CreateUser_WhenUserExist_ShouldReturnFail()
+    public async Task CreateUser_WhenUserExist_Fail()
     {
         // Arrange
-        Result firstResult = await _sender.Send(new CreateUserCommand
+        var firstResult = await _sender.Send(new CreateUserCommand
         {
             TelegramId = TestTelegramId,
             FullName = TestFullName,
@@ -88,7 +86,7 @@ public class UserTests
         });
         
         // Act
-        Result secondResult = await _sender.Send(new CreateUserCommand
+        var secondResult = await _sender.Send(new CreateUserCommand
         {
             TelegramId = TestTelegramId,
             FullName = TestFullName,
@@ -104,17 +102,17 @@ public class UserTests
     }
     
     [Test]
-    public async Task CreateUser_WhenGroupNotExist_ShouldReturnFail()
+    public async Task CreateUser_WhenGroupNotExist_Fail()
     {
         // Act
-        Result createResult = await _sender.Send(new CreateUserCommand
+        var createResult = await _sender.Send(new CreateUserCommand
         {
             TelegramId = TestTelegramId,
             FullName = TestFullName,
             GroupName = "Nonexistent group"
         });
 
-        Result<UserDto> getResult = await _sender.Send(new GetUserInfoQuery
+        var getResult = await _sender.Send(new GetUserInfoQuery
         {
             TelegramId = TestTelegramId
         });
@@ -128,10 +126,10 @@ public class UserTests
     }
 
     [Test]
-    public async Task GetUserInfo_WhenUserExist_ShouldReturnUser()
+    public async Task GetUserInfo_WhenUserExist_User()
     {
         // Arrange
-        Result createUserResult = await _sender.Send(new CreateUserCommand
+        var createUserResult = await _sender.Send(new CreateUserCommand
         {
             TelegramId = TestTelegramId,
             FullName = TestFullName,
@@ -139,7 +137,7 @@ public class UserTests
         });
         
         // Act
-        Result<UserDto> result = await _sender.Send(new GetUserInfoQuery
+        var result = await _sender.Send(new GetUserInfoQuery
         {
             TelegramId = TestTelegramId
         });
@@ -154,10 +152,10 @@ public class UserTests
     }
     
     [Test]
-    public async Task GetUserInfo_WhenUserNotExist_ShouldReturnFail()
+    public async Task GetUserInfo_WhenUserNotExist_Fail()
     {
         // Act
-        Result<UserDto> result = await _sender.Send(new GetUserInfoQuery
+        var result = await _sender.Send(new GetUserInfoQuery
         {
             TelegramId = TestTelegramId
         });

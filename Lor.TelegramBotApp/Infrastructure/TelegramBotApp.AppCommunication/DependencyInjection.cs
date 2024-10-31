@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using MapsterMapper;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,10 +14,13 @@ public static class DependencyInjection
     {
         services.AddSingleton<IDatabaseCommunicationClient, GrpcDatabaseClient>(s =>
         {
-            ILogger<GrpcDatabaseClient> logger = s.GetRequiredService<ILogger<GrpcDatabaseClient>>();
-            string url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            var logger = s.GetRequiredService<ILogger<GrpcDatabaseClient>>();
+            
+            var url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            
             return new GrpcDatabaseClient(url, logger);
         });
+        
         return services;
     }
     
@@ -30,10 +34,10 @@ public static class DependencyInjection
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                IConfigurationSection configurationSection = configuration.GetRequiredSection("RabbitMqSettings");
-                string host = configurationSection["Host"]!;
-                string username = configurationSection["Username"]!;
-                string password = configurationSection["Password"]!;
+                var configurationSection = configuration.GetRequiredSection("RabbitMqSettings");
+                var host = configurationSection["Host"]!;
+                var username = configurationSection["Username"]!;
+                var password = configurationSection["Password"]!;
                 
                 cfg.Host(host, h => {
                     h.Username(username);

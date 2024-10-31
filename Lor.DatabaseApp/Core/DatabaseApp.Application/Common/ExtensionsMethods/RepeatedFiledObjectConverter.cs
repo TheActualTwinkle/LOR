@@ -11,10 +11,8 @@ public static class RepeatedFiledObjectConverter
     {
         RepeatedField<T> repeatedField = new();
 
-        foreach (TSource item in source)
-        {
+        foreach (var item in source)
             repeatedField.Add(mapper(item));
-        }
 
         return Task.FromResult(repeatedField);
     }

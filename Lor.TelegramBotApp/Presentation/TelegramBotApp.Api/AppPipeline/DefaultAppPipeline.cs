@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
-using Telegram.Bot.Types;
 using TelegramBotApp.Api.AppPipeline.Interfaces;
 using TelegramBotApp.AppCommunication;
 using TelegramBotApp.AppCommunication.Interfaces;
@@ -18,7 +17,7 @@ public class DefaultAppPipeline : IAppPipeline
     {
         try
         {
-            using IHost host = Host.CreateDefaultBuilder()
+            using var host = Host.CreateDefaultBuilder()
                 .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
                 .ConfigureAppConfiguration(config =>
                     {
@@ -37,8 +36,8 @@ public class DefaultAppPipeline : IAppPipeline
                 )
                 .Build();
             
-            ITelegramBot botClient = host.Services.GetRequiredService<ITelegramBot>();
-            IDatabaseCommunicationClient databaseCommunicator = host.Services.GetRequiredService<IDatabaseCommunicationClient>();
+            var botClient = host.Services.GetRequiredService<ITelegramBot>();
+            var databaseCommunicator = host.Services.GetRequiredService<IDatabaseCommunicationClient>();
             
             await InitializeAppCommunicators([
                 databaseCommunicator
@@ -47,7 +46,7 @@ public class DefaultAppPipeline : IAppPipeline
             CancellationTokenSource cancellationToken = new();
             botClient.StartReceiving(cancellationToken.Token);
 
-            User me = await botClient.GetMeAsync();
+            var me = await botClient.GetMeAsync();
             Log.Information("Start listening for @{username}", me.Username);
 
             await host.RunAsync(cancellationToken.Token);
@@ -61,9 +60,7 @@ public class DefaultAppPipeline : IAppPipeline
 
     private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)
     {
-        foreach (ICommunicationClient appCommunicator in communicators)
-        {
+        foreach (var appCommunicator in communicators)
             await appCommunicator.StartAsync();
-        }
     }
 }

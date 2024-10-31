@@ -2,12 +2,12 @@ name: Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 jobs:
-  build:
+  UnitTests:
     runs-on: ubuntu-latest
     
     steps:
@@ -19,12 +19,19 @@ jobs:
       - name: Build
         run: dotnet build
 
-  tests:
-    needs: build
+      - name: Test DatabaseApp
+        run: dotnet test Lor.DatabaseApp/Tests/DatabaseApp.Tests/DatabaseApp.Tests.csproj
+
+  IntegrationTests:
+    needs: UnitTests
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-      - name: Test DatabaseApp
-        run: dotnet test Lor.DatabaseApp/Tests/DatabaseApp.Tests/DatabaseApp.Tests.csproj
+      - name: Test DatabaseApp Integration
+        run: dotnet test Lor.DatabaseApp/Tests/DatabaseApp.IntegrationTests/DatabaseApp.IntegrationTests.csproj

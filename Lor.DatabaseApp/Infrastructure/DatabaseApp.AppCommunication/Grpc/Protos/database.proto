@@ -3,117 +3,22 @@ syntax = "proto3";
 option csharp_namespace = "DatabaseApp.AppCommunication.Grpc";
 
 import "google/protobuf/empty.proto";
+import "Data/users.proto";
+import "Data/classes.proto";
+import "Data/groups.proto";
+import "Data/newClassesSubscribers.proto";
 
 service Database {
   rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoReply);
 
   rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
-  rpc GetAvailableLabClasses (GetAvailableLabClassesRequest) returns (GetAvailableLabClassesReply);
-
-  rpc TrySetGroup (TrySetGroupRequest) returns (TrySetGroupReply);
-  rpc TryEnqueueInClass (TryEnqueueInClassRequest) returns (TryEnqueueInClassReply);
-  rpc Dequeue (DequeueRequest) returns (DequeueReply);
+  rpc SetGroup (SetGroupRequest) returns (SetGroupReply);
   
+  rpc GetAvailableClasses (GetAvailableClassesRequest) returns (GetAvailableClassesReply);
+  rpc EnqueueInClass (EnqueueInClassRequest) returns (EnqueueInClassReply);
+  rpc DequeueFromClass (DequeueFromClassRequest) returns (DequeueFromClassReply);
+
+  rpc GetSubscribers (google.protobuf.Empty) returns (GetSubscribersReply);
   rpc AddSubscriber (AddSubscriberRequest) returns (AddSubscriberReply);
   rpc DeleteSubscriber (DeleteSubscriberRequest) returns (DeleteSubscriberReply);
-  
-  rpc GetSubscribers (google.protobuf.Empty) returns (GetSubscribersReply);
-}
-
-message GetUserInfoRequest {
-  int64 userId = 1;
-}
-
-message GetUserInfoReply {
-  string fullName = 1;
-  string groupName = 2;
-  bool isFailed = 3;
-  string errorMessage = 4;
-}
-
-message GetAvailableGroupsReply {
-  map<int32, string> idGroupsMap = 1;
-}
-
-message GetAvailableLabClassesRequest {
-  int64 userId = 1;
-}
-message ClassInformation {
-  int32 classId = 1;
-  string className = 2;
-  int64 classDateUnixTimestamp = 3;
-}
-message GetAvailableLabClassesReply {
-  repeated ClassInformation classInformation = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
-}
-
-message TrySetGroupRequest {
-  int64 userId = 1;
-  string groupName = 2;
-  string fullName = 3;
-}
-
-message TrySetGroupReply {
-  string groupName = 1;
-  string fullName = 2;
-  bool isFailed = 3;
-  string errorMessage = 4;
-}
-
-message TryEnqueueInClassRequest {
-  int64 userId = 1;
-  int32 classId = 2;
-}
-
-message TryEnqueueInClassReply {
-  repeated string studentsQueue = 1;
-  string className = 2;
-  int64 classDateUnixTimestamp = 3;
-  bool wasAlreadyEnqueued = 4;
-  bool isFailed = 5;
-  string errorMessage = 6;
-}
-
-message DequeueRequest {
-  int64 userId = 1;
-  int32 classId = 2;
-}
-
-message DequeueReply {
-  repeated string studentsQueue = 1;
-  string className = 2;
-  int64 classDateUnixTimestamp = 3;
-  bool wasAlreadyDequeued = 4;
-  bool isFailed = 5;
-  string errorMessage = 6;
-}
-
-message AddSubscriberRequest {
-  int64 subscriberId = 1;
-}
-
-message AddSubscriberReply {
-  bool isFailed = 1;
-  string errorMessage = 2;
-}
-
-message DeleteSubscriberRequest {
-  int64 subscriberId = 1;
-}
-
-message DeleteSubscriberReply {
-  bool isFailed = 1;
-  string errorMessage = 2;
-}
-
-message GetSubscribersReply {
-  repeated SubscriberInformation subscribers = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
-}
-message SubscriberInformation {
-  int64 userId = 1;
-  int32 groupId = 2;
 }

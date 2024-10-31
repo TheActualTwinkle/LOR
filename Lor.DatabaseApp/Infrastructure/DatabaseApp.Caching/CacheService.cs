@@ -8,7 +8,7 @@ public class CacheService(IDistributedCache distributedCache) : ICacheService
 {
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) where T : class
     {
-        string? value = await distributedCache.GetStringAsync(key, cancellationToken);
+        var value = await distributedCache.GetStringAsync(key, cancellationToken);
         return value == null ? null : JsonSerializer.Deserialize<T>(value);
     }
 

@@ -1,12 +1,10 @@
 ﻿using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
 using DatabaseApp.Application.Subscriber.Queries.GetSubscribers;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
-using FluentResults;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,7 +26,7 @@ public class SubscribersTests
     {
         await _factory.InitializeAsync();
 
-        IServiceScope scope = _factory.Services.CreateScope();
+        var scope = _factory.Services.CreateScope();
 
         _sender = scope.ServiceProvider.GetRequiredService<ISender>();
         _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -48,18 +46,18 @@ public class SubscribersTests
     }
 
     [Test]
-    public async Task CreateSubscriber_WhenUserExistAndNotSubscribed_ShouldReturnSuccess()
+    public async Task CreateSubscriber_WhenUserExistAndNotSubscribed_Success()
     {
         // Arrange
         await CreateUserAndGroup();
         
         // Act
-        Result result = await _sender.Send(new CreateSubscriberCommand
+        var result = await _sender.Send(new CreateSubscriberCommand
         {
             TelegramId = TestTelegramId
         });
 
-        Result<List<SubscriberDto>> subscribers = await _sender.Send(new GetAllSubscribersQuery());
+        var subscribers = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -71,7 +69,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task CreateSubscriber_WhenUserExistAndAlreadySubscribed_ShouldReturnFailure()
+    public async Task CreateSubscriber_WhenUserExistAndAlreadySubscribed_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -82,12 +80,12 @@ public class SubscribersTests
         });
 
         // Act
-        Result result = await _sender.Send(new CreateSubscriberCommand
+        var result = await _sender.Send(new CreateSubscriberCommand
         {
             TelegramId = TestTelegramId
         });
 
-        Result<List<SubscriberDto>> subscribers = await _sender.Send(new GetAllSubscribersQuery());
+        var subscribers = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -99,18 +97,18 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task CreateSubscriber_WhenUserNotExist_ShouldReturnFailure()
+    public async Task CreateSubscriber_WhenUserNotExist_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
         
         // Act
-        Result result = await _sender.Send(new CreateSubscriberCommand
+        var result = await _sender.Send(new CreateSubscriberCommand
         {
             TelegramId = 987654321
         });
 
-        Result<List<SubscriberDto>> subscribers = await _sender.Send(new GetAllSubscribersQuery());
+        var subscribers = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -121,7 +119,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task DeleteSubscriber_WhenUserExistAndSubscribed_ShouldReturnSuccess()
+    public async Task DeleteSubscriber_WhenUserExistAndSubscribed_Success()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -132,12 +130,12 @@ public class SubscribersTests
         });
 
         // Act
-        Result result = await _sender.Send(new DeleteSubscriberCommand
+        var result = await _sender.Send(new DeleteSubscriberCommand
         {
             TelegramId = TestTelegramId
         });
 
-        Result<List<SubscriberDto>> subscribers = await _sender.Send(new GetAllSubscribersQuery());
+        var subscribers = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -148,18 +146,18 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task DeleteSubscriber_WhenUserExistAndNotSubscribed_ShouldReturnFailure()
+    public async Task DeleteSubscriber_WhenUserExistAndNotSubscribed_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
         
         // Act
-        Result result = await _sender.Send(new DeleteSubscriberCommand
+        var result = await _sender.Send(new DeleteSubscriberCommand
         {
             TelegramId = TestTelegramId
         });
 
-        Result<List<SubscriberDto>> subscribers = await _sender.Send(new GetAllSubscribersQuery());
+        var subscribers = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -170,7 +168,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task DeleteSubscriber_WhenUserNotExist_ShouldReturnFailure()
+    public async Task DeleteSubscriber_WhenUserNotExist_Failure()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -181,12 +179,12 @@ public class SubscribersTests
         });
 
         // Act
-        Result result = await _sender.Send(new DeleteSubscriberCommand
+        var result = await _sender.Send(new DeleteSubscriberCommand
         {
             TelegramId = 987654321
         });
 
-        Result<List<SubscriberDto>> subscribers = await _sender.Send(new GetAllSubscribersQuery());
+        var subscribers = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -197,7 +195,7 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task GetAllSubscribers_WhenSubscribersExist_ShouldReturnSuccess()
+    public async Task GetAllSubscribers_WhenSubscribersExist_Success()
     {
         // Arrange
         await CreateUserAndGroup();
@@ -208,7 +206,7 @@ public class SubscribersTests
         });
 
         // Act
-        Result<List<SubscriberDto>> result = await _sender.Send(new GetAllSubscribersQuery());
+        var result = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>
@@ -220,13 +218,13 @@ public class SubscribersTests
     }
     
     [Test]
-    public async Task GetAllSubscribers_WhenSubscribersIsEmpty_ShouldReturnSuccess()
+    public async Task GetAllSubscribers_WhenSubscribersIsEmpty_Success()
     {
         // Arrange
         await CreateUserAndGroup();
         
         // Act
-        Result<List<SubscriberDto>> result = await _sender.Send(new GetAllSubscribersQuery());
+        var result = await _sender.Send(new GetAllSubscribersQuery());
 
         // Assert
         Assert.Multiple(() =>

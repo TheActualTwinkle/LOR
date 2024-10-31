@@ -1,15 +1,12 @@
-﻿using DatabaseApp.Application.Class;
-using DatabaseApp.Application.Class.Command.CreateClass;
+﻿using DatabaseApp.Application.Class.Command.CreateClass;
 using DatabaseApp.Application.Class.Command.DeleteClass;
 using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
-using DatabaseApp.Application.Group;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
-using FluentResults;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,7 +27,7 @@ public class ClassTests
     {
         await _factory.InitializeAsync();
 
-        IServiceScope scope = _factory.Services.CreateScope();
+        var scope = _factory.Services.CreateScope();
 
         _sender = scope.ServiceProvider.GetRequiredService<ISender>();
         _unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -59,22 +56,22 @@ public class ClassTests
     }
     
     [Test]
-    public async Task CreateClasses_WhenClassNotExist_ShouldReturnListOfClasses()
+    public async Task CreateClasses_WhenClassNotExist_ListOfClasses()
     {
-        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        var groupDto = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
         // Act
-        Result createResult = await _sender.Send(new CreateClassesCommand
+        var createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
             GroupId = groupDto.Value.Id
         });
 
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
 
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
 
         // Assert
         Assert.Multiple(() =>
@@ -87,30 +84,30 @@ public class ClassTests
     }
     
     [Test]
-    public async Task CreateClasses_WhenClassExist_ShouldReturnDistinctClasses()
+    public async Task CreateClasses_WhenClassExist_DistinctClasses()
     {
-        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        var groupDto = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
         
         // Arrange
-        Result createResult1 = await _sender.Send(new CreateClassesCommand
+        var createResult1 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
             GroupId = groupDto.Value.Id
         });
 
         // Act
-        Result createResult2 = await _sender.Send(new CreateClassesCommand
+        var createResult2 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
             GroupId = groupDto.Value.Id
         });
         
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
 
         // Assert
         Assert.Multiple(() =>
@@ -124,31 +121,31 @@ public class ClassTests
     }
     
     [Test]
-    public async Task DeleteClass_WhenClassExist_ShouldReturnSuccessAndDatabaseContainEmptyClasses()
+    public async Task DeleteClass_WhenClassExist_SuccessAndDatabaseContainEmptyClasses()
     {
-        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        var groupDto = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
         
         // Arrange
-        Result createResult = await _sender.Send(new CreateClassesCommand
+        var createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
             GroupId = groupDto.Value.Id
         });
         
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Act
-        Result deleteResult = await _sender.Send(new DeleteClassCommand
+        var deleteResult = await _sender.Send(new DeleteClassCommand
         {
             ClassesId = [classes.Value.First().Id]
         });
         
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
 
         // Assert
         Assert.Multiple(() =>
@@ -162,10 +159,10 @@ public class ClassTests
     }
     
     [Test]
-    public async Task DeleteClass_WhenClassNotExist_ShouldReturnFail()
+    public async Task DeleteClass_WhenClassNotExist_Fail()
     {
         // Act
-        Result deleteResult = await _sender.Send(new DeleteClassCommand
+        var deleteResult = await _sender.Send(new DeleteClassCommand
         {
             ClassesId = [99999985]
         });
@@ -175,26 +172,26 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClass_WhenClassExist_ShouldReturnClass()
+    public async Task GetClass_WhenClassExist_Class()
     {
-        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        var groupDto = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
         
         // Arrange
-        Result createResult = await _sender.Send(new CreateClassesCommand
+        var createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
             GroupId = groupDto.Value.Id
         });
         
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Act
-        Result<ClassDto> result = await _sender.Send(new GetClassQuery
+        var result = await _sender.Send(new GetClassQuery
         {
             ClassId = classes.Value.First().Id
         });
@@ -210,17 +207,17 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClass_WhenClassNotExist_ShouldReturnFail()
+    public async Task GetClass_WhenClassNotExist_Fail()
     {
         // Act
-        Result<ClassDto> result = await _sender.Send(new GetClassQuery
+        var result = await _sender.Send(new GetClassQuery
         {
             ClassId = 99999985
         });
         
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        Result<List<ClassDto>> classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Assert
         Assert.Multiple(() =>
@@ -232,9 +229,9 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClasses_WhenClassesExist_ShouldReturnListOfClasses()
+    public async Task GetClasses_WhenClassesExist_ListOfClasses()
     {
-        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        var groupDto = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
@@ -252,10 +249,10 @@ public class ClassTests
             GroupId = groupDto.Value.Id
         });
         
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
         // Act
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Assert
         Assert.Multiple(() =>
@@ -267,12 +264,12 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClasses_WhenClassesNotExist_ShouldReturnEmptyList()
+    public async Task GetClasses_WhenClassesNotExist_EmptyList()
     {
-        Result<GroupDto> getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
         // Act
-        Result<List<ClassDto>> getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
         
         // Assert
         Assert.Multiple(() =>
@@ -284,9 +281,9 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetOutdatedClasses_WhenOutdatedClassesExist_ShouldReturnListOfClasses()
+    public async Task GetOutdatedClasses_WhenOutdatedClassesExist_ListOfClasses()
     {
-        Result<GroupDto> groupDto = await _sender.Send(new GetGroupQuery
+        var groupDto = await _sender.Send(new GetGroupQuery
         {
             GroupName = TestGroupName
         });
@@ -305,7 +302,7 @@ public class ClassTests
         });
         
         // Act
-        Result<List<int>> getOutdatedClassesResult = await _sender.Send(new GetOutdatedClassesQuery());
+        var getOutdatedClassesResult = await _sender.Send(new GetOutdatedClassesQuery());
         
         // Assert
         Assert.Multiple(() =>
@@ -316,10 +313,10 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetOutdatedClasses_WhenOutdatedClassesNotExist_ShouldReturnEmptyList()
+    public async Task GetOutdatedClasses_WhenOutdatedClassesNotExist_EmptyList()
     {
         // Act
-        Result<List<int>> getResult = await _sender.Send(new GetOutdatedClassesQuery());
+        var getResult = await _sender.Send(new GetOutdatedClassesQuery());
         
         // Assert
         Assert.Multiple(() =>
