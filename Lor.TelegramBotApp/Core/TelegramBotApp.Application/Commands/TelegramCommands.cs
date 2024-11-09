@@ -112,14 +112,16 @@ public class GetAvailableLabClassesTelegramCommand : ITelegramCommand
 }
 
 [Export(typeof(ITelegramCommand))]
-[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}hop")]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}")]
 [ExportMetadata(nameof(Description), "- записывает на лабораторную работу")]
 [ExportMetadata(nameof(ButtonDescriptionText), "Записаться на лаб. работу \u270d\ufe0f")]
 public class EnqueueInClassTelegramCommand : ITelegramCommand
 {
-    public string Command => $"{TelegramCommandFactory.CommandPrefix}hop";
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}";
     public string Description => "- записывает на лабораторную работу";
     public string ButtonDescriptionText => "Записаться на лаб. работу \u270d\ufe0f";
+    
+    private const string CommandWithoutPrefix = "hop";
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
@@ -132,21 +134,24 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
         if (availableLabClassesResult.IsFailed)
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
 
-        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
+        
         return new ExecutionResult(Result.Fail("Выберите пару для ЗАПИСИ \u270d\ufe0f"), replyMarkup);
     }
 }
 
 [Export(typeof(ITelegramCommand))]
-[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}dehop")]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}")]
 [ExportMetadata(nameof(Description), "- выписывает из очереди на лабораторную работу")]
 [ExportMetadata(nameof(ButtonDescriptionText), "Отменить запись \ud83d\udeb7")]
 public class DequeueTelegramCommand : ITelegramCommand
 {
-    public string Command => $"{TelegramCommandFactory.CommandPrefix}dehop";
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}";
     public string Description => "- выписывает из очереди на лабораторную работу";
     public string ButtonDescriptionText => "Отменить запись \ud83d\udeb7";
-    
+
+    private const string CommandWithoutPrefix = "dehop";
+
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         var databaseCommunicator = factory.DatabaseCommunicator;
@@ -158,7 +163,8 @@ public class DequeueTelegramCommand : ITelegramCommand
         if (availableLabClassesResult.IsFailed)
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
 
-        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value);
+        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
+        
         return new ExecutionResult(Result.Fail("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
     }
 }
@@ -219,7 +225,8 @@ public class AuthorizationTelegramCommand : ITelegramCommand
             return new ExecutionResult(Result.Fail($"Обработка {Command}\nОтветом на это сообщение введите, пожалуйста, ФИО для авторизации"), new ForceReplyMarkup());
 
         if (argumentsList.Count() != 2 && argumentsList.Count() != 3)
-            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"), new ForceReplyMarkup());
+            return new ExecutionResult(Result.Fail($"Обработка {Command}\nОшибка при вводе ФИО. Ответом на это сообщение введите, пожалуйста, ФИО в формате: Фамилия Имя Отчество"), 
+                new ForceReplyMarkup());
 
         var fullName = argumentsList.Aggregate((x, y) => $"{x} {y}");
         var authorizeResult = await factory.AuthorizationService.TryAuthorize(new AuthorizationRequest(fullName));
@@ -235,13 +242,17 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 
 public static class MarkupCreator
 {
-    public static Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<Class> classes)
+    public static Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<Class> classes, string callbackQueryWithoutPrefix)
     {
         List<InlineKeyboardButton[]> buttons = [];
+        
         foreach (var classInformation in classes)
         {
             var dateTime = classInformation.Date;
-            var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}", $"{TelegramCommandQueryFactory.CommandQueryPrefix}hop {classInformation.Id}");
+            
+            var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}",
+                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Id}");
+            
             buttons.Add([button]);
         }
 
