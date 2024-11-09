@@ -2,7 +2,6 @@
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
-using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;

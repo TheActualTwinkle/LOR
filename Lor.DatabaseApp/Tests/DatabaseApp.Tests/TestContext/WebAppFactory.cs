@@ -54,7 +54,7 @@ public class WebAppFactory : WebApplicationFactory<Program>
                     .ReturnsAsync((string _, CancellationToken _) => null);
 
                 mockCache
-                    .Setup(m => m.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<CancellationToken>()))
+                    .Setup(m => m.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
                     .Returns(Task.CompletedTask);
 
                 return mockCache.Object;

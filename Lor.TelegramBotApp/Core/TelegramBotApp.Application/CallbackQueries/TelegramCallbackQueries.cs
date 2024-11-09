@@ -66,7 +66,12 @@ public class DequeueCallbackQuery : ICallbackQuery
 
         var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
         var messageHeader = result.Value.WasAlreadyDequeued ? 
-            $"Вы не были записаны в очередь {classData}\n" : $"Вы успешно выписаны из очереди {classData}\nОчередь:\n";
+            $"Вы не были записаны в очередь {classData}\n" : $"Вы успешно выписаны из очереди {classData}\n";
+        
+        if (!result.Value.StudentsQueue.Any())
+            return new ExecutionResult(Result.Ok(messageHeader));
+        
+        messageHeader += "Очередь:\n";
         
         StringBuilder message = new(messageHeader);
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
