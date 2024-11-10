@@ -10,6 +10,7 @@ public class SubscriberRepository(IDatabaseContext context)
 {
     public async Task<List<Subscriber>?> GetAllSubscribers(CancellationToken cancellationToken) =>
         await _context.Subscribers
+            .Include(s => s.User)
             .ToListAsync(cancellationToken);
 
     public async Task<Subscriber?> GetSubscriberByUserId(int userId, CancellationToken cancellationToken) =>
