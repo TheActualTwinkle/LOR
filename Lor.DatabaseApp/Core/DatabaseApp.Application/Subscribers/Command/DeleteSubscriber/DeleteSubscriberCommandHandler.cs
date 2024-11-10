@@ -2,11 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
 
-public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
+public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<DeleteSubscriberCommand, Result>
 {
     public async Task<Result> Handle(DeleteSubscriberCommand request, CancellationToken cancellationToken)
@@ -23,9 +24,10 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        var cachedSubscriptions = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken: cancellationToken) ?? [];
+        var allSubscribers = await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
         
-        await cacheService.SetAsync(Constants.AllSubscribersKey, cachedSubscriptions.Where(x => x.TelegramId != request.TelegramId),
+        await cacheService.SetAsync(Constants.AllSubscribersKey, 
+            mapper.From(allSubscribers).AdaptToType<List<SubscriberDto>>(),
             cancellationToken: cancellationToken);
 
         return Result.Ok();

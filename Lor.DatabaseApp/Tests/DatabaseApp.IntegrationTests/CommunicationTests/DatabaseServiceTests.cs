@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using DatabaseApp.Domain.Models;
+﻿using DatabaseApp.Domain.Models;
 using FluentResults;
 using GroupScheduleApp.Shared;
-using TelegramBotApp.AppCommunication.Data;
 
 // ReSharper disable SuggestVarOrType_Elsewhere
 

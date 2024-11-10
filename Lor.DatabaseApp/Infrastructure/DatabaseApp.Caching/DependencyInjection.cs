@@ -1,4 +1,5 @@
 ﻿using DatabaseApp.Caching.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,8 +11,16 @@ public static class DependencyInjection
     public static IServiceCollection AddCaching(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddStackExchangeRedisCache(options =>
-                options.Configuration = configuration.GetConnectionString("Redis") ?? throw new NullReferenceException("Can`t find Redis connection string in configuration"))
-            .AddScoped<ICacheService, CacheService>();
+            options.Configuration = configuration.GetConnectionString("Redis") ?? throw new NullReferenceException("Can`t find Redis connection string in configuration"));
+        
+        services.AddSingleton<ICacheService>(provider =>
+        {
+            var distributedCache = provider.GetRequiredService<IDistributedCache>();
+            
+            return new CacheService(distributedCache, new DistributedCacheEntryOptions {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+        });
         
         return services;
     }

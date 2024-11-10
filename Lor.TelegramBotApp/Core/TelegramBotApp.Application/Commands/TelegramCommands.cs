@@ -1,6 +1,5 @@
 ﻿using System.Composition;
 using System.Text;
-using DatabaseApp.AppCommunication.Grpc;
 using FluentResults;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Consumers.Data;
