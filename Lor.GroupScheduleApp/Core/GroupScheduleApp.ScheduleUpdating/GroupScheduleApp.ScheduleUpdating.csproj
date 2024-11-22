@@ -8,7 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj" />
       <ProjectReference Include="..\..\Infrastructure\GroupScheduleApp.AppCommunication\GroupScheduleApp.AppCommunication.csproj" />
       <ProjectReference Include="..\..\Infrastructure\GroupScheduleApp.ScheduleProviding\GroupScheduleApp.ScheduleProviding.csproj" />
     </ItemGroup>

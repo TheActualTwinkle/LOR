@@ -27,6 +27,7 @@ public class StartTelegramCommand : ITelegramCommand
                                $"Если все прошло успешно, бот назначит вам вашу группу и лабораторные работы, на которые вы можете записаться введя {TelegramCommandFactory.CommandPrefix}hop\n\n" +
                                $"Для получения справки введите {TelegramCommandFactory.CommandPrefix}help\n\n" +
                                $"Исходники проекта: https://github.com/TheActualTwinkle/LOR\nВопросы и предложения: @ext4zzzy\n\n";
+        
         return Task.FromResult(new ExecutionResult(Result.Ok(message)));
     }
 }
@@ -125,11 +126,14 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         var databaseCommunicator = factory.DatabaseCommunicator;
+        
         var result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));
 
         var availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        
         if (availableLabClassesResult.IsFailed)
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
 
@@ -154,11 +158,14 @@ public class DequeueTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         var databaseCommunicator = factory.DatabaseCommunicator;
+        
         var result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));
 
         var availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        
         if (availableLabClassesResult.IsFailed)
             return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
 
@@ -181,6 +188,7 @@ public class AddSubscriberTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         var result = await factory.DatabaseCommunicator.AddSubscriber(chatId, cancellationToken);
+        
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Теперь вы будете получать уведомления о новых лабораторных работах"));
     }
 }
@@ -198,6 +206,7 @@ public class DeleteSubscriberTelegramCommand : ITelegramCommand
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {
         var result = await factory.DatabaseCommunicator.DeleteSubscriber(chatId, cancellationToken);
+        
         return result.IsFailed ? new ExecutionResult(Result.Fail(result.Errors.First())) : new ExecutionResult(Result.Ok("Вы отписаны от уведомлений о новых лабораторных работах"));
     }
 }
