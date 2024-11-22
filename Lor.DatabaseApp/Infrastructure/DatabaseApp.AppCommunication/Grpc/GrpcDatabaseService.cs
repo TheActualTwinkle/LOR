@@ -102,7 +102,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new SetGroupReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        return new SetGroupReply { FullName = await request.FullName.FormatFio(), GroupName = userDto.Value.GroupName };
+        return new SetGroupReply { FullName = await request.FullName.Format(), GroupName = userDto.Value.GroupName };
     }
 
     public override async Task<EnqueueInClassReply> EnqueueInClass(EnqueueInClassRequest request,
