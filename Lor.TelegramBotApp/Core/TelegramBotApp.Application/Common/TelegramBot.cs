@@ -136,7 +136,8 @@ public class TelegramBot(
         if (message.Text is not {} text) return;
 
         var commandMatch = TelegramCommandFactory.TelegramCommandRegex().Match(replyText);
-        if (commandMatch.Success == false)
+        
+        if (!commandMatch.Success)
         {
             logger.LogError("Can`t handle message reply: ReplyToMessage has no command");
             return;

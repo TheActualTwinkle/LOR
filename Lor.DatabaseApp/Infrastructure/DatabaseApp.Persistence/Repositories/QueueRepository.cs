@@ -14,7 +14,7 @@ public class QueueRepository(IDatabaseContext context)
 
     public async Task<List<Queue>?> GetQueueByClassId(int classId, CancellationToken cancellationToken)
     {
-        if (_context.Classes.Any(x => x.Id == classId) == false)
+        if (!_context.Classes.Any(x => x.Id == classId))
             return null;
 
         return await _context.Queues

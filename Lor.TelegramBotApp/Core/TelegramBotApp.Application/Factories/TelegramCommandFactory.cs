@@ -53,7 +53,8 @@ public partial class TelegramCommandFactory(IDatabaseCommunicationClient databas
     public async Task<ExecutionResult> StartCommand(string commandString, long chatId, CancellationToken token)
     {
         var match = TelegramCommandRegex().Match(commandString);
-        if (match.Success == false)
+        
+        if (!match.Success)
             return new ExecutionResult(Result.Fail($"Команда не найдена\nДля получения списка команд введите {CommandPrefix}help"));
 
         var command = GetCommand(match.Value.Trim());

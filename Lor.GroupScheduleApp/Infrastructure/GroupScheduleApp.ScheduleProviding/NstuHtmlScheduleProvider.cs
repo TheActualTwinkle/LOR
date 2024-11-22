@@ -2,16 +2,14 @@
 using System.Text.RegularExpressions;
 using GroupScheduleApp.ScheduleProviding.Interfaces;
 using GroupScheduleApp.Shared;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
+using HtmlAgilityPack;
 
 namespace GroupScheduleApp.ScheduleProviding;
 
-public partial class NstuHtmlScheduleProvider : IScheduleProvider
+public partial class NstuHtmlScheduleProvider(IEnumerable<string> urls) : IScheduleProvider
 {
     private static class Constants
     {
-        public const string WeekHeader = "schedule__title-desc";
         public const string WeekHeaderValue = "schedule__title-label";
         public const string TableBody = "schedule__table-body";
         public const string TableBodyRow = "schedule__table-row";
@@ -19,90 +17,98 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
         public const string ClassDate = "schedule__table-date";
         public const string GroupName = "schedule__title-h1";
     }
+
+    private readonly HttpClient _httpClient = new();
     
     // TODO: DI
     private TimeSpan ScheduleFetchDateOffset => TimeSpan.FromDays(7);
-    
-    private readonly ChromeDriver _chromeDriver;
-    private readonly IEnumerable<string> _urls;
-    
-    public NstuHtmlScheduleProvider(IEnumerable<string> urls)
-    {
-        _urls = urls;
-        
-        ChromeOptions options = new();
-        options.AddArgument("--headless"); // Ensure headless mode is enabled
-        options.AddArgument("disable-infobars"); // Disabling info bars
-        options.AddArgument("--disable-extensions"); // Disabling extensions
-        options.AddArgument("--disable-gpu"); // Applicable to Windows OS only
-        options.AddArgument("--disable-dev-shm-usage"); // Overcome limited resource problems
-        options.AddArgument("--no-sandbox"); // Bypass OS security model
-        options.AddArgument("--log-level=3");
-        
-        _chromeDriver = new ChromeDriver(options);
-    }
 
     public async Task<IEnumerable<string>> GetAvailableGroupsAsync()
     {
         List<string> groups = [];
-        
-        foreach (var url in _urls)
+
+        var htmlDocument = new HtmlDocument();
+
+        foreach (var url in urls)
         {
-            await _chromeDriver.Navigate().GoToUrlAsync(url);
-            var groupName = GetGroupName();
+            var response = await _httpClient.GetStringAsync(url);
+
+            htmlDocument.LoadHtml(response);
+
+            var groupName = GetGroupName(htmlDocument);
+
             groups.Add(groupName);
         }
 
         return groups;
     }
 
+    // TODO: Issue at https://github.com/TheActualTwinkle/LOR/issues/1
     public async Task<IEnumerable<GroupClassesData>> GetGroupClassesDataAsync()
     {
         List<GroupClassesData> groupClassesData = [];
+        
+        var htmlDocument = new HtmlDocument();
 
-        foreach (var url in _urls)
+        foreach (var url in urls)
         {
             List<ClassData> classesData = [];
+
+            var response = await _httpClient.GetStringAsync(url);
+            htmlDocument.LoadHtml(response);
+
+            var groupName = GetGroupName(htmlDocument);
             
-            await _chromeDriver.Navigate().GoToUrlAsync(url);
-            var weekNumber = GetWeekNumber(_chromeDriver.FindElement(By.ClassName(Constants.WeekHeader)).FindElement(By.ClassName(Constants.WeekHeaderValue)).Text);
-            var groupName = GetGroupName();
+            var weekNumber = GetWeekNumber(
+                htmlDocument.DocumentNode
+                .SelectSingleNode($"//span[contains(@class, '{Constants.WeekHeaderValue}')]")
+                .InnerText
+                );
 
             if (weekNumber == null) continue;
 
-            await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={weekNumber}");
-            classesData.AddRange(ParseForWeek());
-            
-            await _chromeDriver.Navigate().GoToUrlAsync($"{url}&week={++weekNumber}");
-            classesData.AddRange(ParseForWeek());
-            
-            classesData = classesData.Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchDateOffset).ToList();
+            response = await _httpClient.GetStringAsync($"{url}&week={weekNumber}");
+            htmlDocument.LoadHtml(response);
+            classesData.AddRange(ParseForWeek(htmlDocument));
+
+            response = await _httpClient.GetStringAsync($"{url}&week={++weekNumber}");
+            htmlDocument.LoadHtml(response);
+            classesData.AddRange(ParseForWeek(htmlDocument));
+
+            classesData = classesData
+                .Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchDateOffset)
+                .ToList();
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));
         }
-        
+
         return groupClassesData.AsEnumerable();
     }
 
-    private IEnumerable<ClassData> ParseForWeek()
+    private IEnumerable<ClassData> ParseForWeek(HtmlDocument htmlDocument)
     {
         List<ClassData> classesData = [];
-        
-        var body = _chromeDriver.FindElement(By.ClassName(Constants.TableBody));
-        var rows = body.FindElements(By.XPath($"./div[contains(@class, '{Constants.TableBodyRow}')]")).ToList();
-        
-        foreach (var row in rows.Where(r => string.IsNullOrEmpty(r.Text) == false))
+
+        var body = htmlDocument.DocumentNode.SelectSingleNode($"//div[contains(@class, '{Constants.TableBody}')]");
+
+        var rows = body.SelectNodes($"./div[contains(@class, '{Constants.TableBodyRow}')]").ToList();
+
+        foreach (var row in rows.Where(r => !string.IsNullOrEmpty(r.InnerText)))
         {
-            var classNames = row.FindElements(By.ClassName(Constants.ClassRow))
-                .Where(e => string.IsNullOrWhiteSpace(e.Text) == false)
-                .Where(e => e.Text.Contains("Лабораторная") == true)
-                .Select(e => new string(e.Text.TakeWhile(x => x != '·').ToArray()))
+            var classNames = row.SelectNodes($".//div[contains(@class, '{Constants.ClassRow}')]")
+                .Where(e => !string.IsNullOrWhiteSpace(e.InnerText))
+                .Where(e => e.InnerText.Contains("Лабораторная"))
+                .Select(e =>
+                {
+                    var indexOfSeparator = e.InnerText.IndexOf("&middot", StringComparison.Ordinal);
+                    return new string(e.InnerText.Take(indexOfSeparator).ToArray()).Trim();
+                })
                 .Distinct()
                 .ToList();
 
             if (classNames.Count == 0) continue;
-            
-            var dateRaw = row.FindElement(By.ClassName(Constants.ClassDate)).Text;
+
+            var dateRaw = row.SelectSingleNode($".//span[contains(@class, '{Constants.ClassDate}')]").InnerText;
             var date = DateTime.ParseExact($"{dateRaw}.{DateTime.Now.Year}", "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
             foreach (var className in classNames)
@@ -111,23 +117,23 @@ public partial class NstuHtmlScheduleProvider : IScheduleProvider
 
         return classesData.AsEnumerable();
     }
-    
-    private string GetGroupName()
-    {
-        return _chromeDriver.FindElement(By.ClassName(Constants.GroupName)).Text.Split(' ').Last();
-    }
-    
+
+    private string GetGroupName(HtmlDocument htmlDocument) =>
+        htmlDocument.DocumentNode
+            .SelectSingleNode($"//h1[contains(@class, '{Constants.GroupName}')]")
+            .InnerText
+            .Split(' ')
+            .Last();
+
     private int? GetWeekNumber(string text)
     {
         var match = WeekNumberRegex().Match(text);
-        
+
         return match.Success ? int.Parse(match.Value) : null;
     }
-    
-    private DateTime Today()
-    {
-        return DateTime.Now.Date;
-    }
+
+    private DateTime Today() =>
+        DateTime.Now.Date;
 
     [GeneratedRegex(@"\d+")]
     private static partial Regex WeekNumberRegex();

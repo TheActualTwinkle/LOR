@@ -20,7 +20,6 @@ public static partial class FullNameFormatter
         var formattedMiddleName = string.IsNullOrEmpty(middleName) ? string.Empty : await middleName.FormatPart();
 
         return $"{formattedLastName} {formattedFirstName} {formattedMiddleName}".Trim();
-
     }
 
     private static async Task<string> FormatPart(this string part) =>
