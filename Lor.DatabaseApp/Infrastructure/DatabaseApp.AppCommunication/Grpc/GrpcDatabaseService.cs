@@ -236,6 +236,33 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
         };
     }
+    
+    public override async Task<ViewQueueAtClassReply> ViewQueueAtClass(ViewQueueAtClassRequest request, ServerCallContext context)
+    {
+        var getClassResult = await mediator.Send(new GetClassQuery
+        {
+            ClassId = request.ClassId
+        }, context.CancellationToken);
+
+        if (getClassResult.IsFailed)
+            return new ViewQueueAtClassReply
+                { IsFailed = true, ErrorMessage = getClassResult.Errors.First().Message };
+        
+        var queueDto = await mediator.Send(new GetClassQueueQuery
+        {
+            ClassId = request.ClassId
+        }, context.CancellationToken);
+
+        if (queueDto.IsFailed)
+            return new ViewQueueAtClassReply 
+                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
+
+        return new ViewQueueAtClassReply {
+            ClassName = getClassResult.Value.Name,
+            ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+        };
+    }
 
     public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
     {

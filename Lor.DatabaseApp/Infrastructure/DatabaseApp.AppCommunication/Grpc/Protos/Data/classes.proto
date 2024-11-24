@@ -43,6 +43,17 @@ message DequeueFromClassReply {
   string errorMessage = 6;
 }
 
+message ViewQueueAtClassRequest {
+  int32 classId = 1;
+}
+message ViewQueueAtClassReply {
+  repeated string studentsQueue = 1;
+  string className = 2;
+  int64 classDateUnixTimestamp = 3;
+  bool isFailed = 4;
+  string errorMessage = 5;
+}
+
 message SetAvailableClassesRequest {
   string groupName = 1;
   map<string, int64> classes = 2;

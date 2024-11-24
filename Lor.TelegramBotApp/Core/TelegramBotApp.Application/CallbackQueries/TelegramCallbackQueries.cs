@@ -83,3 +83,42 @@ public class DequeueCallbackQuery : ICallbackQuery
         return new ExecutionResult(Result.Ok(message.ToString()));
     }
 }
+
+[Export(typeof(ICallbackQuery))]
+[ExportMetadata(nameof(Query), $"{TelegramCommandQueryFactory.CommandQueryPrefix}queue")]
+public class ViewQueueAtClassQuery : ICallbackQuery
+{
+    public string Query => $"{TelegramCommandQueryFactory.CommandQueryPrefix}queue";
+    
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {        
+        var argumentsList = arguments.ToList();
+        if (argumentsList.Count != 1)
+            throw new ArgumentException("ViewQueueAtClassQuery: Неверное количество аргументов");
+
+        if (!int.TryParse(argumentsList.First(), out var classId))
+            throw new ArgumentException($"ViewQueueAtClassQuery: Неверный формат аргумента (должен быть {classId.GetType})");
+
+        var result = await factory.DatabaseCommunicator.ViewQueueAtClass(classId, cancellationToken);
+        
+        if (result.IsFailed)
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
+
+        var classData = $"{result.Value.ClassName} {result.Value.ClassesDateTime:dd.MM}";
+        var messageHeader = $"Очередь на {classData}\n";
+        
+        if (!result.Value.StudentsQueue.Any())
+            return new ExecutionResult(Result.Ok(messageHeader));
+        
+        messageHeader += "Очередь:\n";
+        
+        StringBuilder message = new(messageHeader);
+        for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
+        {
+            var labClass = result.Value.StudentsQueue.ElementAt(i);
+            message.AppendLine($"{i+1}. {labClass}");
+        }
+        
+        return new ExecutionResult(Result.Ok(message.ToString()));
+    }
+}
