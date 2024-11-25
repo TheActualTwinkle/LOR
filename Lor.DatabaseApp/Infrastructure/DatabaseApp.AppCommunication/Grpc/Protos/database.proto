@@ -17,6 +17,7 @@ service Database {
   rpc GetAvailableClasses (GetAvailableClassesRequest) returns (GetAvailableClassesReply);
   rpc EnqueueInClass (EnqueueInClassRequest) returns (EnqueueInClassReply);
   rpc DequeueFromClass (DequeueFromClassRequest) returns (DequeueFromClassReply);
+  rpc ViewQueueClass (ViewQueueClassRequest) returns (ViewQueueClassReply);
 
   rpc GetSubscribers (google.protobuf.Empty) returns (GetSubscribersReply);
   rpc AddSubscriber (AddSubscriberRequest) returns (AddSubscriberReply);
