@@ -43,10 +43,10 @@ message DequeueFromClassReply {
   string errorMessage = 6;
 }
 
-message ViewQueueAtClassRequest {
+message ViewQueueClassRequest {
   int32 classId = 1;
 }
-message ViewQueueAtClassReply {
+message ViewQueueClassReply {
   repeated string studentsQueue = 1;
   string className = 2;
   int64 classDateUnixTimestamp = 3;

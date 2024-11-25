@@ -94,11 +94,11 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         });
     }
 
-    public async Task<Result<ViewQueueAtClassResult>> ViewQueueAtClass(int classId, CancellationToken cancellationToken = default)
+    public async Task<Result<ViewQueueClassResult>> ViewQueueClass(int classId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.ViewQueueAtClassAsync(new ViewQueueAtClassRequest{ ClassId = classId }, cancellationToken: cancellationToken);
+        var reply = await _client!.ViewQueueClassAsync(new ViewQueueClassRequest{ ClassId = classId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewQueueAtClassResult
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewQueueClassResult
         {
             StudentsQueue = reply.StudentsQueue,
             ClassName = reply.ClassName,

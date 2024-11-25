@@ -18,6 +18,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {        
         var argumentsList = arguments.ToList();
+        
         if (argumentsList.Count != 1)
             throw new ArgumentException("EnqueueCallbackQuery: Неверное количество аргументов");
 
@@ -34,6 +35,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
             $"Вы уже были записаны на {classData}\n" : $"Вы успешно записаны на {classData}\nОчередь:\n";
         
         StringBuilder message = new(messageHeader);
+        
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             var labClass = result.Value.StudentsQueue.ElementAt(i);
@@ -53,6 +55,7 @@ public class DequeueCallbackQuery : ICallbackQuery
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {        
         var argumentsList = arguments.ToList();
+        
         if (argumentsList.Count != 1)
             throw new ArgumentException("DequeueCallbackQuery: Неверное количество аргументов");
 
@@ -74,6 +77,7 @@ public class DequeueCallbackQuery : ICallbackQuery
         messageHeader += "Очередь:\n";
         
         StringBuilder message = new(messageHeader);
+        
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             var labClass = result.Value.StudentsQueue.ElementAt(i);
@@ -86,20 +90,21 @@ public class DequeueCallbackQuery : ICallbackQuery
 
 [Export(typeof(ICallbackQuery))]
 [ExportMetadata(nameof(Query), $"{TelegramCommandQueryFactory.CommandQueryPrefix}queue")]
-public class ViewQueueAtClassQuery : ICallbackQuery
+public class ViewQueueClassQuery : ICallbackQuery
 {
     public string Query => $"{TelegramCommandQueryFactory.CommandQueryPrefix}queue";
     
     public async Task<ExecutionResult> Execute(long chatId, TelegramCommandQueryFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
     {        
         var argumentsList = arguments.ToList();
+        
         if (argumentsList.Count != 1)
             throw new ArgumentException("ViewQueueAtClassQuery: Неверное количество аргументов");
 
         if (!int.TryParse(argumentsList.First(), out var classId))
             throw new ArgumentException($"ViewQueueAtClassQuery: Неверный формат аргумента (должен быть {classId.GetType})");
 
-        var result = await factory.DatabaseCommunicator.ViewQueueAtClass(classId, cancellationToken);
+        var result = await factory.DatabaseCommunicator.ViewQueueClass(classId, cancellationToken);
         
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));
@@ -113,6 +118,7 @@ public class ViewQueueAtClassQuery : ICallbackQuery
         messageHeader += "Очередь:\n";
         
         StringBuilder message = new(messageHeader);
+        
         for (var i = 0; i < result.Value.StudentsQueue.Count(); i++)
         {
             var labClass = result.Value.StudentsQueue.ElementAt(i);

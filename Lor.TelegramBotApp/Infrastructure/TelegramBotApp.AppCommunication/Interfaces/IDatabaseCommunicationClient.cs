@@ -18,7 +18,7 @@ public interface IDatabaseCommunicationClient : ICommunicationClient
     
     Task<Result<DequeueFromClassResult>> DequeueFromClass(int classId, long userId, CancellationToken cancellationToken = default);
     
-    Task<Result<ViewQueueAtClassResult>> ViewQueueAtClass(int classId, CancellationToken cancellationToken = default);
+    Task<Result<ViewQueueClassResult>> ViewQueueClass(int classId, CancellationToken cancellationToken = default);
     
     Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default);
     
