@@ -2,5 +2,5 @@
 
 public interface IScheduleSendService
 {
-    Task RunAsync();
+    Task StartAsync();
 }

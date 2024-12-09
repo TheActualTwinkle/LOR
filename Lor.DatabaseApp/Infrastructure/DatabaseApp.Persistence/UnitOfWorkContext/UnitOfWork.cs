@@ -19,10 +19,8 @@ public sealed class UnitOfWork(
     public ISubscriberRepository SubscriberRepository => subscriberRepository;
     public IUserRepository UserRepository => userRepository;
 
-    public Task SaveDbChangesAsync(CancellationToken cancellationToken)
-    {
-        return context.SaveDbChangesAsync(cancellationToken);
-    }
+    public Task SaveDbChangesAsync(CancellationToken cancellationToken) =>
+        context.SaveDbChangesAsync(cancellationToken);
 
     public void Dispose()
     {
@@ -30,15 +28,16 @@ public sealed class UnitOfWork(
         GC.SuppressFinalize(this);
     }
 
-    ~UnitOfWork()
-    {
+    ~UnitOfWork() =>
         Dispose(false);
-    }
 
     private void Dispose(bool disposing)
     {
-        if (_disposed) return;
-        if (disposing) context.DisposeResources();
+        if (_disposed) 
+            return;
+        
+        if (disposing)
+            context.DisposeResources();
 
         _disposed = true;
     }
