@@ -15,7 +15,9 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         
-        builder.Configuration.AddJsonFile("appsettings.json", false, true).AddEnvironmentVariables();
+        builder.Configuration.AddJsonFile("appsettings.json", false, true)
+            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
+            .AddEnvironmentVariables();
         
         builder.Host.UseSerilog((context, configuration) => configuration
             .ReadFrom.Configuration(context.Configuration));

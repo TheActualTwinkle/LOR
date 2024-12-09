@@ -19,13 +19,13 @@ public class DefaultAppPipeline : IAppPipeline
             .ConfigureAppConfiguration(config =>
                 {
                     config.AddJsonFile("appsettings.json", false, true);
+                    config.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", true, true);
                     config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true);
                     config.AddEnvironmentVariables();
                 })
             
             // Order of services registration is important!!!
             .ConfigureServices((builder, services) => services
-                .AddLogging() // TODO: Check if needed
                 .AddCommunicators(builder.Configuration)
                 .AddScheduleProvider(builder.Configuration)
                 .AddSenderService(builder.Configuration)
@@ -39,7 +39,9 @@ public class DefaultAppPipeline : IAppPipeline
             communicationClient
         ]);
         
-        await sendService.RunAsync();
+        await sendService.StartAsync();
+        
+        await host.RunAsync();
     }
     
     private async Task InitializeAppCommunicators(IEnumerable<ICommunicationClient> communicators)
