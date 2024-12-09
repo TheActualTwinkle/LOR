@@ -147,7 +147,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
 [ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}")]
 [ExportMetadata(nameof(Description), "- выписывает из очереди на лабораторную работу")]
 [ExportMetadata(nameof(ButtonDescriptionText), "Отменить запись \ud83d\udeb7")]
-public class DequeueTelegramCommand : ITelegramCommand
+public class DequeueFromClassTelegramCommand : ITelegramCommand
 {
     public string Command => $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}";
     public string Description => "- выписывает из очереди на лабораторную работу";
@@ -172,6 +172,38 @@ public class DequeueTelegramCommand : ITelegramCommand
         var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
         
         return new ExecutionResult(Result.Fail("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
+    }
+}
+
+[Export(typeof(ITelegramCommand))]
+[ExportMetadata(nameof(Command), $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}")]
+[ExportMetadata(nameof(Description), "- показывает очередь на лабораторную работу")]
+[ExportMetadata(nameof(ButtonDescriptionText), "Посмотреть очередь \ud83e\uddfe")]
+public class ViewQueueAtClass : ITelegramCommand
+{
+    public string Command => $"{TelegramCommandFactory.CommandPrefix}{CommandWithoutPrefix}";
+    public string Description => "- показывает очередь на лабораторную работу";
+    public string ButtonDescriptionText => "Посмотреть очередь \ud83e\uddfe";
+
+    private const string CommandWithoutPrefix = "queue";
+
+    public async Task<ExecutionResult> Execute(long chatId, TelegramCommandFactory factory, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        var databaseCommunicator = factory.DatabaseCommunicator;
+        
+        var result = await databaseCommunicator.GetUserInfo(chatId, cancellationToken);
+        
+        if (result.IsFailed)
+            return new ExecutionResult(Result.Fail(result.Errors.First()));
+
+        var availableLabClassesResult = await databaseCommunicator.GetAvailableLabClasses(chatId, cancellationToken);
+        
+        if (availableLabClassesResult.IsFailed)
+            return new ExecutionResult(Result.Fail(availableLabClassesResult.Errors.First()));
+
+        var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
+        
+        return new ExecutionResult(Result.Fail("Выберите пару для ПРОСМОТРА ОЧЕРЕДИ \ud83e\uddfe"), replyMarkup);
     }
 }
 
