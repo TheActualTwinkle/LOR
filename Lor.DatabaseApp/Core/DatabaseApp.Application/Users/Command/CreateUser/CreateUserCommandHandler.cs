@@ -1,4 +1,5 @@
-﻿using DatabaseApp.Caching;
+﻿using DatabaseApp.Application.Common.ExtensionsMethods;
+using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
@@ -12,7 +13,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.CheckUser(request.TelegramId, await request.FullName.FormatFio(), cancellationToken);
+        var user = await unitOfWork.UserRepository.CheckUser(request.TelegramId, await request.FullName.Format(), cancellationToken);
 
         if (user is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
 
@@ -22,7 +23,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 
         Domain.Models.User newUser = new()
         {
-            FullName = await request.FullName.FormatFio(),
+            FullName = await request.FullName.Format(),
             TelegramId = request.TelegramId,
             GroupId = group.Id
         };

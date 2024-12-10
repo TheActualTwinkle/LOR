@@ -229,7 +229,7 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 
         IEnumerable<string> argumentsList = arguments.ToList();
         
-        if (argumentsList.Any() == false)
+        if (!argumentsList.Any())
             return new ExecutionResult(Result.Fail($"Обработка {Command}\nОтветом на это сообщение введите, пожалуйста, ФИО для авторизации"), new ForceReplyMarkup());
 
         if (argumentsList.Count() != 2 && argumentsList.Count() != 3)

@@ -1,11 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 
-public static class FioFormatter
+namespace DatabaseApp.Application.Common.ExtensionsMethods;
+
+public static partial class FullNameFormatter
 {
-    public static async Task<string> FormatFio(this string fullName)
+    public static async Task<string> Format(this string fullName)
     {
-        var match = Regex.Match(fullName,
-            @"^(?<lastName>\p{L}+)\s+(?<firstName>\p{L}+)(\s+(?<middleName>\p{L}+))?$");
+        var match = FullNameRegex().Match(fullName);
 
         if (!match.Success)
             throw new ArgumentException("Некорректное ФИО");
@@ -19,9 +20,11 @@ public static class FioFormatter
         var formattedMiddleName = string.IsNullOrEmpty(middleName) ? string.Empty : await middleName.FormatPart();
 
         return $"{formattedLastName} {formattedFirstName} {formattedMiddleName}".Trim();
-
     }
 
     private static async Task<string> FormatPart(this string part) =>
         await Task.FromResult(part[..1].ToUpper() + part[1..].ToLower());
+    
+    [GeneratedRegex(@"^(?<lastName>\p{L}+)\s+(?<firstName>\p{L}+)(\s+(?<middleName>\p{L}+))?$")]
+    private static partial Regex FullNameRegex();
 }

@@ -51,7 +51,7 @@ public class TelegramCommandQueryFactory(IDatabaseCommunicationClient databaseCo
     {
         if (callbackQuery.Data is null) return new ExecutionResult(Result.Fail("CallbackQuery: Не найдены данные"));
         
-        if (callbackQuery.Data.StartsWith(CommandQueryPrefix) == false) return new ExecutionResult(Result.Fail("CallbackQuery: Неверный формат запроса"));
+        if (!callbackQuery.Data.StartsWith(CommandQueryPrefix)) return new ExecutionResult(Result.Fail("CallbackQuery: Неверный формат запроса"));
         
         if (callbackQuery.Message is null) return new ExecutionResult(Result.Fail("CallbackQuery: Не найдено сообщение"));
         

@@ -1,9 +1,8 @@
-﻿using GroupScheduleApp.AppCommunication.Interfaces;
-using GroupScheduleApp.ScheduleProviding.Interfaces;
-using GroupScheduleApp.ScheduleUpdating.Settings;
+﻿using GroupScheduleApp.ScheduleUpdating.Settings;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace GroupScheduleApp.ScheduleUpdating;
 
@@ -11,20 +10,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddSenderService(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IScheduleSendService>(s =>
-        {
-            var logger = s.GetRequiredService<ILogger<ScheduleSendService>>();
-            
-            var scheduleProvider = s.GetRequiredService<IScheduleProvider>();
-            var databaseUpdaterCommunicationClient = s.GetRequiredService<IDatabaseUpdaterCommunicationClient>();
+        var hangfireConnectionString = configuration.GetConnectionString("HangfireDb");
 
-            var intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalMinutes").Value!;
-            var pollingInterval = TimeSpan.FromMinutes(int.Parse(intervalString));
+        services.AddHangfire(c =>
+            c.UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
+                .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
-            ScheduleSendServiceSettings settings = new(pollingInterval);
-            
-            return new ScheduleSendService(scheduleProvider, databaseUpdaterCommunicationClient, settings, logger);
-        });
+        services.AddHangfireServer(o => o.SchedulePollingInterval = TimeSpan.FromSeconds(10));
+
+        var intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalCronUtc").Value!;
+
+        services.AddSingleton(_ => new ScheduleSendServiceSettings(intervalString));
+
+        services.AddSingleton<IScheduleSendService, ScheduleSendService>();
+
         return services;
     }
 }

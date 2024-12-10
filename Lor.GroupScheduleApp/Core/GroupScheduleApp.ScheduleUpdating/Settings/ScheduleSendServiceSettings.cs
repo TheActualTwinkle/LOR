@@ -1,6 +1,3 @@
 ﻿namespace GroupScheduleApp.ScheduleUpdating.Settings;
 
-public readonly struct ScheduleSendServiceSettings(TimeSpan sendInterval)
-{
-    public TimeSpan SendInterval { get; } = sendInterval;
-}
+public record ScheduleSendServiceSettings(string CronExpression);

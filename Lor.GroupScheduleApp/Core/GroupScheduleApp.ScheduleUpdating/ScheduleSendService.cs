@@ -1,6 +1,7 @@
-﻿using GroupScheduleApp.ScheduleProviding.Interfaces;
-using GroupScheduleApp.AppCommunication.Interfaces;
+﻿using GroupScheduleApp.AppCommunication.Interfaces;
+using GroupScheduleApp.ScheduleProviding.Interfaces;
 using GroupScheduleApp.ScheduleUpdating.Settings;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace GroupScheduleApp.ScheduleUpdating;
@@ -8,28 +9,23 @@ namespace GroupScheduleApp.ScheduleUpdating;
 public class ScheduleSendService(
     IScheduleProvider scheduleProvider,
     IDatabaseUpdaterCommunicationClient databaseUpdaterCommunicationClient,
+    IRecurringJobManager recurringJobManager,
     ScheduleSendServiceSettings settings,
     ILogger<ScheduleSendService> logger) : IScheduleSendService
 {
-    public async Task RunAsync()
+    public async Task StartAsync()
     {
-        while (true)
-        {
-            try
-            {
-                await SendAllDataAsync();
-            }
-            catch (Exception e)
-            {
-                logger.LogError("Error: {message}", e.Message);
-            }
-
-            await Task.Delay(settings.SendInterval);
-        }
-        // ReSharper disable once FunctionNeverReturns
+        await SendAllDataAsync();
+        
+        recurringJobManager.AddOrUpdate(
+            "SendAllData",
+            () => SendAllDataAsync(),
+            settings.CronExpression);
     }
 
-    private async Task SendAllDataAsync()
+    // Used by Hangfire
+    // ReSharper disable once MemberCanBePrivate.Global
+    public async Task SendAllDataAsync()
     {
         var availableGroups = await scheduleProvider.GetAvailableGroupsAsync();
         var groupClassesData = await scheduleProvider.GetGroupClassesDataAsync();

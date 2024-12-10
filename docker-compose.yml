@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgres:latest
+    image: postgres:16
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -10,6 +10,11 @@ services:
       - "31400:31400"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 31400 -U postgres"]
+      interval: 15s
+      timeout: 15s
+      retries: 3
 
   databaseapp:
     build:
@@ -26,6 +31,8 @@ services:
       - RabbitMqSettings:Username=${RABBITMQ_USER}
       - RabbitMqSettings:Password=${RABBITMQ_PASSWORD}
     depends_on:
+      database:
+        condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
@@ -51,6 +58,10 @@ services:
       dockerfile: Lor.GroupScheduleApp/Presentation/GroupScheduleApp.Api/Dockerfile
     environment:
       - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
+      - ConnectionStrings:HangfireDb=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      database:
+        condition: service_healthy
 
   redis:
     image: redis:latest

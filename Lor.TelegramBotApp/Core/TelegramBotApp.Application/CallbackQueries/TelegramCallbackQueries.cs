@@ -21,7 +21,7 @@ public class EnqueueCallbackQuery : ICallbackQuery
         if (argumentsList.Count != 1)
             throw new ArgumentException("EnqueueCallbackQuery: Неверное количество аргументов");
 
-        if (int.TryParse(argumentsList.First(), out var classId) == false)
+        if (!int.TryParse(argumentsList.First(), out var classId))
             throw new ArgumentException($"EnqueueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
 
         var result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
@@ -56,7 +56,7 @@ public class DequeueCallbackQuery : ICallbackQuery
         if (argumentsList.Count != 1)
             throw new ArgumentException("DequeueCallbackQuery: Неверное количество аргументов");
 
-        if (int.TryParse(argumentsList.First(), out var classId) == false)
+        if (!int.TryParse(argumentsList.First(), out var classId))
             throw new ArgumentException($"DequeueCallbackQuery: Неверный формат аргумента (должен быть {classId.GetType})");
 
         var result = await factory.DatabaseCommunicator.DequeueFromClass(classId, chatId, cancellationToken);
