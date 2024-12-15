@@ -233,7 +233,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         return new DequeueFromClassReply
         {
             ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp =getClassResult.Value.Date.ToUnixTime(),
+            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
             StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
         };
     }

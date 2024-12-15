@@ -280,6 +280,33 @@ public class QueueTests
             Assert.That(queueAfterDelete.Value, Has.Count.EqualTo(queueBeforeDelete.Value.Count - 1));
         });
     }
+
+    [Test]
+    public async Task ViewQueueClass()
+    {
+        await CreateUserAndClasses();
+
+        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
+        
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+
+        await _sender.Send(new CreateQueueCommand
+        {
+            TelegramId = TestTelegramId,
+            ClassId = getClassesResult.Value.First().Id
+        });
+        
+        // Act
+        var queueClass = await _sender.Send(new GetClassQueueQuery { ClassId = getClassesResult.Value.First().Id });
+        
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(queueClass.IsSuccess, Is.True);
+            Assert.That(getGroupResult.IsSuccess, Is.True);
+            Assert.That(queueClass.Value, Has.Count.EqualTo(1));
+        });
+    }
     
     [Test]
     public async Task GetClassQueue_WhenClassExist_Queue()
