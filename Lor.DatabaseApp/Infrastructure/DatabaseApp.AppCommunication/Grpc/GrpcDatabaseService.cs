@@ -1,4 +1,5 @@
-﻿using DatabaseApp.Application.Class;
+﻿using DatabaseApp.AppCommunication.Extensions;
+using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
@@ -74,7 +75,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         {
             ClassId = dto.Id,
             ClassName = dto.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
+            ClassDateUnixTimestamp = dto.Date.ToUnixTime()
         });
         
         return new GetAvailableClassesReply { ClassInformation = { classInformation }};
@@ -138,7 +139,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             {
                 WasAlreadyEnqueued = true,
                 ClassName = getClassResult.Value.Name,
-                ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+                ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
                 StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
             };
 
@@ -165,7 +166,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         return new EnqueueInClassReply
         {
             ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
             StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
         };
     }
@@ -206,7 +207,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             {
                 WasAlreadyDequeuedFromClass = true,
                 ClassName = getClassResult.Value.Name,
-                ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+                ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
                 StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
             };
 
@@ -232,7 +233,34 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         return new DequeueFromClassReply
         {
             ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
+            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
+            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+        };
+    }
+    
+    public override async Task<ViewQueueClassReply> ViewQueueClass(ViewQueueClassRequest request, ServerCallContext context)
+    {
+        var getClassResult = await mediator.Send(new GetClassQuery
+        {
+            ClassId = request.ClassId
+        }, context.CancellationToken);
+
+        if (getClassResult.IsFailed)
+            return new ViewQueueClassReply
+                { IsFailed = true, ErrorMessage = getClassResult.Errors.First().Message };
+        
+        var queueDto = await mediator.Send(new GetClassQueueQuery
+        {
+            ClassId = request.ClassId
+        }, context.CancellationToken);
+
+        if (queueDto.IsFailed)
+            return new ViewQueueClassReply 
+                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
+
+        return new ViewQueueClassReply {
+            ClassName = getClassResult.Value.Name,
+            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
             StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
         };
     }

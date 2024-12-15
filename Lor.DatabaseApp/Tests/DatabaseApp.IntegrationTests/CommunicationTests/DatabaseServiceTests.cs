@@ -170,6 +170,50 @@ public class DatabaseServiceTests
             Assert.That(queueAfterDelete, Is.EquivalentTo(expectedQueue));
         });
     }
+
+    [Test]
+    public async Task ViewQueueClass()
+    {
+        var users = new List<User>
+        {
+            new()
+            {
+                FullName = "Мистер Бист Средний",
+                Group = new Group {Name = DefaultGroupName},
+                TelegramId = DefaultUserId + 1
+            },
+            new()
+            {
+                FullName = "Мистер Бист Старший",
+                Group = new Group {Name = DefaultGroupName},
+                TelegramId = DefaultUserId + 2
+            }
+        };
+        
+        Assert.That((await AddUsersToGroup(users)).IsSuccess, Is.True);
+        
+        var classesResult = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
+        Assert.That(classesResult.IsSuccess, Is.True);
+
+        var classId = classesResult.Value.First().Id;
+        
+        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
+        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 1);
+        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 2);
+        
+        var viewQueueClassResult = await IntegrationTestsSharedContext.DatabaseCommunication.ViewQueueClass(classId);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result1.IsSuccess, Is.True);
+            Assert.That(result2.IsSuccess, Is.True);
+            Assert.That(result3.IsSuccess, Is.True);
+            
+            Assert.That(viewQueueClassResult.IsSuccess, Is.True);
+
+            Assert.That(viewQueueClassResult.Value.StudentsQueue, Is.EquivalentTo( result3.Value.StudentsQueue.ToList()));
+        });
+    }
     
     [Test]
     public async Task AddSubscriber()
