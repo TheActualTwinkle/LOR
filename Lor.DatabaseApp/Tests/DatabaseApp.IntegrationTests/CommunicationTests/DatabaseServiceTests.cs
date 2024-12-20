@@ -172,7 +172,7 @@ public class DatabaseServiceTests
     }
 
     [Test]
-    public async Task ViewQueueClass()
+    public async Task ViewClassQueue()
     {
         var users = new List<User>
         {

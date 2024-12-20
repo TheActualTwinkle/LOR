@@ -14,9 +14,9 @@ public interface IDatabaseCommunicationClient : ICommunicationClient
     
     Task<Result<string>> SetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default);
     
-    Task<Result<EnqueueInResult>> EnqueueInClass(int classId, long userId, CancellationToken cancellationToken = default);
+    Task<Result<EnqueueInClassResult>> EnqueueInClass(int classId, long userId, CancellationToken cancellationToken = default);
     
-    Task<Result<DequeueFromResult>> DequeueFromClass(int classId, long userId, CancellationToken cancellationToken = default);
+    Task<Result<DequeueFromClassResult>> DequeueFromClass(int classId, long userId, CancellationToken cancellationToken = default);
     
     Task<Result<ViewClassQueueResult>> ViewClassQueue(int classId, CancellationToken cancellationToken = default);
     
