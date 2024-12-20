@@ -68,9 +68,9 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
-    public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int classId, long userId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { UserId = userId, ClassId = classId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult
         {
@@ -81,13 +81,25 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         });
     }
     
-    public async Task<Result<DequeueFromClassResult>> DequeueFromClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<DequeueFromClassResult>> DequeueFromClass(int classId, long userId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { UserId = userId, ClassId = classId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassResult
         {
             WasAlreadyDequeued = reply.WasAlreadyDequeuedFromClass,
+            StudentsQueue = reply.StudentsQueue,
+            ClassName = reply.ClassName,
+            ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
+        });
+    }
+
+    public async Task<Result<ViewClassQueueResult>> ViewClassQueue(int classId, CancellationToken cancellationToken = default)
+    {
+        var reply = await _client!.ViewQueueClassAsync(new ViewQueueClassRequest{ ClassId = classId }, cancellationToken: cancellationToken);
+        
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewClassQueueResult
+        {
             StudentsQueue = reply.StudentsQueue,
             ClassName = reply.ClassName,
             ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
