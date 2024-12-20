@@ -68,11 +68,11 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
-    public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int classId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<EnqueueInResult>> EnqueueInClass(int classId, long userId, CancellationToken cancellationToken = default)
     {
         var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { UserId = userId, ClassId = classId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInResult
         {
             WasAlreadyEnqueued = reply.WasAlreadyEnqueued,
             StudentsQueue = reply.StudentsQueue,
@@ -81,11 +81,11 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         });
     }
     
-    public async Task<Result<DequeueFromClassResult>> DequeueFromClass(int classId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<DequeueFromResult>> DequeueFromClass(int classId, long userId, CancellationToken cancellationToken = default)
     {
         var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { UserId = userId, ClassId = classId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassResult
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromResult
         {
             WasAlreadyDequeued = reply.WasAlreadyDequeuedFromClass,
             StudentsQueue = reply.StudentsQueue,
@@ -94,11 +94,11 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         });
     }
 
-    public async Task<Result<ViewQueueClassResult>> ViewQueueClass(int classId, CancellationToken cancellationToken = default)
+    public async Task<Result<ViewClassQueueResult>> ViewClassQueue(int classId, CancellationToken cancellationToken = default)
     {
         var reply = await _client!.ViewQueueClassAsync(new ViewQueueClassRequest{ ClassId = classId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewQueueClassResult
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewClassQueueResult
         {
             StudentsQueue = reply.StudentsQueue,
             ClassName = reply.ClassName,

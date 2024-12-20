@@ -201,7 +201,7 @@ public class DatabaseServiceTests
         var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 1);
         var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 2);
         
-        var viewQueueClassResult = await IntegrationTestsSharedContext.DatabaseCommunication.ViewQueueClass(classId);
+        var viewQueueClassResult = await IntegrationTestsSharedContext.DatabaseCommunication.ViewClassQueue(classId);
         
         Assert.Multiple(() =>
         {

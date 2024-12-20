@@ -90,7 +90,7 @@ public class DequeueCallbackQuery : ICallbackQuery
 
 [Export(typeof(ICallbackQuery))]
 [ExportMetadata(nameof(Query), $"{TelegramCommandQueryFactory.CommandQueryPrefix}queue")]
-public class ViewQueueClassQuery : ICallbackQuery
+public class ViewClassQueueQuery : ICallbackQuery
 {
     public string Query => $"{TelegramCommandQueryFactory.CommandQueryPrefix}queue";
     
@@ -104,7 +104,7 @@ public class ViewQueueClassQuery : ICallbackQuery
         if (!int.TryParse(argumentsList.First(), out var classId))
             throw new ArgumentException($"ViewQueueAtClassQuery: Неверный формат аргумента (должен быть {classId.GetType})");
 
-        var result = await factory.DatabaseCommunicator.ViewQueueClass(classId, cancellationToken);
+        var result = await factory.DatabaseCommunicator.ViewClassQueue(classId, cancellationToken);
         
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));

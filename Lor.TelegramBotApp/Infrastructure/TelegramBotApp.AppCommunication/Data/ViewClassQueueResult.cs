@@ -1,6 +1,6 @@
 ﻿namespace TelegramBotApp.AppCommunication.Data;
 
-public record ViewQueueClassResult
+public record ViewClassQueueResult
 {
     public IEnumerable<string> StudentsQueue { get; init; }
     
