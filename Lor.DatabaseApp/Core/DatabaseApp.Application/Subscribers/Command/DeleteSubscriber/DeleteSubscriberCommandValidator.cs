@@ -4,8 +4,5 @@ namespace DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
 
 public class DeleteSubscriberCommandValidator : AbstractValidator<DeleteSubscriberCommand>
 {
-    public DeleteSubscriberCommandValidator()
-    {
-        RuleFor(x => x.TelegramId).GreaterThan(0);
-    }
+    public DeleteSubscriberCommandValidator() => RuleFor(x => x.TelegramId).GreaterThan(0);
 }
