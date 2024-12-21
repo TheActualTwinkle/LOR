@@ -27,5 +27,4 @@ public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService
         
         return Result.Ok(subscribersDto);
     }
-        
 }
