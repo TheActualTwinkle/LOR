@@ -75,6 +75,6 @@ public interface IUserRepository : IRepository
 {
     public Task AddAsync(User user, CancellationToken cancellationToken);
     
-    public Task<User?> CheckUserExists(long telegramId, string fullName, CancellationToken cancellationToken);
+    public Task<User?> IsUserExists(long telegramId, string fullName, CancellationToken cancellationToken);
     public Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken);
 }
