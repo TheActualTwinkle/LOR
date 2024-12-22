@@ -10,7 +10,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 {
     public required DbSet<Class> Classes { get; init; }
     public required DbSet<Group> Groups { get; init; }
-    public required DbSet<Queue> Queues { get; init; }
+    public required DbSet<QueueEntry> Queues { get; init; }
     public required DbSet<Subscriber> Subscribers { get; init; }
     public required DbSet<User> Users { get; init; }
     public DatabaseFacade Db => Database;

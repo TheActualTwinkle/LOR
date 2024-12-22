@@ -7,7 +7,7 @@ public sealed class UnitOfWork(
     IDatabaseContext context,
     IClassRepository classRepository,
     IGroupRepository groupRepository,
-    IQueueRepository queueRepository,
+    IQueueEntryRepository queueEntryRepository,
     ISubscriberRepository subscriberRepository,
     IUserRepository userRepository) : IUnitOfWork
 {
@@ -15,7 +15,7 @@ public sealed class UnitOfWork(
 
     public IClassRepository ClassRepository => classRepository;
     public IGroupRepository GroupRepository => groupRepository;
-    public IQueueRepository QueueRepository => queueRepository;
+    public IQueueEntryRepository QueueEntryRepository => queueEntryRepository;
     public ISubscriberRepository SubscriberRepository => subscriberRepository;
     public IUserRepository UserRepository => userRepository;
 

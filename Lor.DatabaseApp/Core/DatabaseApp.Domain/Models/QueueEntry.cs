@@ -1,6 +1,6 @@
 ﻿namespace DatabaseApp.Domain.Models;
 
-public class Queue : IEntity
+public class QueueEntry : IEntity
 {
     public int Id { get; init; }
     public int ClassId { get; init; }

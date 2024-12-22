@@ -2,11 +2,11 @@
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
-using DatabaseApp.Application.Queue.Commands.CreateQueue;
-using DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
-using DatabaseApp.Application.Queue.Commands.DeleteQueue;
-using DatabaseApp.Application.Queue.Queries.GetQueue;
-using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
+using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
+using DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
+using DatabaseApp.Application.QueueEntries.Queries.GetQueue;
+using DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DatabaseApp.Tests.DatabaseTests;
 
-public class QueueTests
+public class QueueEntryTests
 {
     private readonly WebAppFactory _factory = new();
     
@@ -83,7 +83,7 @@ public class QueueTests
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         // Act
-        var createResult = await _sender.Send(new CreateQueueCommand
+        var createResult = await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
@@ -125,7 +125,7 @@ public class QueueTests
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
         // Act
-        var createResult = await _sender.Send(new CreateQueueCommand
+        var createResult = await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
@@ -159,7 +159,7 @@ public class QueueTests
         });
 
         // Act
-        var createResult = await _sender.Send(new CreateQueueCommand
+        var createResult = await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = 1337
@@ -179,14 +179,14 @@ public class QueueTests
         
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
-        await _sender.Send(new CreateQueueCommand
+        await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
         });
 
         // Act
-        var createResult = await _sender.Send(new CreateQueueCommand
+        var createResult = await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
@@ -213,7 +213,7 @@ public class QueueTests
         
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
-        await _sender.Send(new CreateQueueCommand
+        await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
@@ -259,7 +259,7 @@ public class QueueTests
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
         var outdatedClassId = getClassesResult.Value.Last().Id;
         
-        await _sender.Send(new CreateQueueCommand
+        await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = outdatedClassId
@@ -291,7 +291,7 @@ public class QueueTests
         
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
-        await _sender.Send(new CreateQueueCommand
+        await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id
@@ -331,7 +331,7 @@ public class QueueTests
 
         var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
 
-        await _sender.Send(new CreateQueueCommand
+        await _sender.Send(new CreateQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id

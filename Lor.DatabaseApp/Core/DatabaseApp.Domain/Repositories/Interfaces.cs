@@ -6,7 +6,7 @@ public interface IUnitOfWork : IDisposable
 {
     IClassRepository ClassRepository { get; }
     IGroupRepository GroupRepository { get; }
-    IQueueRepository QueueRepository { get; }
+    IQueueEntryRepository QueueEntryRepository { get; }
     ISubscriberRepository SubscriberRepository { get; }
     IUserRepository UserRepository { get; }
 
@@ -41,23 +41,23 @@ public interface IGroupRepository : IRepository
     public Task<Group?> GetGroupByGroupName(string groupName, CancellationToken cancellationToken);
 }
 
-public interface IQueueRepository : IRepository
+public interface IQueueEntryRepository : IRepository
 {
-    public Task AddAsync(Queue queue, CancellationToken cancellationToken);
+    public Task AddAsync(QueueEntry queueEntry, CancellationToken cancellationToken);
     
-    public void Delete(Queue queue);
+    public void Delete(QueueEntry queueEntry);
 
     public Task<int> GetCurrentQueueNum(int classId);
     
-    public Task<List<Queue>?> GetQueueByClassId(int classId, CancellationToken cancellationToken);
+    public Task<List<QueueEntry>?> GetQueueByClassId(int classId, CancellationToken cancellationToken);
 
-    public Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);
+    public Task<List<QueueEntry>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken);
     
     public Task<uint> GetUserQueueNum(long telegramId, int classId, CancellationToken cancellationToken);
     
     public Task<bool> IsUserInQueue(int userId, int classId, CancellationToken cancellationToken);
     
-    public void Update(Queue queue);
+    public void Update(QueueEntry queueEntry);
 }
 
 public interface ISubscriberRepository : IRepository

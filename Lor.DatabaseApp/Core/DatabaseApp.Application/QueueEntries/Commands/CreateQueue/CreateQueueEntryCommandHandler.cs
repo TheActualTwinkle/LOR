@@ -5,12 +5,12 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
+namespace DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
 
-public class CreateQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
-    : IRequestHandler<CreateQueueCommand, Result>
+public class CreateQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+    : IRequestHandler<CreateQueueEntryCommand, Result>
 {
-    public async Task<Result> Handle(CreateQueueCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CreateQueueEntryCommand request, CancellationToken cancellationToken)
     {
         var user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
@@ -26,28 +26,28 @@ public class CreateQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
         if (@class is null) return Result.Fail("Пара не найдена.");
 
         var queueNum =
-             Convert.ToUInt32(await unitOfWork.QueueRepository.GetCurrentQueueNum(request.ClassId));
+             Convert.ToUInt32(await unitOfWork.QueueEntryRepository.GetCurrentQueueNum(request.ClassId));
 
         var queueExist =
-            await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
+            await unitOfWork.QueueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
 
         if (queueExist)
             return Result.Fail($"Ваша запись на пару \"{@class.Name} - {@class.Date:dd.MM}\" уже создана.");
 
-        Domain.Models.Queue queue = new()
+        Domain.Models.QueueEntry queueEntry = new()
         {
             UserId = user.Id,
             ClassId = request.ClassId,
             QueueNum = queueNum + 1
         };
         
-        await unitOfWork.QueueRepository.AddAsync(queue, cancellationToken);
+        await unitOfWork.QueueEntryRepository.AddAsync(queueEntry, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, 
-            mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken))
-                .AdaptToType<List<QueueDto>>(), cancellationToken: cancellationToken);
+            mapper.From(await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken))
+                .AdaptToType<List<QueueEntryDto>>(), cancellationToken: cancellationToken);
 
         return Result.Ok();
     }

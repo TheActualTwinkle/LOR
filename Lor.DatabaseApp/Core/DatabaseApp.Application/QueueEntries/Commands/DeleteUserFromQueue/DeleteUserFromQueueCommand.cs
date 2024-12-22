@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Commands.DeleteQueue;
+namespace DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
 
 public record DeleteUserFromQueueCommand : IRequest<Result>
 {

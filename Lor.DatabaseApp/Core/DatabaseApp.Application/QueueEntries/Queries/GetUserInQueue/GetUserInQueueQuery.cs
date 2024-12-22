@@ -2,7 +2,7 @@
 using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
 
 public record GetUserInQueueQuery : IRequest<Result<UserDto?>>
 {
