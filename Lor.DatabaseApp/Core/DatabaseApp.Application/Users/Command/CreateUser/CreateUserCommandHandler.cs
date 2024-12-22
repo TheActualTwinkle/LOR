@@ -13,7 +13,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.CheckUser(request.TelegramId, await request.FullName.Format(), cancellationToken);
+        var user = await unitOfWork.UserRepository.IsUserExists(request.TelegramId, await request.FullName.Format(), cancellationToken);
 
         if (user is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
 

@@ -8,7 +8,7 @@ namespace DatabaseApp.Persistence.Repositories;
 public class UserRepository(IDatabaseContext context)
     : RepositoryBase<User>(context), IUserRepository
 {
-    public async Task<User?> CheckUser(long telegramId, string fullName, CancellationToken cancellationToken) =>
+    public async Task<User?> IsUserExists(long telegramId, string fullName, CancellationToken cancellationToken) =>
         await _context.Users
             .FirstOrDefaultAsync(u => u.TelegramId == telegramId || u.FullName == fullName, cancellationToken);
 

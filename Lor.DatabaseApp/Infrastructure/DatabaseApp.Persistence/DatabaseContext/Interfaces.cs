@@ -8,7 +8,7 @@ public interface IDatabaseContext
 {
     DbSet<Class> Classes { get; }
     DbSet<Group> Groups { get; }
-    DbSet<Queue> Queues { get; }
+    DbSet<QueueEntry> Queues { get; }
     DbSet<Subscriber> Subscribers { get; }
     DbSet<User> Users { get; }
     DatabaseFacade Db { get; }

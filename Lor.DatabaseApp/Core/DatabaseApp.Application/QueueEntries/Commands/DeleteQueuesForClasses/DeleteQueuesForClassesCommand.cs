@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
+namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
 public record DeleteQueuesForClassesCommand : IRequest<Result>
 {

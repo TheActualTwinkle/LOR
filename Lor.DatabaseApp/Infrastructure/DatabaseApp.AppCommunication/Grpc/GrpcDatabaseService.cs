@@ -4,10 +4,10 @@ using DatabaseApp.Application.Class.Queries.GetClass;
 using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Application.Group.Queries.GetGroups;
-using DatabaseApp.Application.Queue.Commands.CreateQueue;
-using DatabaseApp.Application.Queue.Commands.DeleteQueue;
-using DatabaseApp.Application.Queue.Queries.GetQueue;
-using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
+using DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
+using DatabaseApp.Application.QueueEntries.Queries.GetQueue;
+using DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
 using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
@@ -144,7 +144,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             };
 
         // If we have to ACTUALLY enqueue user
-        var result = await mediator.Send(new CreateQueueCommand
+        var result = await mediator.Send(new CreateQueueEntryCommand
         {
             TelegramId = request.UserId,
             ClassId = request.ClassId

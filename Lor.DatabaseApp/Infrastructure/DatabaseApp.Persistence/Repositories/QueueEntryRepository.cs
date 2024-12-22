@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
 
-public class QueueRepository(IDatabaseContext context)
-    : RepositoryBase<Queue>(context), IQueueRepository
+public class QueueEntryEntryRepository(IDatabaseContext context)
+    : RepositoryBase<QueueEntry>(context), IQueueEntryRepository
 {
     public async Task<int> GetCurrentQueueNum(int classId) =>
         await Task.FromResult(_context.Queues
             .Count(q => q.ClassId == classId));
 
-    public async Task<List<Queue>?> GetQueueByClassId(int classId, CancellationToken cancellationToken)
+    public async Task<List<QueueEntry>?> GetQueueByClassId(int classId, CancellationToken cancellationToken)
     {
         if (!_context.Classes.Any(x => x.Id == classId))
             return null;
@@ -24,7 +24,7 @@ public class QueueRepository(IDatabaseContext context)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Queue>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken) =>
+    public async Task<List<QueueEntry>?> GetOutdatedQueueListByClassId(int classId, CancellationToken cancellationToken) =>
         await _context.Queues
             .Where(q => q.ClassId == classId)
             .ToListAsync(cancellationToken);

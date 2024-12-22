@@ -19,7 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseContext, ApplicationDbContext>();
         services.AddScoped<IClassRepository, ClassRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
-        services.AddScoped<IQueueRepository, QueueRepository>();
+        services.AddScoped<IQueueEntryRepository, QueueEntryEntryRepository>();
         services.AddScoped<ISubscriberRepository, SubscriberRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 

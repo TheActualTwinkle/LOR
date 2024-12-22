@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Queue.Commands.DeleteQueue;
+namespace DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
 
 public class DeleteUserFromQueueCommandValidator : AbstractValidator<DeleteUserFromQueueCommand>
 {

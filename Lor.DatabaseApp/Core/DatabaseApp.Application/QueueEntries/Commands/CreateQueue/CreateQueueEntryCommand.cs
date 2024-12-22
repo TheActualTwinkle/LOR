@@ -1,9 +1,9 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Commands.CreateQueue;
+namespace DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
 
-public record CreateQueueCommand : IRequest<Result>
+public record CreateQueueEntryCommand : IRequest<Result>
 {
     public required long TelegramId { get; init; }
 

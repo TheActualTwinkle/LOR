@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DatabaseApp.Persistence.EntityTypeConfiguration;
 
-public class QueueConfiguration : IEntityTypeConfiguration<Queue>
+public class QueueConfiguration : IEntityTypeConfiguration<QueueEntry>
 {
-    public void Configure(EntityTypeBuilder<Queue> builder)
+    public void Configure(EntityTypeBuilder<QueueEntry> builder)
     {
         builder.ToTable("QUEUES");
         

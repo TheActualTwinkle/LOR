@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
+namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
 public class DeleteQueuesForClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<DeleteQueuesForClassesCommand, Result>
@@ -14,14 +14,14 @@ public class DeleteQueuesForClassesCommandHandler(IUnitOfWork unitOfWork, ICache
     {
         foreach (var classId in request.ClassesId)
         {
-            var outdatedQueueList = await unitOfWork.QueueRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
+            var outdatedQueueList = await unitOfWork.QueueEntryRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
         
             if (outdatedQueueList is null) return Result.Fail($"Очередь для {classId} не найдена");
         
             foreach (var queue in outdatedQueueList)
-                unitOfWork.QueueRepository.Delete(queue);
+                unitOfWork.QueueEntryRepository.Delete(queue);
 
-            var queues = mapper.From(await unitOfWork.QueueRepository.GetQueueByClassId(classId, cancellationToken)).AdaptToType<List<QueueDto>>();
+            var queues = mapper.From(await unitOfWork.QueueEntryRepository.GetQueueByClassId(classId, cancellationToken)).AdaptToType<List<QueueEntryDto>>();
             
             await cacheService.SetAsync(Constants.QueuePrefix + classId, queues, cancellationToken: cancellationToken);
         }

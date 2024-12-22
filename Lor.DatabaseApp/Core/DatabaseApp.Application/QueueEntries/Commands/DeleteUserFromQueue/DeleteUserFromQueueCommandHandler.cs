@@ -5,22 +5,22 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Commands.DeleteQueue;
+namespace DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
 
 public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<DeleteUserFromQueueCommand, Result>
 {
     public async Task<Result> Handle(DeleteUserFromQueueCommand request, CancellationToken cancellationToken)
     {
-        var queueOfClass = await unitOfWork.QueueRepository.GetQueueByClassId(request.ClassId, cancellationToken);
+        var queueOfClass = await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
             
         if (queueOfClass is null) return Result.Fail("Запись в очереди не найдена");
 
-        var userQueueNum = await unitOfWork.QueueRepository.GetUserQueueNum(request.TelegramId, request.ClassId, cancellationToken);
+        var userQueueNum = await unitOfWork.QueueEntryRepository.GetUserQueueNum(request.TelegramId, request.ClassId, cancellationToken);
             
         var queue = queueOfClass.First(x => x.QueueNum == userQueueNum);
         
-        unitOfWork.QueueRepository.Delete(queue);
+        unitOfWork.QueueEntryRepository.Delete(queue);
         
         var queueAfterDeletedEntry = queueOfClass.Where(x => x.QueueNum > userQueueNum);
 
@@ -28,12 +28,12 @@ public class DeleteUserFromQueueCommandHandler(IUnitOfWork unitOfWork, ICacheSer
         {
             item.QueueNum -= 1;
             
-            unitOfWork.QueueRepository.Update(item);
+            unitOfWork.QueueEntryRepository.Update(item);
         }
 
         queueOfClass.Remove(queue);
         
-        var newQueue = mapper.From(queueOfClass).AdaptToType<List<QueueDto>>();
+        var newQueue = mapper.From(queueOfClass).AdaptToType<List<QueueEntryDto>>();
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         

@@ -4,7 +4,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
 
 public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>
@@ -17,7 +17,7 @@ public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
         if (user is null) return Result.Fail("Пользователь не найден.");
         
         var isUserInQueue =
-            await unitOfWork.QueueRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
+            await unitOfWork.QueueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
         return isUserInQueue == true ? Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) : Result.Ok<UserDto?>(null);
     }

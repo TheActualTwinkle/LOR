@@ -4,7 +4,7 @@ using DatabaseApp.Application.Class.Queries.GetClasses;
 using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries.GetGroup;
-using DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
+using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
 using Google.Protobuf.WellKnownTypes;

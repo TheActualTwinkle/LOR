@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Queue.Commands.DeleteOutdatedQueues;
+namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
 public class DeleteQueuesForClassesCommandValidator : AbstractValidator<DeleteQueuesForClassesCommand>
 {
