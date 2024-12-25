@@ -80,7 +80,7 @@ public class DatabaseServiceTests
         Assert.That(classesResult.IsSuccess, Is.True);
 
         var className = classesResult.Value.First().Name;
-        var classDate = classesResult.Value.Last().Date;
+        var classDate = classesResult.Value.First().Date;
         
         var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
         var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 1);
@@ -105,7 +105,7 @@ public class DatabaseServiceTests
         Assert.That(classesResult.IsSuccess, Is.True);
 
         var className = classesResult.Value.First().Name;
-        var classDate = classesResult.Value.Last().Date;
+        var classDate = classesResult.Value.First().Date;
         
         var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
         var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
@@ -147,7 +147,7 @@ public class DatabaseServiceTests
         Assert.That(classesResult.IsSuccess, Is.True);
 
         var className = classesResult.Value.First().Name;
-        var classDate = classesResult.Value.Last().Date;
+        var classDate = classesResult.Value.First().Date;
         
         var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
         var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 1);
@@ -199,7 +199,7 @@ public class DatabaseServiceTests
         Assert.That(classesResult.IsSuccess, Is.True);
 
         var className = classesResult.Value.First().Name;
-        var classDate = classesResult.Value.Last().Date;
+        var classDate = classesResult.Value.First().Date;
         
         var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
         var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 1);
