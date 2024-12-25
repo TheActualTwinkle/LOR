@@ -14,9 +14,9 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
     {
         foreach (var item in request.Classes)
         {
-            var classExist = await unitOfWork.ClassRepository.CheckClass(item.Key, item.Value, cancellationToken);
+            var classExist = await unitOfWork.ClassRepository.GetClassByNameAndDate(item.Key, item.Value, cancellationToken);
 
-            if (classExist) continue;
+            if (classExist is not null) continue;
             
             Domain.Models.Class @class = new()
             {

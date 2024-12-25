@@ -92,14 +92,14 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ICacheService cacheSer
         
         await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: context.CancellationToken);
 
-        var newClasses = classes.Value.Except(oldClasses.Value).ToList();
+        var newClasses = classes.Value.Except(oldClasses.Value).OrderBy(x => x.Id);
         
-        if (newClasses.Count == 0) return new Empty();
+        if (!newClasses.Any()) return new Empty();
         
         NewClassesMessage newClassesMessage = new()
         {
             GroupId = groupDto.Value.Id,
-            Classes = newClasses.Select(x => new Class { Id = x.Id, Name = x.Name, Date = x.Date })
+            Classes = newClasses.Select(x => new Class { Name = x.Name, Date = x.Date })
         };
         
         await bus.Publish(newClassesMessage, cancellationToken: context.CancellationToken);

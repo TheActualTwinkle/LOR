@@ -10,7 +10,7 @@ public class GetClassQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
 {
     public async Task<Result<ClassDto>> Handle(GetClassQuery request, CancellationToken cancellationToken)
     {
-        var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        var @class = await unitOfWork.ClassRepository.GetClassByNameAndDate(request.ClassName, request.ClassDate, cancellationToken);
 
         return @class is null ? Result.Fail("Такой пары не существует.") : mapper.From(@class).AdaptToType<ClassDto>();
     }

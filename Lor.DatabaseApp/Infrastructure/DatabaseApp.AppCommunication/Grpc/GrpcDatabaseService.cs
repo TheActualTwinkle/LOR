@@ -26,7 +26,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var userDto = await mediator.Send(new GetUserInfoQuery
         {
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (userDto.IsFailed)
@@ -55,7 +55,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var userDto = await mediator.Send(new GetUserInfoQuery
         {
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (userDto.IsFailed)
@@ -73,7 +73,6 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var classInformation = await classes.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
         {
-            ClassId = dto.Id,
             ClassName = dto.Name,
             ClassDateUnixTimestamp = dto.Date.ToUnixTime()
         });
@@ -85,7 +84,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var result = await mediator.Send(new CreateUserCommand
         {
-            TelegramId = request.UserId,
+            TelegramId = request.TelegramId,
             FullName = request.FullName,
             GroupName = request.GroupName
         }, context.CancellationToken);
@@ -96,7 +95,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var userDto = await mediator.Send(new GetUserInfoQuery
         {
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (userDto.IsFailed)
@@ -111,13 +110,14 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var getClassResult = await mediator.Send(new GetClassQuery
         {
-            ClassId = request.ClassId
+            ClassName = request.ClassName,
+            ClassDate = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(request.ClassDateUnixTimestamp).DateTime)
         }, context.CancellationToken);
         
         var userInQueue = await mediator.Send(new GetUserInQueueQuery
         {
-            ClassId = request.ClassId,
-            TelegramId = request.UserId
+            ClassId = getClassResult.Value.Id,
+            TelegramId = request.TelegramId
         });
         
         if (userInQueue.IsFailed)
@@ -126,7 +126,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         var queueDto = await mediator.Send(new GetClassQueueQuery
         {
-            ClassId = request.ClassId
+            ClassId = getClassResult.Value.Id
         }, context.CancellationToken);
         
         if (queueDto.IsFailed)
@@ -138,16 +138,14 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new EnqueueInClassReply
             {
                 WasAlreadyEnqueued = true,
-                ClassName = getClassResult.Value.Name,
-                ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
                 StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
             };
 
         // If we have to ACTUALLY enqueue user
         var result = await mediator.Send(new CreateQueueEntryCommand
         {
-            TelegramId = request.UserId,
-            ClassId = request.ClassId
+            TelegramId = request.TelegramId,
+            ClassId = getClassResult.Value.Id
         }, context.CancellationToken);
         
         if (result.IsFailed)
@@ -156,26 +154,22 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         queueDto = await mediator.Send(new GetClassQueueQuery
         {
-            ClassId = request.ClassId
+            ClassId = getClassResult.Value.Id,
         }, context.CancellationToken);
         
         if (queueDto.IsFailed)
             return new EnqueueInClassReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
 
-        return new EnqueueInClassReply
-        {
-            ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
-            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
-        };
+        return new EnqueueInClassReply { StudentsQueue = { queueDto.Value.Select(x => x.FullName) } };
     }
     
     public override async Task<DequeueFromClassReply> DequeueFromClass(DequeueFromClassRequest request, ServerCallContext context)
     {
         var getClassResult = await mediator.Send(new GetClassQuery
         {
-            ClassId = request.ClassId
+            ClassName = request.ClassName,
+            ClassDate = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(request.ClassDateUnixTimestamp).DateTime)
         }, context.CancellationToken);
 
         if (getClassResult.IsFailed)
@@ -184,7 +178,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         var queueDto = await mediator.Send(new GetClassQueueQuery
         {
-            ClassId = request.ClassId
+            ClassId = getClassResult.Value.Id,
         }, context.CancellationToken);
 
         if (queueDto.IsFailed)
@@ -193,8 +187,8 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         var userInQueue = await mediator.Send(new GetUserInQueueQuery
         {
-            ClassId = request.ClassId,
-            TelegramId = request.UserId
+            ClassId = getClassResult.Value.Id,
+            TelegramId = request.TelegramId
         });
         
         if (userInQueue.IsFailed)
@@ -206,16 +200,14 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new DequeueFromClassReply
             {
                 WasAlreadyDequeuedFromClass = true,
-                ClassName = getClassResult.Value.Name,
-                ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
                 StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
             };
 
         // If we have to ACTUALLY DequeueFromClass user
         var result = await mediator.Send(new DeleteUserFromQueueCommand
         {
-            ClassId = request.ClassId,
-            TelegramId = request.UserId
+            ClassId = getClassResult.Value.Id,
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
             
         if (result.IsFailed) return new DequeueFromClassReply
@@ -223,26 +215,22 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             
         queueDto = await mediator.Send(new GetClassQueueQuery
         {
-            ClassId = request.ClassId
+            ClassId = getClassResult.Value.Id
         }, context.CancellationToken);
 
         if (queueDto.IsFailed)
             return new DequeueFromClassReply 
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
 
-        return new DequeueFromClassReply
-        {
-            ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
-            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
-        };
+        return new DequeueFromClassReply { StudentsQueue = { queueDto.Value.Select(x => x.FullName) } };
     }
     
     public override async Task<ViewQueueClassReply> ViewQueueClass(ViewQueueClassRequest request, ServerCallContext context)
     {
         var getClassResult = await mediator.Send(new GetClassQuery
         {
-            ClassId = request.ClassId
+            ClassName = request.ClassName,
+            ClassDate = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(request.ClassDateUnixTimestamp).DateTime)
         }, context.CancellationToken);
 
         if (getClassResult.IsFailed)
@@ -251,25 +239,21 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
         
         var queueDto = await mediator.Send(new GetClassQueueQuery
         {
-            ClassId = request.ClassId
+            ClassId = getClassResult.Value.Id,
         }, context.CancellationToken);
 
         if (queueDto.IsFailed)
             return new ViewQueueClassReply 
                 { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
 
-        return new ViewQueueClassReply {
-            ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = getClassResult.Value.Date.ToUnixTime(),
-            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
-        };
+        return new ViewQueueClassReply { StudentsQueue = { queueDto.Value.Select(x => x.FullName) } };
     }
 
     public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
     {
         var result = await mediator.Send(new CreateSubscriberCommand
         {
-            TelegramId = request.SubscriberId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (result.IsFailed)
@@ -283,7 +267,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var result = await mediator.Send(new DeleteSubscriberCommand
         {
-            TelegramId = request.SubscriberId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (result.IsFailed)
@@ -303,7 +287,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var repeatedField = await subscriberDto.Value.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
         {
-            UserId = dto.TelegramId,
+            TelegramId = dto.TelegramId,
             GroupId = dto.GroupId
         });
         

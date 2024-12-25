@@ -291,7 +291,7 @@ public static class MarkupCreator
             var dateTime = classInformation.Date;
             
             var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}",
-                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Id}");
+                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Name} {classInformation.Date}");
             
             buttons.Add([button]);
         }

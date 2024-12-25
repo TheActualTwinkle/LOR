@@ -193,7 +193,8 @@ public class ClassTests
         // Act
         var result = await _sender.Send(new GetClassQuery
         {
-            ClassId = classes.Value.First().Id
+            ClassName = classes.Value.First().Name,
+            ClassDate = classes.Value.First().Date
         });
         
         // Assert
@@ -212,7 +213,8 @@ public class ClassTests
         // Act
         var result = await _sender.Send(new GetClassQuery
         {
-            ClassId = 99999985
+            ClassName = "99999985",
+            ClassDate = DateOnly.FromDateTime(DateTime.Now)
         });
         
         var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
