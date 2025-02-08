@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Group.Queries.GetGroups;
+namespace DatabaseApp.Application.Group.Queries;
 
 public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetGroupsQuery, Result<List<GroupDto>>>

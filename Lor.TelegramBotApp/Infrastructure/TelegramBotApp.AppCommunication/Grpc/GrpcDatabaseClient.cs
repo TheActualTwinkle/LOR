@@ -1,12 +1,13 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
+﻿using DatabaseApp.AppCommunication.Consumers.Data;
+using DatabaseApp.AppCommunication.Grpc;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
-using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Extensions;
 using TelegramBotApp.AppCommunication.Interfaces;
+using TelegramBotApp.AppCommunication.Data;
 
 namespace TelegramBotApp.AppCommunication;
 
@@ -122,7 +123,7 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
 
         List<SubscriberInfo> subscribers = [];
         foreach (var subscriber in reply.Subscribers.ToList())
-            subscribers.Add(new SubscriberInfo { TelegramId = subscriber.TelegramId, GroupId = subscriber.GroupId });
+            subscribers.Add(new SubscriberInfo { TelegramId = subscriber.TelegramId, GroupName = subscriber.GroupName });
 
         return subscribers;
     }

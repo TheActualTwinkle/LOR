@@ -1,9 +1,8 @@
-﻿namespace TelegramBotApp.AppCommunication.Consumers.Data;
+﻿namespace DatabaseApp.AppCommunication.Consumers.Data;
 
 public record NewClassesMessage
 {
-    public required int GroupId { get; init; }
-    
+    public required string GroupName { get; init; }
     public required IEnumerable<Class> Classes { get; init; }
 }
 

@@ -20,10 +20,18 @@ public class ClassRepository(IDatabaseContext context)
         await _context.Classes
             .Where(c => c.GroupId == groupId)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Class>?> GetClassesByGroupName(string groupName, CancellationToken cancellationToken) =>
+        await _context.Classes
+            .Where(c => c.Group.Name == groupName)
+            .ToListAsync(cancellationToken);
     
-public async Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken) =>
+    public async Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken) =>
         await _context.Classes
             .Where(c => c.Date < DateOnly.FromDateTime(DateTime.Now))
             .Select(c => c.Id)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Class>?> GetUpcomingClasses(CancellationToken cancellationToken) => 
+        await _context.Classes.Where(c => c.Date == DateOnly.FromDateTime(DateTime.Now.AddDays(1).Date)).ToListAsync(cancellationToken);
 }

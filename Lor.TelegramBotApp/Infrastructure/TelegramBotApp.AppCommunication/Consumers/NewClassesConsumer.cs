@@ -1,7 +1,7 @@
-﻿using MassTransit;
+﻿using DatabaseApp.AppCommunication.Consumers.Data;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
 
@@ -20,7 +20,7 @@ public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient c
             return;
         }
 
-        var subscribers = result.Value.Where(x => x.GroupId == context.Message.GroupId).ToList();
+        var subscribers = result.Value.Where(x => x.GroupName == context.Message.GroupName).ToList();
 
         var classesString = string.Join('\n', context.Message.Classes.Select(x => $"{x.Name} - {x.Date:dd.MM}"));
 

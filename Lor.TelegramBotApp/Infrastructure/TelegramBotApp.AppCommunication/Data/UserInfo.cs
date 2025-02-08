@@ -1,7 +1,7 @@
 ﻿namespace TelegramBotApp.AppCommunication.Data;
 
-public struct UserInfo
+public record UserInfo
 {
-    public string FullName { get; init; }
-    public string GroupName { get; init; }
+    public required string FullName { get; init; }
+    public required string GroupName { get; init; }
 }

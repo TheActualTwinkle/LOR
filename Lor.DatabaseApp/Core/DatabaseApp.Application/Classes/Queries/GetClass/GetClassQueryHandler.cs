@@ -3,7 +3,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Queries.GetClass;
+namespace DatabaseApp.Application.Class.Queries;
 
 public class GetClassQueryHandler(IUnitOfWork unitOfWork, IMapper mapper) 
     : IRequestHandler<GetClassQuery, Result<ClassDto>>

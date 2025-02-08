@@ -1,5 +1,5 @@
-﻿using FluentResults;
-using TelegramBotApp.AppCommunication.Consumers.Data;
+﻿using DatabaseApp.AppCommunication.Consumers.Data;
+using FluentResults;
 using TelegramBotApp.AppCommunication.Data;
 
 namespace TelegramBotApp.AppCommunication.Interfaces;

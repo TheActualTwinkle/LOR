@@ -28,6 +28,7 @@ public class Program
         builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddBus(builder.Configuration);
+        builder.Services.AddReminderService(builder.Configuration);
 
         var app = builder.Build();
         

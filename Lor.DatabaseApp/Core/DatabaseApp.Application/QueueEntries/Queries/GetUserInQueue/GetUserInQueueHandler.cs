@@ -4,7 +4,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>

@@ -27,5 +27,5 @@ message GetSubscribersReply {
 }
 message SubscriberInformation {
   int64 telegramId = 1;
-  int32 groupId = 2;
+  string groupName = 2;
 }

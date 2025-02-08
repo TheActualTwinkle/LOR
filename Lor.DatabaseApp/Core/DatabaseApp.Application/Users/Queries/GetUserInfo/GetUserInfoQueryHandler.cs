@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.User.Queries.GetUserInfo;
+namespace DatabaseApp.Application.User.Queries;
 
 public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetUserInfoQuery, Result<UserDto>>
@@ -24,7 +24,7 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cache
 
         if (group is null) return Result.Fail("Группа не найдена.");
 
-        var userDto = mapper.From(new UserDto { FullName = user.FullName, GroupId = user.GroupId, GroupName = group.Name }).AdaptToType<UserDto>();
+        var userDto = mapper.From(new UserDto { FullName = user.FullName, GroupName = group.Name }).AdaptToType<UserDto>();
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, userDto, cancellationToken: cancellationToken);
 

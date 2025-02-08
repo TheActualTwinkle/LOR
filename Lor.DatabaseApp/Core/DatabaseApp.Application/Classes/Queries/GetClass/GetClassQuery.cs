@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Queries.GetClass;
+namespace DatabaseApp.Application.Class.Queries;
 
 public record GetClassQuery : IRequest<Result<ClassDto>>
 {

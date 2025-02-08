@@ -1,11 +1,9 @@
-﻿using DatabaseApp.Application.Class;
-using DatabaseApp.Application.Class.Command.CreateClass;
-using DatabaseApp.Application.Class.Command.DeleteClass;
-using DatabaseApp.Application.Class.Queries.GetClasses;
-using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
-using DatabaseApp.Application.Group;
+﻿using DatabaseApp.AppCommunication.Consumers.Data;
+using DatabaseApp.Application.Class;
+using DatabaseApp.Application.Class.Command.CreateClasses;
+using DatabaseApp.Application.Class.Command.DeleteClasses;
+using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
@@ -14,16 +12,14 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MassTransit;
 using MediatR;
-using Microsoft.Extensions.Logging;
-using TelegramBotApp.AppCommunication.Consumers.Data;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
 public class GrpcDatabaseUpdaterService(
-    ISender mediator,
-    ICacheService cacheService,
     IBus bus,
-    ILogger<GrpcDatabaseUpdaterService> logger) 
+    ICacheService cacheService, 
+    ISender mediator
+    ) 
     : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
@@ -41,24 +37,17 @@ public class GrpcDatabaseUpdaterService(
 
     public override async Task<Empty> SetAvailableClasses(SetAvailableClassesRequest request, ServerCallContext context)
     {
-        var getGroupResult = await mediator.Send(new GetGroupQuery
-        {
-            GroupName = request.GroupName
-        }, context.CancellationToken);
-
-        if (getGroupResult.IsFailed)
-            throw new RpcException(new Status(StatusCode.NotFound, getGroupResult.Errors.First().Message));
-
         // Snapshot of classes BEFORE new has been added.
         var oldClasses = await mediator.Send(new GetClassesQuery
         {
-            GroupId = getGroupResult.Value.Id
+            GroupName = request.GroupName
+            
         }, context.CancellationToken);
         
         if (oldClasses.IsFailed)
             throw new RpcException(new Status(StatusCode.NotFound, oldClasses.Errors.First().Message));
 
-        var createClassesResult = await CreateClasses(request.Classes, getGroupResult.Value.Id, context.CancellationToken);
+        var createClassesResult = await CreateClasses(request.Classes, request.GroupName, context.CancellationToken);
         
         if (createClassesResult.IsFailed)
             throw new RpcException(new Status(StatusCode.Internal, createClassesResult.Errors.First().Message));
@@ -68,41 +57,33 @@ public class GrpcDatabaseUpdaterService(
 
         var classes = await mediator.Send(new GetClassesQuery
         {
-            GroupId = getGroupResult.Value.Id
+            GroupName = request.GroupName
         }, context.CancellationToken);
 
         if (classes.IsFailed)
             throw new RpcException(new Status(StatusCode.NotFound, classes.Errors.First().Message));
 
-        var groupDto = await mediator.Send(new GetGroupQuery
-        {
-            GroupName = request.GroupName
-        });
-        
-        if (groupDto.IsFailed)
-            throw new RpcException(new Status(StatusCode.NotFound, groupDto.Errors.First().Message));
-
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + groupDto.Value.Id, classes.Value, cancellationToken: context.CancellationToken);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classes.Value, cancellationToken: context.CancellationToken);
 
         var newClasses = classes.Value.Except(oldClasses.Value).OrderBy(x => x.Id).ToList();
 
         if (newClasses.Count == 0) return new Empty();
 
-        await PublishNewClassesMessage(groupDto.Value, newClasses, context.CancellationToken);
+        await PublishNewClassesMessage(request.GroupName, newClasses, context.CancellationToken);
 
         return new Empty();
     }
 
     private async Task<Result> CreateClasses(
         IDictionary<string, long> classesDate,
-        int groupId,
+        string groupName,
         CancellationToken cancellationToken = default)
     {
         try
         {
             return await mediator.Send(new CreateClassesCommand
             {
-                GroupId = groupId,
+                GroupName = groupName,
                 Classes = classesDate.ToDictionary(
                     c => c.Key,
                     c => DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(c.Value).DateTime)
@@ -127,18 +108,18 @@ public class GrpcDatabaseUpdaterService(
                 ClassesId = outdatedClassList.Value
             }, cancellationToken);
 
-            await mediator.Send(new DeleteClassCommand
+            await mediator.Send(new DeleteClassesCommand
             {
                 ClassesId = outdatedClassList.Value
             }, cancellationToken);
         }
     }
 
-    private async Task PublishNewClassesMessage(GroupDto groupDto, IEnumerable<ClassDto> newClasses, CancellationToken cancellationToken = default)
+    private async Task PublishNewClassesMessage(string groupName, IEnumerable<ClassDto> newClasses, CancellationToken cancellationToken = default)
     {
         NewClassesMessage newClassesMessage = new()
         {
-            GroupId = groupDto.Id,
+            GroupName = groupName,
             Classes = newClasses.Select(x => new Class { Name = x.Name, Date = x.Date })
         };
 

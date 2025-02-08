@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetUserInQueueValidator : AbstractValidator<GetUserInQueueQuery>
 {

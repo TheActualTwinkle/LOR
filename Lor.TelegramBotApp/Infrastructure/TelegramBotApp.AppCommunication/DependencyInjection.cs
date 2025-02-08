@@ -30,7 +30,7 @@ public static class DependencyInjection
             x.SetKebabCaseEndpointNameFormatter();
 
             x.AddConsumer<NewClassesConsumer>();
-            // x.AddConsumer<UpcomingClassesConsumer>();
+            x.AddConsumer<UpcomingClassesConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {

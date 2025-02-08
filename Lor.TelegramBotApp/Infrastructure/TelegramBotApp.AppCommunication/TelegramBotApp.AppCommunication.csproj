@@ -34,4 +34,10 @@
       <ProjectReference Include="..\..\Core\TelegramBotApp.Domain\TelegramBotApp.Domain.csproj" />
     </ItemGroup>
     
+    <ItemGroup>
+      <Compile Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\Consumers\Data\NewClassesMessage.cs">
+        <Link>Consumers\Data\NewClassesMessage.cs</Link>
+      </Compile>
+    </ItemGroup>
+    
 </Project>
