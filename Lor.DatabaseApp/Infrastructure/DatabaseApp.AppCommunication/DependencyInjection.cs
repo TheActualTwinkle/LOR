@@ -33,7 +33,9 @@ public static class DependencyInjection
                     h.Password(password);
                 });
 
-                cfg.ConfigureEndpoints(context);
+                cfg.ReceiveEndpoint(
+                    "tba-new-classes", 
+                    e => e.Consumer<NewClassesConsumer>(context));
             });
         });
 

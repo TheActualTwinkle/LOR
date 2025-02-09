@@ -8,7 +8,11 @@ using TelegramBotApp.Domain.Interfaces;
 namespace TelegramBotApp.AppCommunication.Consumers;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient communicationClient, ILogger<NewClassesConsumer> logger) : IConsumer<NewClassesMessage>
+public class NewClassesConsumer(
+    ITelegramBot bot,
+    IDatabaseCommunicationClient communicationClient,
+    ILogger<NewClassesConsumer> logger)
+    : IConsumer<NewClassesMessage>
 {
     public async Task Consume(ConsumeContext<NewClassesMessage> context)
     {
@@ -27,7 +31,12 @@ public class NewClassesConsumer(ITelegramBot bot, IDatabaseCommunicationClient c
         foreach (var subscriber in subscribers)
         {
             var message = $"Доступны новые лабораторные работы! Используйте /hop для записи:\n{classesString}";
-            await bot.SendMessageAsync(subscriber.TelegramId, message, new ReplyKeyboardRemove(), new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
+            
+            await bot.SendMessageAsync(
+                subscriber.TelegramId, 
+                message, 
+                new ReplyKeyboardRemove(), 
+                new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
         }
     }
 }

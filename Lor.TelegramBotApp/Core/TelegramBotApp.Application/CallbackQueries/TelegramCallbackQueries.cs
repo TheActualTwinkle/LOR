@@ -19,19 +19,19 @@ public class EnqueueCallbackQuery : ICallbackQuery
     {        
         var argumentsList = arguments.ToList();
         
-        if (argumentsList.Count != 2)
-            throw new ArgumentException("ViewQueueAtClassQuery: Неверное количество аргументов");
+        if (argumentsList.Count != 1)
+            throw new ArgumentException("EnqueueCallbackQuery: Неверное количество аргументов");
 
-        if (string.IsNullOrEmpty(argumentsList.First()) || !DateOnly.TryParse(argumentsList.Last(), out var classDate))
-            throw new ArgumentException($"ViewQueueAtClassQuery: Неверный формат аргумента"); //TODO: add type arg?
-
-        var className = argumentsList.First();
-        var result = await factory.DatabaseCommunicator.EnqueueInClass(className, classDate, chatId, cancellationToken);
+        if (!int.TryParse(argumentsList.First(), out var classId))
+            throw new ArgumentException("EnqueueCallbackQuery: Неверный формат аргумента"); //TODO: add type arg?
+        
+        var result = await factory.DatabaseCommunicator.EnqueueInClass(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));
 
-        var classData = $"{className} {classDate:dd.MM}";
+        var classData = $"{result.Value.Name} {result.Value.Date:dd.MM}";
+        
         var messageHeader = result.Value.WasAlreadyEnqueued ? 
             $"Вы уже были записаны на {classData}\n" : $"Вы успешно записаны на {classData}\nОчередь:\n";
         
@@ -57,19 +57,19 @@ public class DequeueCallbackQuery : ICallbackQuery
     {        
         var argumentsList = arguments.ToList();
         
-        if (argumentsList.Count != 2)
-            throw new ArgumentException("ViewQueueAtClassQuery: Неверное количество аргументов");
+        if (argumentsList.Count != 1)
+            throw new ArgumentException("DequeueCallbackQuery: Неверное количество аргументов");
 
-        if (string.IsNullOrEmpty(argumentsList.First()) || !DateOnly.TryParse(argumentsList.Last(), out var classDate))
-            throw new ArgumentException($"ViewQueueAtClassQuery: Неверный формат аргумента"); //TODO: add type arg?
-
-        var className = argumentsList.First();
-        var result = await factory.DatabaseCommunicator.DequeueFromClass(className, classDate, chatId, cancellationToken);
+        if (!int.TryParse(argumentsList.First(), out var classId))
+            throw new ArgumentException("DequeueCallbackQuery: Неверный формат аргумента"); //TODO: add type arg?
+        
+        var result = await factory.DatabaseCommunicator.DequeueFromClass(classId, chatId, cancellationToken);
         
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));
 
-        var classData = $"{className} {classDate:dd.MM}";
+        var classData = $"{result.Value.Name} {result.Value.Date:dd.MM}";
+        
         var messageHeader = result.Value.WasAlreadyDequeuedFromClass ? 
             $"Вы не были записаны в очередь {classData}\n" : $"Вы успешно выписаны из очереди {classData}\n";
         
@@ -100,25 +100,27 @@ public class ViewClassQueueQuery : ICallbackQuery
     {        
         var argumentsList = arguments.ToList();
         
-        if (argumentsList.Count != 2)
+        if (argumentsList.Count != 1)
             throw new ArgumentException("ViewQueueAtClassQuery: Неверное количество аргументов");
 
-        if (string.IsNullOrEmpty(argumentsList.First()) || !DateOnly.TryParse(argumentsList.Last(), out var classDate))
-            throw new ArgumentException($"ViewQueueAtClassQuery: Неверный формат аргумента"); //TODO: add type arg?
+        if (!int.TryParse(argumentsList.First(), out var classId))
+            throw new ArgumentException("ViewQueueAtClassQuery: Неверный формат аргумента"); //TODO: add type arg?
 
-        var className = argumentsList.First();
-        var result = await factory.DatabaseCommunicator.ViewClassQueue(className, classDate, cancellationToken);
+        var result = await factory.DatabaseCommunicator.ViewClassQueue(classId, cancellationToken);
         
         if (result.IsFailed)
             return new ExecutionResult(Result.Fail(result.Errors.First()));
 
-        var classData = $"{className} {classDate:dd.MM}";
-        var messageHeader = $"Очередь на {classData}\n";
+        var classData = $"{result.Value.Name} {result.Value.Date:dd.MM}";
         
+        var messageHeader = $"Очередь на {classData}:\n";
+
         if (!result.Value.StudentsQueue.Any())
+        {
+            messageHeader += "Очередь пуста :^(";
+            
             return new ExecutionResult(Result.Ok(messageHeader));
-        
-        messageHeader += "Очередь:\n";
+        }
         
         StringBuilder message = new(messageHeader);
         

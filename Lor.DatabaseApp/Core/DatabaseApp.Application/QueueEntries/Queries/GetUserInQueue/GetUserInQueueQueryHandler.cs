@@ -19,6 +19,12 @@ public class GetUserInQueueQueryHandler(
         if (user is null)
             return Result.Fail("Пользователь не найден.");
         
+        var @class = 
+            await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        
+        if (@class is null)
+            return Result.Fail("Такой пары не существует.");
+        
         var isUserInQueue =
             await unitOfWork.QueueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         

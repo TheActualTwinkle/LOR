@@ -14,12 +14,14 @@ public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cac
     {
         var queueCache = await cacheService.GetAsync<List<QueueEntryDto>>(Constants.QueuePrefix + request.ClassId, cancellationToken);
         
-        if (queueCache is not null) return Result.Ok(queueCache);
+        if (queueCache is not null) 
+            return Result.Ok(queueCache);
         
         var queueList =
             await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
         
-        if (queueList is null) return Result.Fail("Очередь не найдена.");
+        if (queueList is null) 
+            return Result.Fail("Очередь не найдена.");
 
         var queueDto = mapper.From(queueList).AdaptToType<List<QueueEntryDto>>();
         

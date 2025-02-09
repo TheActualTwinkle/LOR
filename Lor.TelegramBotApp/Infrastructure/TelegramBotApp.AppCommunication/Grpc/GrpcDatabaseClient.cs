@@ -55,7 +55,8 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
 
         return Result.Ok(reply.ClassInformation.Select(x => new ClassDto
         {
-            Name = x.ClassName,
+            Id = x.Id,
+            Name = x.Name,
             Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(x.ClassDateUnixTimestamp).DateTime)
         }));
     }
@@ -67,34 +68,40 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
-    public async Task<Result<EnqueueInClassDto>> EnqueueInClass(string className,  DateOnly classDate, long telegramId, CancellationToken cancellationToken = default)
+    public async Task<Result<EnqueueInClassDto>> EnqueueInClass(int classId, long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { TelegramId = telegramId, ClassName =  className, ClassDateUnixTimestamp = classDate.ToUnixTime()}, cancellationToken: cancellationToken);
+        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { TelegramId = telegramId, ClassId = classId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassDto
         {
-            WasAlreadyEnqueued = reply.WasAlreadyEnqueued,
-            StudentsQueue = reply.StudentsQueue
+            Name = reply.Class.Name,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(reply.Class.ClassDateUnixTimestamp).DateTime),
+            StudentsQueue = reply.StudentsQueue,
+            WasAlreadyEnqueued = reply.WasAlreadyEnqueued
         });
     }
     
-    public async Task<Result<DequeueFromClassDto>> DequeueFromClass(string className,  DateOnly classDate, long telegramId, CancellationToken cancellationToken = default)
+    public async Task<Result<DequeueFromClassDto>> DequeueFromClass(int classId, long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest {  TelegramId = telegramId, ClassName =  className, ClassDateUnixTimestamp = classDate.ToUnixTime() }, cancellationToken: cancellationToken);
+        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { TelegramId = telegramId, ClassId = classId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassDto
         {
-            WasAlreadyDequeuedFromClass = reply.WasAlreadyDequeuedFromClass,
-            StudentsQueue = reply.StudentsQueue
+            Name = reply.Class.Name,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(reply.Class.ClassDateUnixTimestamp).DateTime),
+            StudentsQueue = reply.StudentsQueue,
+            WasAlreadyDequeuedFromClass = reply.WasAlreadyDequeuedFromClass
         });
     }
 
-    public async Task<Result<ViewClassQueueDto>> ViewClassQueue(string className,  DateOnly classDate, CancellationToken cancellationToken = default)
+    public async Task<Result<ViewClassQueueDto>> ViewClassQueue(int classId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.ViewQueueClassAsync(new ViewQueueClassRequest{ ClassName = className, ClassDateUnixTimestamp = classDate.ToUnixTime()}, cancellationToken: cancellationToken);
+        var reply = await _client!.ViewQueueClassAsync(new ViewQueueClassRequest{ ClassId = classId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewClassQueueDto
         {
+            Name = reply.Class.Name,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(reply.Class.ClassDateUnixTimestamp).DateTime),
             StudentsQueue = reply.StudentsQueue
         });
     }
@@ -117,9 +124,11 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
     {
         var reply = await _client!.GetSubscribersAsync(new Empty(), cancellationToken: cancellationToken);
 
-        if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
+        if (reply.IsFailed) 
+            return Result.Fail(reply.ErrorMessage);
 
         List<SubscriberDto> subscribers = [];
+        
         foreach (var subscriber in reply.Subscribers.ToList())
             subscribers.Add(new SubscriberDto { TelegramId = subscriber.TelegramId, GroupName = subscriber.GroupName });
 

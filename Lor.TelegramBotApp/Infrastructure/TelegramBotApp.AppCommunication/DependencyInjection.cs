@@ -44,8 +44,14 @@ public static class DependencyInjection
                     h.Username(username);
                     h.Password(password);
                 });
-            
-                cfg.ConfigureEndpoints(context);
+                
+                cfg.ReceiveEndpoint(
+                    "dba-new-classes", 
+                    e => e.Consumer<NewClassesConsumer>(context));
+                
+                cfg.ReceiveEndpoint(
+                    "dba-upcoming-classes", 
+                    e => e.Consumer<UpcomingClassesConsumer>(context));
             });
         });
 

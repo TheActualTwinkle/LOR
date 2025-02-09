@@ -65,34 +65,32 @@ public partial class TelegramCommandFactory(IDatabaseCommunicationClient databas
         return await command.Execute(chatId, this, GetArguments(commandString), token);
     }
     
-    public static IEnumerable<string> GetAllCommandsInfo()
-    {
-        return Info.Commands.Select(x => $"{x.Metadata.Command} {x.Metadata.Description}");
-    }
+    public static IEnumerable<string> GetAllCommandsInfo() =>
+        Info.Commands.Select(x => $"{x.Metadata.Command} {x.Metadata.Description}");
 
     public static ReplyKeyboardMarkup GetCommandButtonsReplyMarkup()
     {
         var commandsWithButtonDescription = Info.Commands.Where(x => x.Metadata.ButtonDescriptionText != null);
         
-        var buttons = commandsWithButtonDescription.Select(x => new[] { new KeyboardButton($"{x.Metadata.ButtonDescriptionText}\n\n({x.Metadata.Command})") });
+        var buttons = commandsWithButtonDescription.Select(x => 
+            new[] { new KeyboardButton($"{x.Metadata.ButtonDescriptionText}\n\n({x.Metadata.Command})") });
         
         // Take 2 buttons per row
-        var buttonsPerRow = buttons.Select((x, i) => new { Index = i, Value = x }).GroupBy(x => x.Index / 2).Select(x => x.Select(v => v.Value).SelectMany(v => v));
+        var buttonsPerRow = buttons
+            .Select((x, i) => new { Index = i, Value = x })
+            .GroupBy(x => x.Index / 2)
+            .Select(x => x.Select(v => v.Value).SelectMany(v => v));
         
         ReplyKeyboardMarkup replyKeyboardMarkup = new(buttonsPerRow);
 
         return replyKeyboardMarkup;
     }
 
-    private static ITelegramCommand? GetCommand(string command)
-    {
-        return Info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
-    }
+    private static ITelegramCommand? GetCommand(string command) =>
+        Info.Commands.FirstOrDefault(x => x.Metadata.Command == command)?.Value;
 
-    private string[] GetArguments(string commandString)
-    {
-        return commandString.Split(' ').Skip(1).ToArray();
-    }
+    private string[] GetArguments(string commandString) =>
+        commandString.Split(' ').Skip(1).ToArray();
 
     [GeneratedRegex(@$"\{CommandPrefix}\w+")]
     public static partial Regex TelegramCommandRegex();

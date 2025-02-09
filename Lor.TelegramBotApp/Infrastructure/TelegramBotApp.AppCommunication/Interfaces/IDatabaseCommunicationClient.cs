@@ -13,11 +13,11 @@ public interface IDatabaseCommunicationClient : ICommunicationClient
     
     Task<Result<string>> SetGroup(long telegramId, string groupName, string fullName, CancellationToken cancellationToken = default);
     
-    Task<Result<EnqueueInClassDto>> EnqueueInClass(string className,  DateOnly classDate, long telegramId, CancellationToken cancellationToken = default);
+    Task<Result<EnqueueInClassDto>> EnqueueInClass(int classId, long telegramId, CancellationToken cancellationToken = default);
     
-    Task<Result<DequeueFromClassDto>> DequeueFromClass(string className,  DateOnly classDate, long telegramId, CancellationToken cancellationToken = default);
+    Task<Result<DequeueFromClassDto>> DequeueFromClass(int classId, long telegramId, CancellationToken cancellationToken = default);
     
-    Task<Result<ViewClassQueueDto>> ViewClassQueue(string className,  DateOnly classDate, CancellationToken cancellationToken = default);
+    Task<Result<ViewClassQueueDto>> ViewClassQueue(int classId, CancellationToken cancellationToken = default);
     
     Task<Result> AddSubscriber(long telegramId, CancellationToken cancellationToken = default);
     

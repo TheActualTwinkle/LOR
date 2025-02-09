@@ -139,7 +139,7 @@ public class EnqueueInClassTelegramCommand : ITelegramCommand
 
         var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
         
-        return new ExecutionResult(Result.Fail("Выберите пару для ЗАПИСИ \u270d\ufe0f"), replyMarkup);
+        return new ExecutionResult(Result.Ok("Выберите пару для ЗАПИСИ \u270d\ufe0f"), replyMarkup);
     }
 }
 
@@ -171,7 +171,7 @@ public class DequeueFromClassTelegramCommand : ITelegramCommand
 
         var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
         
-        return new ExecutionResult(Result.Fail("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
+        return new ExecutionResult(Result.Ok("Выберите пару для ОТМЕНЫ ЗАПИСИ \ud83d\udeb7"), replyMarkup);
     }
 }
 
@@ -203,7 +203,7 @@ public class ViewQueueAtClass : ITelegramCommand
 
         var replyMarkup = await MarkupCreator.CreateInlineKeyboardMarkupAsync(availableLabClassesResult.Value, CommandWithoutPrefix);
         
-        return new ExecutionResult(Result.Fail("Выберите пару для ПРОСМОТРА ОЧЕРЕДИ \ud83e\uddfe"), replyMarkup);
+        return new ExecutionResult(Result.Ok("Выберите пару для ПРОСМОТРА ОЧЕРЕДИ \ud83e\uddfe"), replyMarkup);
     }
 }
 
@@ -291,7 +291,7 @@ public static class MarkupCreator
             var dateTime = classInformation.Date;
             
             var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}",
-                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Name} {classInformation.Date}");
+                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Id}");
             
             buttons.Add([button]);
         }

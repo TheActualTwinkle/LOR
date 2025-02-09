@@ -12,42 +12,43 @@ message GetAvailableClassesReply {
   string errorMessage = 3;
 }
 message ClassInformation {
-  string className = 1;
-  int64 classDateUnixTimestamp = 2;
+  int32 id = 1;
+  string name = 2;
+  int64 classDateUnixTimestamp = 3;
 }
 
 message EnqueueInClassRequest {
   int64 telegramId = 1;
-  string className = 2;
-  int64 classDateUnixTimestamp = 3;
+  int32 classId = 2;
 }
 message EnqueueInClassReply {
   repeated string studentsQueue = 1;
   bool wasAlreadyEnqueued = 2;
-  bool isFailed = 3;
-  string errorMessage = 4;
+  ClassInformation class = 3;
+  bool isFailed = 4;
+  string errorMessage = 5;
 }
 
 message DequeueFromClassRequest {
   int64 telegramId = 1;
-  string className = 2;
-  int64 classDateUnixTimestamp = 3;
+  int32 classId = 2;
 }
 message DequeueFromClassReply {
   repeated string studentsQueue = 1;
   bool wasAlreadyDequeuedFromClass = 2;
-  bool isFailed = 3;
-  string errorMessage = 4;
+  ClassInformation class = 3;
+  bool isFailed = 4;
+  string errorMessage = 5;
 }
 
 message ViewQueueClassRequest {
-  string className = 1;
-  int64 classDateUnixTimestamp = 2;
+  int32 classId = 1;
 }
 message ViewQueueClassReply {
   repeated string studentsQueue = 1;
-  bool isFailed = 2;
-  string errorMessage = 3;
+  ClassInformation class = 2;
+  bool isFailed = 3;
+  string errorMessage = 4;
 }
 
 message SetAvailableClassesRequest {

@@ -12,14 +12,17 @@ public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService
 {
     public async Task<Result<List<SubscriberDto>>> Handle(GetAllSubscribersQuery request, CancellationToken cancellationToken)
     {
-        var cachedSubscriber = await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken);
+        var cachedSubscriber = 
+            await cacheService.GetAsync<List<SubscriberDto>>(Constants.AllSubscribersKey, cancellationToken);
 
         if (cachedSubscriber is not null)
             return Result.Ok(cachedSubscriber);
 
-        var subscribers = await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
+        var subscribers = 
+            await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
 
-        if (subscribers is null) return Result.Fail("Подписчики не найдены");
+        if (subscribers is null) 
+            return Result.Fail("Подписчики не найдены");
         
         var subscribersDto = mapper.From(subscribers).AdaptToType<List<SubscriberDto>>();
             
