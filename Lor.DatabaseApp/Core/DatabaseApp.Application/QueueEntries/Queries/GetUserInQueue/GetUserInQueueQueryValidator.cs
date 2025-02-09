@@ -2,9 +2,9 @@
 
 namespace DatabaseApp.Application.QueueEntries.Queries;
 
-public class GetUserInQueueValidator : AbstractValidator<GetUserInQueueQuery>
+public class GetUserInQueueQueryValidator : AbstractValidator<GetUserInQueueQuery>
 {
-    public GetUserInQueueValidator()
+    public GetUserInQueueQueryValidator()
     {
         RuleFor(x => x.TelegramId).GreaterThan(0);
         RuleFor(x => x.ClassId).GreaterThan(0);

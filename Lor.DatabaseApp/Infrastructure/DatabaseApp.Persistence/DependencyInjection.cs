@@ -16,7 +16,9 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString, builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+        
         services.AddScoped<IDatabaseContext, ApplicationDbContext>();
+        
         services.AddScoped<IClassRepository, ClassRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
         services.AddScoped<IQueueEntryRepository, QueueEntryEntryRepository>();

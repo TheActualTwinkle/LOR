@@ -1,3 +1,6 @@
 ﻿namespace DatabaseApp.AppCommunication.ReminderService.Settings;
 
-public record ClassReminderServiceSettings(string NotificationAdvanceTime);
+public record ClassReminderServiceSettings
+{
+    public required TimeSpan AdvanceNoticeTime { get; init; }
+}

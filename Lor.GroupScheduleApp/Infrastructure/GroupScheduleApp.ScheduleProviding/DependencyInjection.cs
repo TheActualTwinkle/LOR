@@ -13,5 +13,6 @@ public static class DependencyInjection
     }
     
     private static IEnumerable<string> GetClasses(IConfiguration configuration) =>
-        configuration.GetSection("HtmlParser:NSTU").Get<IEnumerable<string>>() ?? throw new Exception("Schedule urls not found in configuration");
+        configuration.GetSection("HtmlParser:NSTU").Get<IEnumerable<string>>() ?? 
+        throw new Exception("Schedule urls not found in configuration");
 }

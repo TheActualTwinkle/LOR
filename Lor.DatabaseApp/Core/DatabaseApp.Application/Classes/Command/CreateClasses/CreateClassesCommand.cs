@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Command.CreateClasses;
+namespace DatabaseApp.Application.Class.Command;
 
 public record CreateClassesCommand : IRequest<Result>
 {

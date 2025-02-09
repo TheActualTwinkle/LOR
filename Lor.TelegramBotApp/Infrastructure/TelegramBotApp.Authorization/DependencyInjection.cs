@@ -5,7 +5,7 @@ namespace TelegramBotApp.Authorization;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddAuthorization(this IServiceCollection services)
+    public static IServiceCollection AddNstuAuthorization(this IServiceCollection services)
     {
         services.AddSingleton<IAuthorizationService, NstuAuthorizationService>();
         return services;

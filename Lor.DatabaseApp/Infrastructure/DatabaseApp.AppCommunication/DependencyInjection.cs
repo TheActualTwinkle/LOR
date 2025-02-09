@@ -43,20 +43,26 @@ public static class DependencyInjection
     public static IServiceCollection AddReminderService(this IServiceCollection services, IConfiguration configuration)
     {
         var hangfireConnectionString = configuration.GetConnectionString("HangfireDb");
-
+        
         services.AddHangfire(c =>
             c.UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
                 .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
-
+        
         services.AddHangfireServer(o => o.SchedulePollingInterval = TimeSpan.FromSeconds(10));
 
-        var notificationAdvanceString = configuration.GetRequiredSection("ClassReminderServiceSettings:NotificationAdvanceTime").Value!;
+        var advanceNoticeTime = configuration
+            .GetRequiredSection("ClassReminderServiceSettings")
+            .GetValue<TimeSpan>("AdvanceNoticeTime");
 
-        services.AddSingleton(_ => new ClassReminderServiceSettings(notificationAdvanceString));
+        services.AddSingleton(_ => new ClassReminderServiceSettings
+        {
+            AdvanceNoticeTime = advanceNoticeTime
+        });
 
-        services.AddSingleton<IClassReminderService, ClassReminderService>();
+        // Must be scoped to DI Consumers properly
+        services.AddScoped<IClassReminderService, ClassReminderService>();
 
         return services;
     }

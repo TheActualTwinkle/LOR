@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClasses;
+﻿using DatabaseApp.Application.Class.Command;
 using DatabaseApp.Application.Class.Command.DeleteClasses;
 using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;

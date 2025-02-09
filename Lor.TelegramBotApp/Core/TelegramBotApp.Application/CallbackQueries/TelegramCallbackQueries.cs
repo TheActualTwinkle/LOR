@@ -70,7 +70,7 @@ public class DequeueCallbackQuery : ICallbackQuery
             return new ExecutionResult(Result.Fail(result.Errors.First()));
 
         var classData = $"{className} {classDate:dd.MM}";
-        var messageHeader = result.Value.WasAlreadyDequeued ? 
+        var messageHeader = result.Value.WasAlreadyDequeuedFromClass ? 
             $"Вы не были записаны в очередь {classData}\n" : $"Вы успешно выписаны из очереди {classData}\n";
         
         if (!result.Value.StudentsQueue.Any())

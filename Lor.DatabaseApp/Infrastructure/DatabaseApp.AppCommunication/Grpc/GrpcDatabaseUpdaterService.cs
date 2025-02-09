@@ -1,6 +1,6 @@
-﻿using DatabaseApp.AppCommunication.Consumers.Data;
+﻿using DatabaseApp.AppCommunication.Messages;
 using DatabaseApp.Application.Class;
-using DatabaseApp.Application.Class.Command.CreateClasses;
+using DatabaseApp.Application.Class.Command;
 using DatabaseApp.Application.Class.Command.DeleteClasses;
 using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
@@ -18,8 +18,7 @@ namespace DatabaseApp.AppCommunication.Grpc;
 public class GrpcDatabaseUpdaterService(
     IBus bus,
     ICacheService cacheService, 
-    ISender mediator
-    ) 
+    ISender mediator) 
     : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
@@ -120,7 +119,12 @@ public class GrpcDatabaseUpdaterService(
         NewClassesMessage newClassesMessage = new()
         {
             GroupName = groupName,
-            Classes = newClasses.Select(x => new Class { Name = x.Name, Date = x.Date })
+            Classes = newClasses.Select(c => new ClassDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Date = c.Date
+            })
         };
 
         await bus.Publish(newClassesMessage, cancellationToken);

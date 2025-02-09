@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClasses;
+﻿using DatabaseApp.Application.Class.Command;
 using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
@@ -200,12 +200,12 @@ public class UserTests
         
         // Act
 
-        var queueResult = await _sender.Send(new GetClassQueueQuery()
+        var queueResult = await _sender.Send(new GetClassQueueQuery
         {
             ClassId = classResult.Value.Id
         });
         
-        var getUsersFromQueue = await _sender.Send(new GetUsersFromQueueQuery
+        var getUsersFromQueue = await _sender.Send(new GetEnqueuedUsersQuery
         {
             Queue = queueResult.Value
         });

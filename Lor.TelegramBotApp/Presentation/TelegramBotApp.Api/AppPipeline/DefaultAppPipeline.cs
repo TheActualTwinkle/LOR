@@ -30,7 +30,7 @@ public class DefaultAppPipeline : IAppPipeline
                 // Order of services registration is important!!!
                 .ConfigureServices((builder, services) => services
                     .AddCommunicators(builder.Configuration)
-                    .AddAuthorization()                  
+                    .AddNstuAuthorization()                  
                     .AddApplication(builder.Configuration)
                     .AddBus(builder.Configuration)
                 )
