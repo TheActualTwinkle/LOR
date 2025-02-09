@@ -61,11 +61,18 @@ public class WebAppFactory : WebApplicationFactory<Program>
             if (dbContextDescriptor != null)
                 services.Remove(dbContextDescriptor);
 
+            var connectionString = _dbContainer.GetConnectionString();
+            
             services.AddDbContext<IDatabaseContext, ApplicationDbContext>(options =>
-                options.UseNpgsql(_dbContainer.GetConnectionString()));
+                options.UseNpgsql(connectionString));
+            
+            services.AddHangfire(c =>
+                c.UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(connectionString))
+                    .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
             
             MockCache(services);
-            MockJobScheduler(services, _dbContainer.GetConnectionString());
         });
     }
 
@@ -93,15 +100,6 @@ public class WebAppFactory : WebApplicationFactory<Program>
 
             return mock.Object;
         });
-    }
-    
-    private static void MockJobScheduler(IServiceCollection services, string connectionString)
-    {
-        services.AddHangfire(c =>
-            c.UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(connectionString))
-                .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
     }
     
     #endregion
