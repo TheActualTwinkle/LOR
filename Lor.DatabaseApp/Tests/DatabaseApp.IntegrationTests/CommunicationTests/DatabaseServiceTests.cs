@@ -79,11 +79,12 @@ public class DatabaseServiceTests
         var classesResult = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         Assert.That(classesResult.IsSuccess, Is.True);
 
-        var classId = classesResult.Value.First().Id;
+        var className = classesResult.Value.First().Name;
+        var classDate = classesResult.Value.First().Date;
         
-        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
-        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 1);
-        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 2);
+        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
+        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 1);
+        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 2);
         
         Assert.Multiple(() =>
         {
@@ -103,10 +104,11 @@ public class DatabaseServiceTests
         var classesResult = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         Assert.That(classesResult.IsSuccess, Is.True);
 
-        var classId = classesResult.Value.First().Id;
+        var className = classesResult.Value.First().Name;
+        var classDate = classesResult.Value.First().Date;
         
-        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
-        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
+        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
+        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
         
         Assert.Multiple(() =>
         {
@@ -144,15 +146,16 @@ public class DatabaseServiceTests
         var classesResult = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         Assert.That(classesResult.IsSuccess, Is.True);
 
-        var classId = classesResult.Value.First().Id;
+        var className = classesResult.Value.First().Name;
+        var classDate = classesResult.Value.First().Date;
         
-        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
-        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 1);
-        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 2);
+        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
+        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 1);
+        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 2);
 
         var queueBeforeDelete = result3.Value.StudentsQueue.ToList();
         
-        var dequeueResult = await IntegrationTestsSharedContext.DatabaseCommunication.DequeueFromClass(classId, DefaultUserId + index);
+        var dequeueResult = await IntegrationTestsSharedContext.DatabaseCommunication.DequeueFromClass(className, classDate, DefaultUserId + index);
 
         var queueAfterDelete = dequeueResult.Value.StudentsQueue;
         
@@ -195,13 +198,14 @@ public class DatabaseServiceTests
         var classesResult = await IntegrationTestsSharedContext.DatabaseCommunication.GetAvailableLabClasses(DefaultUserId);
         Assert.That(classesResult.IsSuccess, Is.True);
 
-        var classId = classesResult.Value.First().Id;
+        var className = classesResult.Value.First().Name;
+        var classDate = classesResult.Value.First().Date;
         
-        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId);
-        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 1);
-        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(classId, DefaultUserId + 2);
+        var result1 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId);
+        var result2 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 1);
+        var result3 = await IntegrationTestsSharedContext.DatabaseCommunication.EnqueueInClass(className, classDate, DefaultUserId + 2);
         
-        var viewQueueClassResult = await IntegrationTestsSharedContext.DatabaseCommunication.ViewClassQueue(classId);
+        var viewQueueClassResult = await IntegrationTestsSharedContext.DatabaseCommunication.ViewClassQueue(className, classDate);
         
         Assert.Multiple(() =>
         {

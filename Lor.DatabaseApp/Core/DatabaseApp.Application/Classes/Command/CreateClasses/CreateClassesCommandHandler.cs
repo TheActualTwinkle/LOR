@@ -5,22 +5,26 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Command.CreateClass;
+namespace DatabaseApp.Application.Class.Command;
 
 public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateClassesCommand, Result>
 {
     public async Task<Result> Handle(CreateClassesCommand request, CancellationToken cancellationToken)
     {
+        var group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        
+        if (group is null) return Result.Fail("Group not found");
+        
         foreach (var item in request.Classes)
         {
-            var classExist = await unitOfWork.ClassRepository.CheckClass(item.Key, item.Value, cancellationToken);
+            var classExist = await unitOfWork.ClassRepository.GetClassByNameAndDate(item.Key, item.Value, cancellationToken);
 
-            if (classExist) continue;
+            if (classExist is not null) continue;
             
             Domain.Models.Class @class = new()
             {
-                GroupId = request.GroupId,
+                GroupId = group.Id,
                 Name = item.Key,
                 Date = item.Value
             };
@@ -30,11 +34,11 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        var classes = await unitOfWork.ClassRepository.GetClassesByGroupId(request.GroupId, cancellationToken);
+        var classes = await unitOfWork.ClassRepository.GetClassesByGroupName(request.GroupName, cancellationToken);
 
         var classesDto = mapper.From(classes).AdaptToType<List<ClassDto>>();
 
-        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupId, classesDto, cancellationToken: cancellationToken);
+        await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classesDto, cancellationToken: cancellationToken);
         
         return Result.Ok();
     }

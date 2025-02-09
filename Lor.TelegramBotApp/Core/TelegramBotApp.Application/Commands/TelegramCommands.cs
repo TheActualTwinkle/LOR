@@ -2,7 +2,7 @@
 using System.Text;
 using FluentResults;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBotApp.AppCommunication.Consumers.Data;
+using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.Application.Factories;
 using TelegramBotApp.Application.Interfaces;
 using TelegramBotApp.Authorization;
@@ -282,7 +282,7 @@ public class AuthorizationTelegramCommand : ITelegramCommand
 
 public static class MarkupCreator
 {
-    public static Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<Class> classes, string callbackQueryWithoutPrefix)
+    public static Task<IReplyMarkup> CreateInlineKeyboardMarkupAsync(IEnumerable<ClassDto> classes, string callbackQueryWithoutPrefix)
     {
         List<InlineKeyboardButton[]> buttons = [];
         
@@ -291,7 +291,7 @@ public static class MarkupCreator
             var dateTime = classInformation.Date;
             
             var button = InlineKeyboardButton.WithCallbackData($"{classInformation.Name} {dateTime:dd.MM}",
-                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Id}");
+                $"{TelegramCommandQueryFactory.CommandQueryPrefix}{callbackQueryWithoutPrefix} {classInformation.Name} {classInformation.Date}");
             
             buttons.Add([button]);
         }

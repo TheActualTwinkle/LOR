@@ -12,6 +12,9 @@ public class UserRepository(IDatabaseContext context)
         await _context.Users
             .FirstOrDefaultAsync(u => u.TelegramId == telegramId || u.FullName == fullName, cancellationToken);
 
+    public async Task<User?> GetUserByFullName(string fullName, CancellationToken cancellationToken) =>
+        await _context.Users
+            .FirstOrDefaultAsync(u => u.FullName == fullName, cancellationToken);
     public async Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken) =>
         await _context.Users
             .FirstOrDefaultAsync(u => u.TelegramId == telegramId, cancellationToken);

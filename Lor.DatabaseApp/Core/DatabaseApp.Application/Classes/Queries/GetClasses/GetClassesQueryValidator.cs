@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Class.Queries.GetClasses;
+namespace DatabaseApp.Application.Class.Queries;
 
 public class GetClassesQueryValidator : AbstractValidator<GetClassesQuery>
 {
     public GetClassesQueryValidator() => 
-        RuleFor(x => x.GroupId).GreaterThan(0);
+        RuleFor(x => x.GroupName).NotNull().NotEmpty();
 }

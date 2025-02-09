@@ -15,7 +15,8 @@ public static class DependencyInjection
         {
             var logger = s.GetRequiredService<ILogger<GrpcDatabaseClient>>();
             
-            var url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            var url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ??
+                      throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
             
             return new GrpcDatabaseClient(url, logger);
         });
@@ -30,6 +31,7 @@ public static class DependencyInjection
             x.SetKebabCaseEndpointNameFormatter();
 
             x.AddConsumer<NewClassesConsumer>();
+            x.AddConsumer<UpcomingClassesConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {

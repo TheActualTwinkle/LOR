@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.User.Queries.GetUserInfo;
+namespace DatabaseApp.Application.User.Queries;
 
 public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetUserInfoQuery, Result<UserDto>>
@@ -14,17 +14,20 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cache
     {
         var cachedUser = await cacheService.GetAsync<UserDto>(Constants.UserPrefix + request.TelegramId, cancellationToken);
 
-        if (cachedUser is not null) return Result.Ok(cachedUser);
+        if (cachedUser is not null) 
+            return Result.Ok(cachedUser);
         
         var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден.");
+        if (user is null) 
+            return Result.Fail("Пользователь не найден.");
 
         var group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
-        if (group is null) return Result.Fail("Группа не найдена.");
+        if (group is null) 
+            return Result.Fail("Группа не найдена.");
 
-        var userDto = mapper.From(new UserDto { FullName = user.FullName, GroupId = user.GroupId, GroupName = group.Name }).AdaptToType<UserDto>();
+        var userDto = mapper.From(user).AdaptToType<UserDto>();
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, userDto, cancellationToken: cancellationToken);
 

@@ -1,10 +1,7 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClass;
-using DatabaseApp.Application.Class.Command.DeleteClass;
-using DatabaseApp.Application.Class.Queries.GetClass;
-using DatabaseApp.Application.Class.Queries.GetClasses;
-using DatabaseApp.Application.Class.Queries.GetOutdatedClasses;
+﻿using DatabaseApp.Application.Class.Command;
+using DatabaseApp.Application.Class.Command.DeleteClasses;
+using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Group.Queries.GetGroup;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;
@@ -58,26 +55,19 @@ public class ClassTests
     [Test]
     public async Task CreateClasses_WhenClassNotExist_ListOfClasses()
     {
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
         // Act
         var createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
 
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-
-        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(1));
             Assert.That(getResult.Value.First().Name, Is.EqualTo(TestClassName));
         });
@@ -86,35 +76,27 @@ public class ClassTests
     [Test]
     public async Task CreateClasses_WhenClassExist_DistinctClasses()
     {
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-        
         // Arrange
         var createResult1 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
 
         // Act
         var createResult2 = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-        
-        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult1.IsSuccess, Is.True);
             Assert.That(createResult2.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(1));
             Assert.That(getResult.Value.First().Name, Is.EqualTo(TestClassName));
         });
@@ -123,36 +105,28 @@ public class ClassTests
     [Test]
     public async Task DeleteClass_WhenClassExist_SuccessAndDatabaseContainEmptyClasses()
     {
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-        
         // Arrange
         var createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-        
-        var classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
         
         // Act
-        var deleteResult = await _sender.Send(new DeleteClassCommand
+        var deleteResult = await _sender.Send(new DeleteClassesCommand
         {
             ClassesId = [classes.Value.First().Id]
         });
         
-        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupName =TestGroupName});
 
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
             Assert.That(deleteResult.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
@@ -162,7 +136,7 @@ public class ClassTests
     public async Task DeleteClass_WhenClassNotExist_Fail()
     {
         // Act
-        var deleteResult = await _sender.Send(new DeleteClassCommand
+        var deleteResult = await _sender.Send(new DeleteClassesCommand
         {
             ClassesId = [99999985]
         });
@@ -174,33 +148,26 @@ public class ClassTests
     [Test]
     public async Task GetClass_WhenClassExist_Class()
     {
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-        
         // Arrange
         var createResult = await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-        
-        var classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var classes = await _sender.Send(new GetClassesQuery {GroupName =TestGroupName});
         
         // Act
         var result = await _sender.Send(new GetClassQuery
         {
-            ClassId = classes.Value.First().Id
+            ClassName = classes.Value.First().Name,
+            ClassDate = classes.Value.First().Date
         });
         
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value.Name, Is.EqualTo(TestClassName));
         });
@@ -212,18 +179,16 @@ public class ClassTests
         // Act
         var result = await _sender.Send(new GetClassQuery
         {
-            ClassId = 99999985
+            ClassName = "99999985",
+            ClassDate = DateOnly.FromDateTime(DateTime.Now)
         });
         
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-        
-        var classes = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
         
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(result.IsFailed, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(classes.Value, Has.Count.EqualTo(0));
         });
     }
@@ -231,34 +196,26 @@ public class ClassTests
     [Test]
     public async Task GetClasses_WhenClassesExist_ListOfClasses()
     {
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-        
         // Arrange
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_1", DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-        
         // Act
-        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
         
         // Assert
         Assert.Multiple(() =>
         {
             Assert.That(getResult.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(2));
         });
     }
@@ -266,15 +223,12 @@ public class ClassTests
     [Test]
     public async Task GetClasses_WhenClassesNotExist_EmptyList()
     {
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-        
         // Act
-        var getResult = await _sender.Send(new GetClassesQuery {GroupId = getGroupResult.Value.Id});
+        var getResult = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
         
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(getResult.IsSuccess, Is.True);
             Assert.That(getResult.Value, Has.Count.EqualTo(0));
         });
@@ -283,22 +237,17 @@ public class ClassTests
     [Test]
     public async Task GetOutdatedClasses_WhenOutdatedClassesExist_ListOfClasses()
     {
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-        
         // Arrange
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(-2)) } },
-            GroupId = groupDto.Value.Id
+            GroupName =TestGroupName
         });
         
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_1", DateOnly.FromDateTime(DateTime.Now.AddDays(2)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
         // Act

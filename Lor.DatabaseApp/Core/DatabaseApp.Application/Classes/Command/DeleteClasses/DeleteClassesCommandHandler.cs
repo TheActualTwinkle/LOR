@@ -5,12 +5,12 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Command.DeleteClass;
+namespace DatabaseApp.Application.Class.Command.DeleteClasses;
 
-public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
-    : IRequestHandler<DeleteClassCommand, Result>
+public class DeleteClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+    : IRequestHandler<DeleteClassesCommand, Result>
 {
-    public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteClassesCommand request, CancellationToken cancellationToken)
     {
         foreach (var item in request.ClassesId)
         {

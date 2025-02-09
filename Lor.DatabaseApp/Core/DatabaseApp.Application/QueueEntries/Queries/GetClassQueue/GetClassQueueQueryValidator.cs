@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.QueueEntries.Queries.GetQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetClassQueueQueryValidator : AbstractValidator<GetClassQueueQuery>
 {

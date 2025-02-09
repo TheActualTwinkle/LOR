@@ -1,12 +1,11 @@
-﻿using DatabaseApp.Application.Class.Command.CreateClass;
-using DatabaseApp.Application.Class.Queries.GetClasses;
+﻿using DatabaseApp.Application.Class.Command;
+using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Group.Queries.GetGroup;
+using DatabaseApp.Application.Group.Queries;
 using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
-using DatabaseApp.Application.QueueEntries.Queries.GetQueue;
-using DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
+using DatabaseApp.Application.QueueEntries.Queries;
 using DatabaseApp.Application.User.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
@@ -66,21 +65,16 @@ public class QueueEntryTests
             FullName = TestFullName,
             GroupName = TestGroupName
         });
-        
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
 
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
 
         var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         // Act
         var createResult = await _sender.Send(new CreateQueueEntryCommand
@@ -109,20 +103,15 @@ public class QueueEntryTests
             GroupNames = [TestGroupName]
         });
         
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
         
         var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
 
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         // Act
         var createResult = await _sender.Send(new CreateQueueEntryCommand
@@ -174,10 +163,8 @@ public class QueueEntryTests
     {
         // Arrange
         await CreateUserAndClasses();
-
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         await _sender.Send(new CreateQueueEntryCommand
         {
@@ -198,7 +185,6 @@ public class QueueEntryTests
         Assert.Multiple(() =>
         {
             Assert.That(createResult.IsFailed, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queue.Value, Has.Count.EqualTo(1));
         });
     }
@@ -208,10 +194,8 @@ public class QueueEntryTests
     {
         // Arrange
         await CreateUserAndClasses();
-
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         await _sender.Send(new CreateQueueEntryCommand
         {
@@ -232,7 +216,6 @@ public class QueueEntryTests
         Assert.Multiple(() =>
         {
             Assert.That(deleteResult.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queueAfterDelete.Value, Has.Count.EqualTo(0));
         });
     }
@@ -243,20 +226,13 @@ public class QueueEntryTests
         // Arrange
         await CreateUserAndClasses();
         
-        var groupDto = await _sender.Send(new GetGroupQuery
-        {
-            GroupName = TestGroupName
-        });
-        
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName + "_outdated", DateOnly.FromDateTime(DateTime.Now.AddDays(-1)) } },
-            GroupId = groupDto.Value.Id
+            GroupName = TestGroupName
         });
-
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
         var outdatedClassId = getClassesResult.Value.Last().Id;
         
         await _sender.Send(new CreateQueueEntryCommand
@@ -276,7 +252,6 @@ public class QueueEntryTests
         Assert.Multiple(() =>
         {
             Assert.That(deleteResult.IsSuccess, Is.True);
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(queueAfterDelete.Value, Has.Count.EqualTo(queueBeforeDelete.Value.Count - 1));
         });
     }
@@ -289,7 +264,7 @@ public class QueueEntryTests
 
         var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         await _sender.Send(new CreateQueueEntryCommand
         {
@@ -327,9 +302,7 @@ public class QueueEntryTests
         // Arrange
         await CreateUserAndClasses();
         
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
-
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         await _sender.Send(new CreateQueueEntryCommand
         {
@@ -347,7 +320,6 @@ public class QueueEntryTests
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(getGroupResult.IsSuccess, Is.True);
             Assert.That(isUserInQueue.Value, Is.Not.Null);
         });
     }
@@ -357,10 +329,8 @@ public class QueueEntryTests
     {
         // Arrange
         await CreateUserAndClasses();
-
-        var getGroupResult = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
         
-        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupId = getGroupResult.Value.Id });
+        var getClassesResult = await _sender.Send(new GetClassesQuery { GroupName = TestGroupName });
 
         // Act
         var isUserInQueue = await _sender.Send(new GetUserInQueueQuery
@@ -386,13 +356,11 @@ public class QueueEntryTests
             FullName = TestFullName,
             GroupName = TestGroupName
         });
-        
-        var group = await _sender.Send(new GetGroupQuery { GroupName = TestGroupName });
 
         await _sender.Send(new CreateClassesCommand
         {
             Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupId = group.Value.Id
+            GroupName = TestGroupName
         });
     }
 }

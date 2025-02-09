@@ -19,15 +19,19 @@ public interface IClassRepository : IRepository
 {
     public Task AddAsync(Class @class, CancellationToken cancellationToken);
 
-    public Task<bool> CheckClass(string className, DateOnly date, CancellationToken cancellationToken);
-
     public void Delete(Class @class);
 
+    public Task<Class?> GetClassByNameAndDate(string className, DateOnly classDate, CancellationToken cancellationToken);
+    
     public Task<Class?> GetClassById(int classId, CancellationToken cancellationToken);
 
     public Task<List<Class>?> GetClassesByGroupId(int groupId, CancellationToken cancellationToken);
+    
+    public Task<List<Class>?> GetClassesByGroupName(string groupName, CancellationToken cancellationToken);
 
     public Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken);
+    
+    public Task<List<Class>?> GetUpcomingClasses(CancellationToken cancellationToken);
 }
 
 public interface IGroupRepository : IRepository
@@ -74,7 +78,10 @@ public interface ISubscriberRepository : IRepository
 public interface IUserRepository : IRepository
 {
     public Task AddAsync(User user, CancellationToken cancellationToken);
-    
+   
     public Task<User?> IsUserExists(long telegramId, string fullName, CancellationToken cancellationToken);
+
+    public Task<User?> GetUserByFullName(string fullName, CancellationToken cancellationToken);
+    
     public Task<User?> GetUserByTelegramId(long telegramId, CancellationToken cancellationToken);
 }

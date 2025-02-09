@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.QueueEntries.Queries.GetQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetClassQueueQuery, Result<List<QueueEntryDto>>>

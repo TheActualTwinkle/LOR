@@ -8,9 +8,9 @@ namespace DatabaseApp.Persistence.Repositories;
 public class ClassRepository(IDatabaseContext context)
     : RepositoryBase<Class>(context), IClassRepository
 {
-    public async Task<bool> CheckClass(string className, DateOnly date, CancellationToken cancellationToken) =>
+    public async Task<Class?> GetClassByNameAndDate(string className, DateOnly classDate, CancellationToken cancellationToken) =>
         await _context.Classes
-            .AnyAsync(c => c.Name == className && c.Date == date, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Name == className && c.Date == classDate, cancellationToken);
 
     public async Task<Class?> GetClassById(int classId, CancellationToken cancellationToken) =>
         await _context.Classes
@@ -20,10 +20,18 @@ public class ClassRepository(IDatabaseContext context)
         await _context.Classes
             .Where(c => c.GroupId == groupId)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Class>?> GetClassesByGroupName(string groupName, CancellationToken cancellationToken) =>
+        await _context.Classes
+            .Where(c => c.Group.Name == groupName)
+            .ToListAsync(cancellationToken);
     
-public async Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken) =>
+    public async Task<List<int>> GetOutdatedClassesId(CancellationToken cancellationToken) =>
         await _context.Classes
             .Where(c => c.Date < DateOnly.FromDateTime(DateTime.Now))
             .Select(c => c.Id)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Class>?> GetUpcomingClasses(CancellationToken cancellationToken) => 
+        await _context.Classes.Where(c => c.Date == DateOnly.FromDateTime(DateTime.Now.AddDays(1).Date)).ToListAsync(cancellationToken);
 }

@@ -7,7 +7,7 @@ message GetAvailableGroupsReply {
 }
 
 message SetGroupRequest {
-  int64 userId = 1;
+  int64 telegramId = 1;
   string groupName = 2;
   string fullName = 3;
 }

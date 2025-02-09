@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Group.Queries.GetGroup;
+namespace DatabaseApp.Application.Group.Queries;
 
 public class GetGroupQueryValidator : AbstractValidator<GetGroupQuery>
 {

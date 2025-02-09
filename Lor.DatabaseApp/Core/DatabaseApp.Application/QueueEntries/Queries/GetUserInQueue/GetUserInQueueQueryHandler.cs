@@ -4,9 +4,11 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.QueueEntries.Queries.IsUserInQueue;
+namespace DatabaseApp.Application.QueueEntries.Queries;
 
-public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
+public class GetUserInQueueQueryHandler(
+    IUnitOfWork unitOfWork,
+    IMapper mapper)
     : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>
 {
     public async Task<Result<UserDto?>> Handle(GetUserInQueueQuery request, CancellationToken cancellationToken)
@@ -14,11 +16,14 @@ public class GetUserInQueueHandler(IUnitOfWork unitOfWork, IMapper mapper)
         var user =
             await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken); 
 
-        if (user is null) return Result.Fail("Пользователь не найден.");
+        if (user is null)
+            return Result.Fail("Пользователь не найден.");
         
         var isUserInQueue =
             await unitOfWork.QueueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
-        return isUserInQueue == true ? Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) : Result.Ok<UserDto?>(null);
+        return isUserInQueue ?
+            Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) :
+            Result.Ok<UserDto?>(null);
     }
 }

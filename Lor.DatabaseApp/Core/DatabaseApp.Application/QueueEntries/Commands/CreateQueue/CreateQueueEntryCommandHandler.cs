@@ -12,8 +12,7 @@ public class CreateQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result> Handle(CreateQueueEntryCommand request, CancellationToken cancellationToken)
     {
-        var user =
-            await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден.");
 
