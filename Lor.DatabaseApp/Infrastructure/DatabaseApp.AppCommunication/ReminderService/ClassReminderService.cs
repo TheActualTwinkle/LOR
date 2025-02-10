@@ -26,7 +26,7 @@ public class ClassReminderService(
         foreach (var classDto in classesDto)
             backgroundJobClient.Schedule(
                 () => PublishClassesReminderMessage(classDto, cancellationToken),
-                classDto.Date.ToDateTime(TimeOnly.MinValue).ToUniversalTime() - settings.AdvanceNoticeTime);
+                classDto.Date.ToDateTime(TimeOnly.MinValue) - settings.AdvanceNoticeTime);
         
         return Task.CompletedTask;
     }
