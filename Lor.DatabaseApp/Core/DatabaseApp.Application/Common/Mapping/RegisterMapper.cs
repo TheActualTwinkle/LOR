@@ -24,7 +24,7 @@ public class RegisterMapper : IRegister
             .Map(dest => dest.TelegramId, src => src.User.TelegramId)
             .Map(dest => dest.GroupName, src => src.User.Group.Name);
         config.NewConfig<Domain.Models.User, UserDto>()
-            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.TelegramId, src => src.Id)
             .Map(dest => dest.FullName, src => src.FullName)
             .Map(dest => dest.GroupName, src => src.Group.Name);
     }

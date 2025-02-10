@@ -17,7 +17,7 @@ public class UpcomingClassesConsumer(ITelegramBot bot) : IConsumer<UpcomingClass
             var message = $"Вы в очереди на : {classesString}\n Не забудьте!";
             
             await bot.SendMessageAsync(
-                user.Id,
+                user.TelegramId,
                 message,
                 new ReplyKeyboardRemove(), 
                 new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
