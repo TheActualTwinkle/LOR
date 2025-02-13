@@ -186,15 +186,14 @@ public class UserTests
             GroupName = TestGroupName
         });
 
-        var classResult = await _sender.Send(new GetClassQuery
+        var classResult = await _sender.Send(new GetClassesQuery
         {
-            ClassName = TestClassName,
-            ClassDate = DateOnly.FromDateTime(DateTime.Now)
+            GroupName = TestGroupName
         });
-
+        
         await _sender.Send(new CreateQueueEntryCommand
         {
-            ClassId = classResult.Value.Id,
+            ClassId = classResult.Value.First(c => c.Name == TestClassName).Id,
             TelegramId = TestTelegramId
         });
         
@@ -202,7 +201,7 @@ public class UserTests
 
         var queueResult = await _sender.Send(new GetClassQueueQuery
         {
-            ClassId = classResult.Value.Id
+            ClassId = classResult.Value.First(c => c.Name == TestClassName).Id
         });
         
         var getUsersFromQueue = await _sender.Send(new GetEnqueuedUsersQuery

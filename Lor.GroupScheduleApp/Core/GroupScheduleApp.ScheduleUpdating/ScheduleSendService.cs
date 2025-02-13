@@ -19,6 +19,7 @@ public class ScheduleSendService(
         
         recurringJobManager.AddOrUpdate(
             "SendAllData",
+            "gsa_queue",
             () => SendAllDataAsync(),
             settings.CronExpression);
     }

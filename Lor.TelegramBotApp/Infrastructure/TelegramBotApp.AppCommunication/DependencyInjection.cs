@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TelegramBotApp.AppCommunication.Consumers;
+using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.AppCommunication.Interfaces;
 
 namespace TelegramBotApp.AppCommunication;
@@ -29,7 +30,6 @@ public static class DependencyInjection
         services.AddMassTransit(x =>
         {
             x.SetKebabCaseEndpointNameFormatter();
-
             x.AddConsumer<NewClassesConsumer>();
             x.AddConsumer<UpcomingClassesConsumer>();
 
@@ -54,6 +54,11 @@ public static class DependencyInjection
                     e => e.Consumer<UpcomingClassesConsumer>(context));
             });
         });
+
+        services.AddScoped<ConsumerSettings>(_ => 
+            new ConsumerSettings(configuration
+            .GetRequiredSection("ConsumersSettings")
+            .GetValue<TimeSpan>("DefaultCancellationTimeout")));
 
         return services;
     }

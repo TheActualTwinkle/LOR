@@ -146,54 +146,6 @@ public class ClassTests
     }
     
     [Test]
-    public async Task GetClass_WhenClassExist_Class()
-    {
-        // Arrange
-        var createResult = await _sender.Send(new CreateClassesCommand
-        {
-            Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now.AddDays(1)) } },
-            GroupName = TestGroupName
-        });
-        
-        var classes = await _sender.Send(new GetClassesQuery {GroupName =TestGroupName});
-        
-        // Act
-        var result = await _sender.Send(new GetClassQuery
-        {
-            ClassName = classes.Value.First().Name,
-            ClassDate = classes.Value.First().Date
-        });
-        
-        // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(createResult.IsSuccess, Is.True);
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Value.Name, Is.EqualTo(TestClassName));
-        });
-    }
-    
-    [Test]
-    public async Task GetClass_WhenClassNotExist_Fail()
-    {
-        // Act
-        var result = await _sender.Send(new GetClassQuery
-        {
-            ClassName = "99999985",
-            ClassDate = DateOnly.FromDateTime(DateTime.Now)
-        });
-        
-        var classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
-        
-        // Assert
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.IsFailed, Is.True);
-            Assert.That(classes.Value, Has.Count.EqualTo(0));
-        });
-    }
-    
-    [Test]
     public async Task GetClasses_WhenClassesExist_ListOfClasses()
     {
         // Arrange

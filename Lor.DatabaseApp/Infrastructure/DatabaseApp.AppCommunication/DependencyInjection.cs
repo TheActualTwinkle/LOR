@@ -1,7 +1,11 @@
 ﻿using DatabaseApp.AppCommunication.Consumers;
+using DatabaseApp.AppCommunication.Consumers.Settings;
 using DatabaseApp.AppCommunication.ReminderService;
 using DatabaseApp.AppCommunication.ReminderService.Interfaces;
 using DatabaseApp.AppCommunication.ReminderService.Settings;
+using DatabaseApp.AppCommunication.RemovalService;
+using DatabaseApp.AppCommunication.RemovalService.Interfaces;
+using DatabaseApp.AppCommunication.RemovalService.Settings;
 using Hangfire;
 using Hangfire.PostgreSql;
 using MassTransit;
@@ -38,6 +42,11 @@ public static class DependencyInjection
                     e => e.Consumer<NewClassesConsumer>(context));
             });
         });
+        
+        services.AddScoped<ConsumerSettings>(_ => 
+            new ConsumerSettings(configuration
+                .GetRequiredSection("ConsumersSettings")
+                .GetValue<TimeSpan>("DefaultCancellationTimeout")));
 
         return services;
     }
@@ -52,7 +61,12 @@ public static class DependencyInjection
                 .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
                 .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
         
-        services.AddHangfireServer(o => o.SchedulePollingInterval = TimeSpan.FromSeconds(10));
+        services.AddHangfireServer(o =>
+        {
+            o.Queues = ["dba_queue"];
+            o.SchedulePollingInterval = TimeSpan.FromSeconds(10);
+        });
+
 
         var advanceNoticeTime = configuration
             .GetRequiredSection("ClassReminderServiceSettings")
@@ -65,6 +79,12 @@ public static class DependencyInjection
 
         // Must be scoped to DI Consumers properly
         services.AddScoped<IClassReminderService, ClassReminderService>();
+        
+        var intervalString = configuration.GetRequiredSection("ClassRemovalServiceSettings:PollingIntervalCronUtc").Value!;
+
+        services.AddSingleton(_ => new ClassRemovalServiceSettings(intervalString));
+        
+        services.AddScoped<IClassRemovalService, ClassRemovalService>();
 
         return services;
     }

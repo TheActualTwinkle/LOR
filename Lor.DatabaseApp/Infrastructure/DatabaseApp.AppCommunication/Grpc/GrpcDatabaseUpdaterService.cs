@@ -1,10 +1,8 @@
 ﻿using DatabaseApp.AppCommunication.Messages;
 using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command;
-using DatabaseApp.Application.Class.Command.DeleteClasses;
 using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
 using FluentResults;
@@ -51,9 +49,6 @@ public class GrpcDatabaseUpdaterService(
         if (createClassesResult.IsFailed)
             throw new RpcException(new Status(StatusCode.Internal, createClassesResult.Errors.First().Message));
 
-        // TODO: Has to be moved outside the SetAvailableClasses logic.
-        await DeleteOutdatedClasses(context.CancellationToken);
-
         var classes = await mediator.Send(new GetClassesQuery
         {
             GroupName = request.GroupName
@@ -94,26 +89,7 @@ public class GrpcDatabaseUpdaterService(
             return Result.Fail($"Error while creating classes {e.Message}");
         }
     }
-
-    private async Task DeleteOutdatedClasses(CancellationToken cancellationToken = default)
-    {
-        var outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery(), cancellationToken);
-
-        if (outdatedClassList.IsSuccess &&
-            outdatedClassList.Value.Count != 0)
-        {
-            await mediator.Send(new DeleteQueuesForClassesCommand
-            {
-                ClassesId = outdatedClassList.Value
-            }, cancellationToken);
-
-            await mediator.Send(new DeleteClassesCommand
-            {
-                ClassesId = outdatedClassList.Value
-            }, cancellationToken);
-        }
-    }
-
+    
     private async Task PublishNewClassesMessage(string groupName, IEnumerable<ClassDto> newClasses, CancellationToken cancellationToken = default)
     {
         NewClassesMessage newClassesMessage = new()

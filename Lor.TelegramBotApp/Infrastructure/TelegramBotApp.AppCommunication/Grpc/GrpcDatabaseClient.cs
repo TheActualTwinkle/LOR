@@ -4,7 +4,6 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using TelegramBotApp.AppCommunication.Data;
-using TelegramBotApp.AppCommunication.Extensions;
 using TelegramBotApp.AppCommunication.Interfaces;
 
 namespace TelegramBotApp.AppCommunication;

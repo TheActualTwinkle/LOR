@@ -3,7 +3,6 @@ using DatabaseApp.AppCommunication.ReminderService.Interfaces;
 using DatabaseApp.AppCommunication.ReminderService.Settings;
 using DatabaseApp.Application.Class;
 using DatabaseApp.Application.QueueEntries.Queries;
-using DatabaseApp.Application.User;
 using Hangfire;
 using MassTransit;
 using MediatR;
@@ -25,6 +24,7 @@ public class ClassReminderService(
     {
         foreach (var classDto in classesDto)
             backgroundJobClient.Schedule(
+                "dba_queue",
                 () => PublishClassesReminderMessage(classDto, cancellationToken),
                 classDto.Date.ToDateTime(TimeOnly.MinValue) - settings.AdvanceNoticeTime);
         
@@ -67,5 +67,7 @@ public class ClassReminderService(
         };
         
         await bus.Publish(upcomingClassesMessage, cancellationToken);
+        
+        logger.LogInformation("Upcoming classes was published");
     }
 }

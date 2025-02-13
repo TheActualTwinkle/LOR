@@ -1,12 +1,13 @@
 ﻿using DatabaseApp.AppCommunication.Messages;
 using MassTransit;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.Domain.Interfaces;
 
 namespace TelegramBotApp.AppCommunication.Consumers;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class UpcomingClassesConsumer(ITelegramBot bot) : IConsumer<UpcomingClassesMessage>
+public class UpcomingClassesConsumer(ITelegramBot bot, ConsumerSettings settings) : IConsumer<UpcomingClassesMessage>
 {
     public async Task Consume(ConsumeContext<UpcomingClassesMessage> context)
     {
@@ -14,13 +15,13 @@ public class UpcomingClassesConsumer(ITelegramBot bot) : IConsumer<UpcomingClass
 
         foreach (var user in context.Message.Users)
         {
-            var message = $"Вы в очереди на : {classesString}\n Не забудьте!";
+            var message = $"Вы в очереди на : {classesString}\nНе забудьте!";
             
             await bot.SendMessageAsync(
                 user.TelegramId,
                 message,
                 new ReplyKeyboardRemove(), 
-                new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
+                new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
         }
     }
 }
