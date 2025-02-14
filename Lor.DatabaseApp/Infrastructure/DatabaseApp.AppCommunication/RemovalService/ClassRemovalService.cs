@@ -1,5 +1,6 @@
 ﻿using DatabaseApp.AppCommunication.RemovalService.Interfaces;
 using DatabaseApp.AppCommunication.RemovalService.Settings;
+using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.DeleteClasses;
 using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
@@ -11,39 +12,37 @@ namespace DatabaseApp.AppCommunication.RemovalService;
 
 public class ClassRemovalService(
     ISender mediator,
-    IRecurringJobManager recurringJobManager,
+    IBackgroundJobClient backgroundJobClient,
     ILogger<ClassRemovalService> logger,
-    ClassRemovalServiceSettings settings) 
+    ClassRemovalServiceSettings settings)
     : IClassRemovalService
 {
-    public async Task StartAsync(CancellationToken cancellationToken = default) 
+    public Task ScheduleRemoval(
+        IEnumerable<ClassDto> classesDto,
+        CancellationToken cancellationToken = default)
     {
-        await DeleteOutdatedClasses(cancellationToken);
-        
-        recurringJobManager.AddOrUpdate(
-            "DeleteOutdatedClasses",
-            "dba_queue",
-            () => DeleteOutdatedClasses(cancellationToken),
-            settings.CronExpression);
-    }
-    
-    private async Task DeleteOutdatedClasses(CancellationToken cancellationToken = default)
-    {
-        var outdatedClassList = await mediator.Send(new GetOutdatedClassesQuery(), cancellationToken);
-
-        if (outdatedClassList.IsSuccess &&
-            outdatedClassList.Value.Count != 0)
+        foreach (var classDto in classesDto)
         {
-            await mediator.Send(new DeleteQueuesForClassesCommand
-            {
-                ClassesId = outdatedClassList.Value
-            }, cancellationToken);
-
-            await mediator.Send(new DeleteClassesCommand
-            {
-                ClassesId = outdatedClassList.Value
-            }, cancellationToken);
+            backgroundJobClient.Schedule(
+                "dba_queue",
+                () => DeleteOutdatedClasses(classDto, cancellationToken),
+                classDto.Date.ToDateTime(TimeOnly.MinValue) + settings.RemovalAdvanceTime);
         }
+        
+        return Task.CompletedTask;
+    }
+
+private async Task DeleteOutdatedClasses(ClassDto classDto, CancellationToken cancellationToken = default)
+    {
+        await mediator.Send(new DeleteQueuesForClassesCommand
+        {
+            ClassId = classDto.Id
+        }, cancellationToken);
+
+        await mediator.Send(new DeleteClassesCommand
+        {
+            ClassId = classDto.Id
+        }, cancellationToken);
         
         logger.LogInformation("Outdated classes deleted");
     }

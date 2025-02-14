@@ -22,7 +22,8 @@ public static class DependencyInjection
         {
             x.SetKebabCaseEndpointNameFormatter();
             
-            x.AddConsumer<NewClassesConsumer>();
+            x.AddConsumer<NewClassesReminderConsumer>();
+            x.AddConsumer<NewClassesRemovalConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -38,13 +39,16 @@ public static class DependencyInjection
                 });
 
                 cfg.ReceiveEndpoint(
-                    "tba-new-classes", 
-                    e => e.Consumer<NewClassesConsumer>(context));
+                    "tba-new-classes-reminder", 
+                    e => e.Consumer<NewClassesReminderConsumer>(context));
+                
+                cfg.ReceiveEndpoint(
+                    "tba-new-classes-removal", 
+                    e => e.Consumer<NewClassesRemovalConsumer>(context));
             });
         });
         
-        services.AddScoped<ConsumerSettings>(_ => 
-            new ConsumerSettings(TimeSpan.FromSeconds(10)));
+        services.AddScoped<ConsumerSettings>(_ => new ConsumerSettings(TimeSpan.FromSeconds(10)));
 
         return services;
     }
@@ -78,9 +82,14 @@ public static class DependencyInjection
         // Must be scoped to DI Consumers properly
         services.AddScoped<IClassReminderService, ClassReminderService>();
         
-        var intervalString = configuration.GetRequiredSection("ClassRemovalServiceSettings:PollingIntervalCronUtc").Value!;
+        var removalAdvanceTime = configuration
+            .GetRequiredSection("ClassRemovalServiceSettings")
+            .GetValue<TimeSpan>("RemovalAdvanceTime");
 
-        services.AddSingleton(_ => new ClassRemovalServiceSettings(intervalString));
+        services.AddSingleton(_ => new ClassRemovalServiceSettings
+        {
+            RemovalAdvanceTime = removalAdvanceTime
+        });
         
         services.AddScoped<IClassRemovalService, ClassRemovalService>();
 

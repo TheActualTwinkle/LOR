@@ -1,25 +1,22 @@
 ﻿using DatabaseApp.AppCommunication.Consumers.Settings;
 using DatabaseApp.AppCommunication.Messages;
-using DatabaseApp.AppCommunication.ReminderService.Interfaces;
 using DatabaseApp.AppCommunication.RemovalService.Interfaces;
 using MassTransit;
 
 namespace DatabaseApp.AppCommunication.Consumers;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public class NewClassesConsumer(
-    IClassReminderService classReminderService, 
+public class NewClassesRemovalConsumer(
     IClassRemovalService classRemovalService,
     ConsumerSettings settings)
     : IConsumer<NewClassesMessage>
 {
     public async Task Consume(ConsumeContext<NewClassesMessage> context)
     {
-        await classReminderService.ScheduleNotification(
+        await classRemovalService.ScheduleRemoval(
             context.Message.Classes,
-            new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
-        
-        await classRemovalService.StartAsync(
             new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
     }
 }
+        
+    

@@ -1,3 +1,6 @@
 ﻿namespace DatabaseApp.AppCommunication.RemovalService.Settings;
 
-public record ClassRemovalServiceSettings(string CronExpression);
+public record ClassRemovalServiceSettings
+{
+    public required TimeSpan RemovalAdvanceTime { get; init; }
+}

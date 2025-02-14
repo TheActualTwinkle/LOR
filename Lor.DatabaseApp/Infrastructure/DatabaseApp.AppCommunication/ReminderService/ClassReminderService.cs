@@ -68,6 +68,6 @@ public class ClassReminderService(
         
         await bus.Publish(upcomingClassesMessage, cancellationToken);
         
-        logger.LogInformation("Upcoming classes was published");
+        logger.LogInformation("Classes reminder message was published");
     }
 }

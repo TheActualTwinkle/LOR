@@ -12,20 +12,17 @@ public class DeleteQueuesForClassesCommandHandler(IUnitOfWork unitOfWork, ICache
 {
     public async Task<Result> Handle(DeleteQueuesForClassesCommand request, CancellationToken cancellationToken)
     {
-        foreach (var classId in request.ClassesId)
-        {
-            var outdatedQueueList = await unitOfWork.QueueEntryRepository.GetOutdatedQueueListByClassId(classId, cancellationToken);
+        var outdatedQueueList = await unitOfWork.QueueEntryRepository.GetOutdatedQueueListByClassId(request.ClassId, cancellationToken);
         
-            if (outdatedQueueList is null) return Result.Fail($"Очередь для {classId} не найдена");
+        if (outdatedQueueList is null) return Result.Fail($"Очередь для {request.ClassId} не найдена");
         
-            foreach (var queue in outdatedQueueList)
-                unitOfWork.QueueEntryRepository.Delete(queue);
+        foreach (var queue in outdatedQueueList)
+            unitOfWork.QueueEntryRepository.Delete(queue);
 
-            var queues = mapper.From(await unitOfWork.QueueEntryRepository.GetQueueByClassId(classId, cancellationToken)).AdaptToType<List<QueueEntryDto>>();
+        var queues = mapper.From(await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).AdaptToType<List<QueueEntryDto>>();
             
-            await cacheService.SetAsync(Constants.QueuePrefix + classId, queues, cancellationToken: cancellationToken);
-        }
-
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queues, cancellationToken: cancellationToken);
+        
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         return Result.Ok();

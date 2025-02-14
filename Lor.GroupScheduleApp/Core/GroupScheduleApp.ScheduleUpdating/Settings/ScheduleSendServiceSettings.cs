@@ -1,3 +1,6 @@
 ﻿namespace GroupScheduleApp.ScheduleUpdating.Settings;
 
-public record ScheduleSendServiceSettings(string CronExpression);
+public record ScheduleSendServiceSettings
+{
+    public required string CronExpression { get; init; }
+};

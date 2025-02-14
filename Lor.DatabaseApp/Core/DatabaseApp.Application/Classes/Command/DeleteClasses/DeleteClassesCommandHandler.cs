@@ -12,14 +12,11 @@ public class DeleteClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
 {
     public async Task<Result> Handle(DeleteClassesCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.ClassesId)
-        {
-            var @class = await unitOfWork.ClassRepository.GetClassById(item, cancellationToken);
+        var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
             
-            if (@class is null) return Result.Fail($"Пара {@class?.Name} не найдена.");
+        if (@class is null) return Result.Fail($"Пара {@class?.Name} не найдена.");
             
-            unitOfWork.ClassRepository.Delete(@class);
-        }
+        unitOfWork.ClassRepository.Delete(@class);
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         

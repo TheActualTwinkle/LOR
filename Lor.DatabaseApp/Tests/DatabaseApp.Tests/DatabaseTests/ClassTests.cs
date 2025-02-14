@@ -117,7 +117,7 @@ public class ClassTests
         // Act
         var deleteResult = await _sender.Send(new DeleteClassesCommand
         {
-            ClassesId = [classes.Value.First().Id]
+            ClassId = classes.Value.First().Id
         });
         
         var getResult = await _sender.Send(new GetClassesQuery {GroupName =TestGroupName});
@@ -138,7 +138,7 @@ public class ClassTests
         // Act
         var deleteResult = await _sender.Send(new DeleteClassesCommand
         {
-            ClassesId = [99999985]
+            ClassId = 99999985
         });
         
         // Assert

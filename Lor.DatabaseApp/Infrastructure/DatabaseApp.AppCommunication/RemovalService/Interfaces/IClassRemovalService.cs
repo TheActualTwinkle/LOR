@@ -1,6 +1,8 @@
-﻿namespace DatabaseApp.AppCommunication.RemovalService.Interfaces;
+﻿using DatabaseApp.Application.Class;
+
+namespace DatabaseApp.AppCommunication.RemovalService.Interfaces;
 
 public interface IClassRemovalService
 {
-    public Task StartAsync(CancellationToken cancellationToken = default);
+    public Task ScheduleRemoval(IEnumerable<ClassDto> classesDto, CancellationToken cancellationToken = default);
 }

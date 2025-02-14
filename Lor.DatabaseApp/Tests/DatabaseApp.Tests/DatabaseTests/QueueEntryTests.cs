@@ -244,7 +244,7 @@ public class QueueEntryTests
         // Act
         var queueBeforeDelete = await _sender.Send(new GetClassQueueQuery { ClassId = outdatedClassId });
         
-        var deleteResult = await _sender.Send(new DeleteQueuesForClassesCommand {ClassesId = [outdatedClassId]});
+        var deleteResult = await _sender.Send(new DeleteQueuesForClassesCommand {ClassId = outdatedClassId});
         
         var queueAfterDelete = await _sender.Send(new GetClassQueueQuery { ClassId = outdatedClassId });
         

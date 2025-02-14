@@ -26,7 +26,10 @@ public static class DependencyInjection
 
         var intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalCronUtc").Value!;
 
-        services.AddSingleton(_ => new ScheduleSendServiceSettings(intervalString));
+        services.AddSingleton(_ => new ScheduleSendServiceSettings
+        {
+            CronExpression = intervalString
+        });
 
         services.AddSingleton<IScheduleSendService, ScheduleSendService>();
 
