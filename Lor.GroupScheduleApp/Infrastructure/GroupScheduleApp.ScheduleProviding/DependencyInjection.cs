@@ -8,7 +8,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddScheduleProvider(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IScheduleProvider>(_ => new NstuHtmlScheduleProvider(GetClasses(configuration)));
+        services.AddSingleton<IScheduleProvider>(_ => new NstuHtmlScheduleProvider(GetClasses(configuration),
+            configuration.GetRequiredSection("HtmlParser").GetValue<TimeSpan>("ScheduleFetchDateOffset")));
         return services;
     }
     

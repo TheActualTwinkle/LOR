@@ -18,11 +18,18 @@ public static class DependencyInjection
                 .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
                 .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
-        services.AddHangfireServer(o => o.SchedulePollingInterval = TimeSpan.FromSeconds(10));
+        services.AddHangfireServer(o =>
+        {
+            o.Queues = ["gsa_queue"];
+            o.SchedulePollingInterval = TimeSpan.FromSeconds(10);
+        });
 
         var intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalCronUtc").Value!;
 
-        services.AddSingleton(_ => new ScheduleSendServiceSettings(intervalString));
+        services.AddSingleton(_ => new ScheduleSendServiceSettings
+        {
+            CronExpression = intervalString
+        });
 
         services.AddSingleton<IScheduleSendService, ScheduleSendService>();
 

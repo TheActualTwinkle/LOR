@@ -2,6 +2,7 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
 
@@ -11,7 +12,8 @@ namespace TelegramBotApp.AppCommunication.Consumers;
 public class NewClassesConsumer(
     ITelegramBot bot,
     IDatabaseCommunicationClient communicationClient,
-    ILogger<NewClassesConsumer> logger)
+    ILogger<NewClassesConsumer> logger,
+    ConsumerSettings settings)
     : IConsumer<NewClassesMessage>
 {
     public async Task Consume(ConsumeContext<NewClassesMessage> context)
@@ -31,12 +33,12 @@ public class NewClassesConsumer(
         foreach (var subscriber in subscribers)
         {
             var message = $"Доступны новые лабораторные работы! Используйте /hop для записи:\n{classesString}";
-            
+
             await bot.SendMessageAsync(
-                subscriber.TelegramId, 
-                message, 
-                new ReplyKeyboardRemove(), 
-                new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token); // TODO: DI and add message
+                subscriber.TelegramId,
+                message,
+                new ReplyKeyboardRemove(),
+                new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
         }
     }
 }
