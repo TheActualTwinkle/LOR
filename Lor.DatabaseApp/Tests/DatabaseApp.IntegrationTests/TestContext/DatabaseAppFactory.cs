@@ -59,7 +59,7 @@ public class DatabaseAppFactory
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public", "hangfire"]
+            SchemasToInclude = ["public"] // TODO: https://github.com/TheActualTwinkle/LOR/issues/59
         });
     }
 
