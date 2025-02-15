@@ -1,7 +1,6 @@
 ﻿using DatabaseApp.AppCommunication.Consumers.Settings;
 using DatabaseApp.AppCommunication.Messages;
 using DatabaseApp.AppCommunication.ReminderService.Interfaces;
-using DatabaseApp.AppCommunication.RemovalService.Interfaces;
 using MassTransit;
 
 namespace DatabaseApp.AppCommunication.Consumers;

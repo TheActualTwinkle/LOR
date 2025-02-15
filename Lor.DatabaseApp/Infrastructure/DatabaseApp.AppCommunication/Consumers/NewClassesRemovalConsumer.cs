@@ -18,5 +18,3 @@ public class NewClassesRemovalConsumer(
             new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
     }
 }
-        
-    

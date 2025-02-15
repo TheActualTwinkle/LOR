@@ -115,7 +115,7 @@ public class ClassTests
         var classes = await _sender.Send(new GetClassesQuery {GroupName = TestGroupName});
         
         // Act
-        var deleteResult = await _sender.Send(new DeleteClassesCommand
+        var deleteResult = await _sender.Send(new DeleteClassCommand
         {
             ClassId = classes.Value.First().Id
         });
@@ -136,7 +136,7 @@ public class ClassTests
     public async Task DeleteClass_WhenClassNotExist_Fail()
     {
         // Act
-        var deleteResult = await _sender.Send(new DeleteClassesCommand
+        var deleteResult = await _sender.Send(new DeleteClassCommand
         {
             ClassId = 99999985
         });

@@ -7,10 +7,10 @@ using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
-public class DeleteQueuesForClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
-    : IRequestHandler<DeleteQueuesForClassesCommand, Result>
+public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+    : IRequestHandler<DeleteQueueForClassCommand, Result>
 {
-    public async Task<Result> Handle(DeleteQueuesForClassesCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteQueueForClassCommand request, CancellationToken cancellationToken)
     {
         var outdatedQueueList = await unitOfWork.QueueEntryRepository.GetOutdatedQueueListByClassId(request.ClassId, cancellationToken);
         

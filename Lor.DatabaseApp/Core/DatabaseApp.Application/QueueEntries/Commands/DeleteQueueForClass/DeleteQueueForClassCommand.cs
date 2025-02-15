@@ -3,7 +3,7 @@ using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
-public record DeleteQueuesForClassesCommand : IRequest<Result>
+public record DeleteQueueForClassCommand : IRequest<Result>
 {
     public required int ClassId { get; init; }
 }

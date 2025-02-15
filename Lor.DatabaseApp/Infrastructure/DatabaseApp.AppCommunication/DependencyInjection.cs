@@ -48,7 +48,14 @@ public static class DependencyInjection
             });
         });
         
-        services.AddScoped<ConsumerSettings>(_ => new ConsumerSettings(TimeSpan.FromSeconds(10)));
+        var defaultCancellationTimeout = configuration
+            .GetRequiredSection("ConsumersSettings")
+            .GetValue<TimeSpan>("DefaultCancellationTimeout");
+
+        services.AddScoped<ConsumerSettings>(_ => new ConsumerSettings
+        {
+            DefaultCancellationTimeout = defaultCancellationTimeout
+        });
 
         return services;
     }

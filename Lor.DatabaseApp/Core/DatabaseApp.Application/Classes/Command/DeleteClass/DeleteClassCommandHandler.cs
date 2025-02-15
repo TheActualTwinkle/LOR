@@ -7,14 +7,15 @@ using MediatR;
 
 namespace DatabaseApp.Application.Class.Command.DeleteClasses;
 
-public class DeleteClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
-    : IRequestHandler<DeleteClassesCommand, Result>
+public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+    : IRequestHandler<DeleteClassCommand, Result>
 {
-    public async Task<Result> Handle(DeleteClassesCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
     {
         var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
             
-        if (@class is null) return Result.Fail($"Пара {@class?.Name} не найдена.");
+        if (@class is null) 
+            return Result.Fail($"Пара {@class?.Name} не найдена.");
             
         unitOfWork.ClassRepository.Delete(@class);
         
@@ -22,7 +23,8 @@ public class DeleteClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
         
         var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
 
-        if (groups is null) return Result.Fail("Группы не найдены.");
+        if (groups is null) 
+            return Result.Fail("Группы не найдены.");
 
         foreach (var group in groups)
         {

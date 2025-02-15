@@ -2,7 +2,6 @@
 using DatabaseApp.AppCommunication.RemovalService.Settings;
 using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.DeleteClasses;
-using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 using Hangfire;
 using MediatR;
@@ -25,21 +24,21 @@ public class ClassRemovalService(
         {
             backgroundJobClient.Schedule(
                 "dba_queue",
-                () => DeleteOutdatedClasses(classDto, cancellationToken),
+                () => DeleteOutdatedClass(classDto, cancellationToken),
                 classDto.Date.ToDateTime(TimeOnly.MinValue) + settings.RemovalAdvanceTime);
         }
         
         return Task.CompletedTask;
     }
 
-private async Task DeleteOutdatedClasses(ClassDto classDto, CancellationToken cancellationToken = default)
+    private async Task DeleteOutdatedClass(ClassDto classDto, CancellationToken cancellationToken = default)
     {
-        await mediator.Send(new DeleteQueuesForClassesCommand
+        await mediator.Send(new DeleteQueueForClassCommand
         {
             ClassId = classDto.Id
         }, cancellationToken);
 
-        await mediator.Send(new DeleteClassesCommand
+        await mediator.Send(new DeleteClassCommand
         {
             ClassId = classDto.Id
         }, cancellationToken);
