@@ -17,11 +17,13 @@ public class ScheduleSendService(
     {
         await SendAllDataAsync();
         
-        recurringJobManager.AddOrUpdate(
+        recurringJobManager.AddOrUpdateDynamic<IScheduleSendService>(
             "SendAllData",
-            "gsa_queue",
-            () => SendAllDataAsync(),
-            settings.CronExpression);
+            s => s.SendAllDataAsync(),
+            settings.CronExpression,
+#pragma warning disable CS0618 // Type or member is obsolete
+            new DynamicRecurringJobOptions { QueueName = "gsa_queue" });
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     // Used by Hangfire

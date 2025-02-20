@@ -26,7 +26,7 @@ public class ClassReminderService(
             backgroundJobClient.Schedule(
                 "dba_queue",
                 () => PublishClassesReminderMessage(classDto, cancellationToken),
-                classDto.Date.ToDateTime(TimeOnly.MinValue) - settings.AdvanceNoticeTime);
+                classDto.Date.ToDateTime(TimeOnly.MinValue).ToUniversalTime() - settings.AdvanceNoticeTime);
         
         return Task.CompletedTask;
     }

@@ -60,12 +60,24 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddReminderService(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJobSchedule(this IServiceCollection services, IConfiguration configuration)
+    {
+        AddHangfire(services, configuration);
+
+        AddClassReminderService(services, configuration);
+
+        AddClassRemovalService(services, configuration);
+
+        return services;
+    }
+
+    private static void AddHangfire(IServiceCollection services, IConfiguration configuration)
     {
         var hangfireConnectionString = configuration.GetConnectionString("HangfireDb");
         
         services.AddHangfire(c =>
-            c.UseSimpleAssemblyNameTypeSerializer()
+            c.UseDynamicJobs()
+                .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
                 .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
@@ -75,8 +87,10 @@ public static class DependencyInjection
             o.Queues = ["dba_queue"];
             o.SchedulePollingInterval = TimeSpan.FromSeconds(10);
         });
+    }
 
-
+    private static void AddClassReminderService(IServiceCollection services, IConfiguration configuration)
+    {
         var advanceNoticeTime = configuration
             .GetRequiredSection("ClassReminderServiceSettings")
             .GetValue<TimeSpan>("AdvanceNoticeTime");
@@ -88,7 +102,10 @@ public static class DependencyInjection
 
         // Must be scoped to DI Consumers properly
         services.AddScoped<IClassReminderService, ClassReminderService>();
-        
+    }
+
+    private static void AddClassRemovalService(IServiceCollection services, IConfiguration configuration)
+    {
         var removalAdvanceTime = configuration
             .GetRequiredSection("ClassRemovalServiceSettings")
             .GetValue<TimeSpan>("RemovalAdvanceTime");
@@ -99,7 +116,5 @@ public static class DependencyInjection
         });
         
         services.AddScoped<IClassRemovalService, ClassRemovalService>();
-
-        return services;
     }
 }

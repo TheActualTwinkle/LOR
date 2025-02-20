@@ -3,4 +3,6 @@
 public interface IScheduleSendService
 {
     Task StartAsync();
+    
+    Task SendAllDataAsync();
 }

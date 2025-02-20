@@ -8,12 +8,13 @@ namespace GroupScheduleApp.ScheduleUpdating;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddSenderService(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJobScheduler(this IServiceCollection services, IConfiguration configuration)
     {
         var hangfireConnectionString = configuration.GetConnectionString("HangfireDb");
 
-        services.AddHangfire(c =>
-            c.UseSimpleAssemblyNameTypeSerializer()
+        services.AddHangfire(c => 
+            c.UseDynamicJobs()
+                .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
                 .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));

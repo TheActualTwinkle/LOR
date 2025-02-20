@@ -28,7 +28,7 @@ public class DefaultAppPipeline : IAppPipeline
             .ConfigureServices((builder, services) => services
                 .AddCommunicators(builder.Configuration)
                 .AddScheduleProvider(builder.Configuration)
-                .AddSenderService(builder.Configuration)
+                .AddJobScheduler(builder.Configuration)
             )
             .Build();
 

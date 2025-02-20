@@ -21,17 +21,17 @@ public class ClassRemovalService(
         CancellationToken cancellationToken = default)
     {
         foreach (var classDto in classesDto)
-        {
             backgroundJobClient.Schedule(
                 "dba_queue",
                 () => DeleteOutdatedClass(classDto, cancellationToken),
                 classDto.Date.ToDateTime(TimeOnly.MinValue) + settings.RemovalAdvanceTime);
-        }
-        
+
         return Task.CompletedTask;
     }
 
-    private async Task DeleteOutdatedClass(ClassDto classDto, CancellationToken cancellationToken = default)
+    // Used by Hangfire
+    // ReSharper disable once MemberCanBePrivate.Global
+    public async Task DeleteOutdatedClass(ClassDto classDto, CancellationToken cancellationToken = default)
     {
         await mediator.Send(new DeleteQueueForClassCommand
         {
