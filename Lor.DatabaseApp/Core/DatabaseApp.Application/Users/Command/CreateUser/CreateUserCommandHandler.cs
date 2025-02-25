@@ -13,7 +13,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.IsUserExists(request.TelegramId, await request.FullName.Format(), cancellationToken);
+        var user = await unitOfWork.UserRepository.IsUserExists(request.TelegramId, FullNameFormatter.Format(request.FullName), cancellationToken);
 
         if (user is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
 
@@ -23,7 +23,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 
         Domain.Models.User newUser = new()
         {
-            FullName = await request.FullName.Format(),
+            FullName = FullNameFormatter.Format(request.FullName),
             TelegramId = request.TelegramId,
             GroupId = group.Id
         };
