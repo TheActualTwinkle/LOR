@@ -4,27 +4,35 @@ namespace DatabaseApp.Application.Common.ExtensionsMethods;
 
 public static partial class FullNameFormatter
 {
-    public static async Task<string> Format(this string fullName)
+    public static string Format(string fullName)
     {
-        var match = FullNameRegex().Match(fullName);
+        if (string.IsNullOrWhiteSpace(fullName))
+            return fullName;
 
-        if (!match.Success)
-            throw new ArgumentException("Некорректное ФИО");
+        fullName = NamePartRegex().Replace(fullName.Trim(), " ");
 
-        var lastName = match.Groups["lastName"].Value;
-        var firstName = match.Groups["firstName"].Value;
-        var middleName = match.Groups["middleName"].Value;
+        var nameParts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        var formattedLastName = await lastName.FormatPart();
-        var formattedFirstName = await firstName.FormatPart();
-        var formattedMiddleName = string.IsNullOrEmpty(middleName) ? string.Empty : await middleName.FormatPart();
+        for (var i = 0; i < nameParts.Length; i++)
+            nameParts[i] = FormatNamePart(nameParts[i]);
 
-        return $"{formattedLastName} {formattedFirstName} {formattedMiddleName}".Trim();
+        return string.Join(" ", nameParts);
     }
 
-    private static async Task<string> FormatPart(this string part) =>
-        await Task.FromResult(part[..1].ToUpper() + part[1..].ToLower());
-    
-    [GeneratedRegex(@"^(?<lastName>\p{L}+)\s+(?<firstName>\p{L}+)(\s+(?<middleName>\p{L}+))?$")]
-    private static partial Regex FullNameRegex();
+    private static string FormatNamePart(string namePart)
+    {
+        if (string.IsNullOrWhiteSpace(namePart))
+            return namePart;
+
+        var subParts = namePart.Split(['-', '\''], StringSplitOptions.RemoveEmptyEntries);
+
+        for (var i = 0; i < subParts.Length; i++)
+            if (subParts[i].Length > 0)
+                subParts[i] = char.ToUpper(subParts[i][0]) + subParts[i][1..].ToLower();
+
+        return string.Join(namePart.Contains('-') ? "-" : "'", subParts);
+    }
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex NamePartRegex();
 }
