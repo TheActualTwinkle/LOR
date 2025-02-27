@@ -1,6 +1,10 @@
-﻿using DatabaseApp.Application.Group.Command.CreateGroup;
+﻿using DatabaseApp.Application.Class.Command;
+using DatabaseApp.Application.Class.Queries;
+using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
+using DatabaseApp.Application.QueueEntries.Queries;
 using DatabaseApp.Application.User.Command.CreateUser;
-using DatabaseApp.Application.User.Queries.GetUserInfo;
+using DatabaseApp.Application.User.Queries;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;
@@ -18,6 +22,7 @@ public class UserTests
     private const long TestTelegramId = 123456789;
     private const string TestFullName = "John Doe";
     private const string TestGroupName = "ОО-АА";
+    private const string TestClassName = "Math";
     
     [OneTimeSetUp]
     public async Task OneTimeSetup()
@@ -162,5 +167,53 @@ public class UserTests
         
         // Assert
         Assert.That(result.IsFailed, Is.True);
+    }
+    
+    [Test]
+    public async Task GetUsersFromQueue_WhenQueueNotEmpty_ListOfUsers()
+    {
+        // Arrange
+        await _sender.Send(new CreateUserCommand
+        {
+            TelegramId = TestTelegramId,
+            FullName = TestFullName,
+            GroupName = TestGroupName
+        });
+        
+        await _sender.Send(new CreateClassesCommand
+        {
+            Classes = new Dictionary<string, DateOnly> { { TestClassName, DateOnly.FromDateTime(DateTime.Now) } },
+            GroupName = TestGroupName
+        });
+
+        var classResult = await _sender.Send(new GetClassesQuery
+        {
+            GroupName = TestGroupName
+        });
+        
+        await _sender.Send(new CreateQueueEntryCommand
+        {
+            ClassId = classResult.Value.First(c => c.Name == TestClassName).Id,
+            TelegramId = TestTelegramId
+        });
+        
+        // Act
+
+        var queueResult = await _sender.Send(new GetClassQueueQuery
+        {
+            ClassId = classResult.Value.First(c => c.Name == TestClassName).Id
+        });
+        
+        var getUsersFromQueue = await _sender.Send(new GetEnqueuedUsersQuery
+        {
+            Queue = queueResult.Value
+        });
+        
+        // Assert
+        Assert.Multiple(() =>
+        {
+            Assert.That(getUsersFromQueue.IsSuccess, Is.True);
+            Assert.That(getUsersFromQueue.Value, Has.Count.EqualTo(1));
+        });
     }
 }

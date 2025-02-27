@@ -3,7 +3,6 @@ using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
-using TelegramBotApp.AppCommunication.Consumers.Data;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 
@@ -32,11 +31,11 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         return Task.CompletedTask;
     }
 
-    public async Task<Result<UserInfo>> GetUserInfo(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<UserDto>> GetUserInfo(long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { UserId = userId }, cancellationToken: cancellationToken);
+        var reply = await _client!.GetUserInfoAsync(new GetUserInfoRequest { TelegramId = telegramId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth") : Result.Ok(new UserInfo { FullName = reply.FullName, GroupName = reply.GroupName });
+        return reply.IsFailed ? Result.Fail("Вы не авторизованы. Для авторизации введите /auth") : Result.Ok(new UserDto { FullName = reply.FullName, GroupName = reply.GroupName });
     }
 
     public async Task<Result<Dictionary<int, string>>> GetAvailableGroups(CancellationToken cancellationToken = default)
@@ -47,76 +46,90 @@ public class GrpcDatabaseClient(string serviceUrl, ILogger<GrpcDatabaseClient> l
         return Result.Ok(groups);
     }
 
-    public async Task<Result<IEnumerable<Class>>> GetAvailableLabClasses(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<ClassDto>>> GetAvailableLabClasses(long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.GetAvailableClassesAsync(new GetAvailableClassesRequest { UserId = userId }, cancellationToken: cancellationToken);
+        var reply = await _client!.GetAvailableClassesAsync(new GetAvailableClassesRequest { TelegramId = telegramId }, cancellationToken: cancellationToken);
         
         if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
 
-        return Result.Ok(reply.ClassInformation.Select(x => new Class
+        return Result.Ok(reply.ClassInformation.Select(x => new ClassDto
         {
-            Id = x.ClassId,
-            Name = x.ClassName,
+            Id = x.Id,
+            Name = x.Name,
             Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(x.ClassDateUnixTimestamp).DateTime)
         }));
     }
 
-    public async Task<Result<string>> SetGroup(long userId, string groupName, string fullName, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> SetGroup(long telegramId, string groupName, string fullName, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.SetGroupAsync(new SetGroupRequest { UserId = userId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
+        var reply = await _client!.SetGroupAsync(new SetGroupRequest { TelegramId = telegramId, GroupName = groupName, FullName = fullName}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok($"{reply.FullName}: группа {reply.GroupName} успешно установлена!");
     }
 
-    public async Task<Result<EnqueueInClassResult>> EnqueueInClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<EnqueueInClassDto>> EnqueueInClass(int classId, long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        var reply = await _client!.EnqueueInClassAsync(new EnqueueInClassRequest { TelegramId = telegramId, ClassId = classId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassResult
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new EnqueueInClassDto
         {
-            WasAlreadyEnqueued = reply.WasAlreadyEnqueued,
+            Name = reply.Class.Name,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(reply.Class.ClassDateUnixTimestamp).DateTime),
             StudentsQueue = reply.StudentsQueue,
-            ClassName = reply.ClassName,
-            ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
+            WasAlreadyEnqueued = reply.WasAlreadyEnqueued
         });
     }
     
-    public async Task<Result<DequeueFromClassResult>> DequeueFromClass(int cassId, long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<DequeueFromClassDto>> DequeueFromClass(int classId, long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { UserId = userId, ClassId = cassId }, cancellationToken: cancellationToken);
+        var reply = await _client!.DequeueFromClassAsync(new DequeueFromClassRequest { TelegramId = telegramId, ClassId = classId }, cancellationToken: cancellationToken);
         
-        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassResult
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new DequeueFromClassDto
         {
-            WasAlreadyDequeued = reply.WasAlreadyDequeuedFromClass,
+            Name = reply.Class.Name,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(reply.Class.ClassDateUnixTimestamp).DateTime),
             StudentsQueue = reply.StudentsQueue,
-            ClassName = reply.ClassName,
-            ClassesDateTime = DateTimeOffset.FromUnixTimeSeconds(reply.ClassDateUnixTimestamp).DateTime
+            WasAlreadyDequeuedFromClass = reply.WasAlreadyDequeuedFromClass
         });
     }
 
-    public async Task<Result> AddSubscriber(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result<ViewClassQueueDto>> ViewClassQueue(int classId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.AddSubscriberAsync(new AddSubscriberRequest { SubscriberId = userId }, cancellationToken: cancellationToken);
+        var reply = await _client!.ViewQueueClassAsync(new ViewQueueClassRequest{ ClassId = classId }, cancellationToken: cancellationToken);
+        
+        return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok(new ViewClassQueueDto
+        {
+            Name = reply.Class.Name,
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeSeconds(reply.Class.ClassDateUnixTimestamp).DateTime),
+            StudentsQueue = reply.StudentsQueue
+        });
+    }
+
+    public async Task<Result> AddSubscriber(long telegramId, CancellationToken cancellationToken = default)
+    {
+        var reply = await _client!.AddSubscriberAsync(new AddSubscriberRequest { TelegramId = telegramId }, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
     }
 
-    public async Task<Result> DeleteSubscriber(long userId, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteSubscriber(long telegramId, CancellationToken cancellationToken = default)
     {
-        var reply = await _client!.DeleteSubscriberAsync(new DeleteSubscriberRequest { SubscriberId = userId}, cancellationToken: cancellationToken);
+        var reply = await _client!.DeleteSubscriberAsync(new DeleteSubscriberRequest { TelegramId = telegramId}, cancellationToken: cancellationToken);
         
         return reply.IsFailed ? Result.Fail(reply.ErrorMessage) : Result.Ok();
     }
 
-    public async Task<Result<IEnumerable<SubscriberInfo>>> GetSubscribers(CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<SubscriberDto>>> GetSubscribers(CancellationToken cancellationToken = default)
     {
         var reply = await _client!.GetSubscribersAsync(new Empty(), cancellationToken: cancellationToken);
 
-        if (reply.IsFailed) return Result.Fail(reply.ErrorMessage);
+        if (reply.IsFailed) 
+            return Result.Fail(reply.ErrorMessage);
 
-        List<SubscriberInfo> subscribers = [];
+        List<SubscriberDto> subscribers = [];
+        
         foreach (var subscriber in reply.Subscribers.ToList())
-            subscribers.Add(new SubscriberInfo { TelegramId = subscriber.UserId, GroupId = subscriber.GroupId });
+            subscribers.Add(new SubscriberDto { TelegramId = subscriber.TelegramId, GroupName = subscriber.GroupName });
 
         return subscribers;
     }

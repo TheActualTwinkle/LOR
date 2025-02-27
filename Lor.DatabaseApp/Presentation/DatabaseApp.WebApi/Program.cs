@@ -22,12 +22,14 @@ public class Program
         builder.Host.UseSerilog((context, configuration) => configuration
             .ReadFrom.Configuration(context.Configuration));
         
+        // Order of services registration is important!!!
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
         builder.Services.AddApplication();
         builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddBus(builder.Configuration);
+        builder.Services.AddJobSchedule(builder.Configuration);
 
         var app = builder.Build();
         
@@ -49,7 +51,8 @@ public class Program
         if (app.Environment.IsDevelopment())
             app.MapGrpcReflectionService();
 
-        app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+        app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. " +
+                              "To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
         await app.RunAsync();
     }

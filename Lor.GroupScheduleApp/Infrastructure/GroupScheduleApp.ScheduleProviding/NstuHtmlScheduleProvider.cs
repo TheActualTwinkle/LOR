@@ -6,7 +6,7 @@ using HtmlAgilityPack;
 
 namespace GroupScheduleApp.ScheduleProviding;
 
-public partial class NstuHtmlScheduleProvider(IEnumerable<string> urls) : IScheduleProvider
+public partial class NstuHtmlScheduleProvider(IEnumerable<string> urls, TimeSpan scheduleFetchDateOffset) : IScheduleProvider
 {
     private static class Constants
     {
@@ -19,9 +19,6 @@ public partial class NstuHtmlScheduleProvider(IEnumerable<string> urls) : ISched
     }
 
     private readonly HttpClient _httpClient = new();
-    
-    // TODO: DI
-    private TimeSpan ScheduleFetchDateOffset => TimeSpan.FromDays(7);
 
     public async Task<IEnumerable<string>> GetAvailableGroupsAsync()
     {
@@ -76,7 +73,7 @@ public partial class NstuHtmlScheduleProvider(IEnumerable<string> urls) : ISched
             classesData.AddRange(ParseForWeek(htmlDocument));
 
             classesData = classesData
-                .Where(d => d.Date >= Today() && d.Date < Today() + ScheduleFetchDateOffset)
+                .Where(d => d.Date >= Today() && d.Date < Today() + scheduleFetchDateOffset)
                 .ToList();
 
             groupClassesData.Add(new GroupClassesData(groupName, classesData));

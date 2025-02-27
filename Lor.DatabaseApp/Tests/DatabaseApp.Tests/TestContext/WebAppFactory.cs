@@ -2,6 +2,8 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -16,13 +18,37 @@ namespace DatabaseApp.Tests.TestContext;
 public class WebAppFactory : WebApplicationFactory<Program>
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:latest")
+        .WithImage("postgres:16")
         .WithDatabase("lor")
         .WithUsername("postgres")
-        .WithPassword("pass").Build();
+        .WithPassword("123456789")
+        .Build();
     
     private Respawner _respawner = null!;
     private DbConnection _connection = null!;
+
+    public async Task InitializeAsync()
+    {
+        await _dbContainer.StartAsync();
+        
+        _connection = Services.CreateScope()
+            .ServiceProvider.GetRequiredService<IDatabaseContext>()
+            .Db.GetDbConnection();
+        
+        await _connection.OpenAsync();
+        
+        _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+        {
+            DbAdapter = DbAdapter.Postgres,
+            SchemasToInclude = ["public", "hangfire"]
+        });
+    }
+
+    public async Task ResetDatabaseAsync() =>
+        await _respawner.ResetAsync(_connection);
+
+    public new async Task DisposeAsync() =>
+        await _dbContainer.DisposeAsync().AsTask();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -34,49 +60,46 @@ public class WebAppFactory : WebApplicationFactory<Program>
             if (dbContextDescriptor != null)
                 services.Remove(dbContextDescriptor);
 
-            services.AddDbContext<IDatabaseContext, ApplicationDbContext>(options =>
-                options.UseNpgsql(_dbContainer.GetConnectionString()));
+            var connectionString = _dbContainer.GetConnectionString();
             
-            // Find ICacheService and Moq it. Every GetAsync should return null.
-            var cacheServiceDescriptor = services.FirstOrDefault(d =>
-                d.ServiceType == typeof(ICacheService));
-
-            if (cacheServiceDescriptor != null)
-                services.Remove(cacheServiceDescriptor);
-
-            services.AddScoped<ICacheService>(_ =>
-            {
-                Mock<ICacheService> mockCache = new();
-
-                // TODO: Shouldn`t be string for <T?>, but Moq is bad with generics on return value.
-                mockCache
-                    .Setup(m => m.GetAsync<string>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync((string _, CancellationToken _) => null);
-
-                mockCache
-                    .Setup(m => m.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
-                    .Returns(Task.CompletedTask);
-
-                return mockCache.Object;
-            });
+            services.AddDbContext<IDatabaseContext, ApplicationDbContext>(options =>
+                options.UseNpgsql(connectionString));
+            
+            services.AddHangfire(c =>
+                c.UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(connectionString))
+                    .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
+            
+            MockCache(services);
         });
     }
 
-    public async Task ResetDatabaseAsync() => await _respawner.ResetAsync(_connection);
+    #region Mocks
 
-    public async Task InitializeAsync()
+    private static void MockCache(IServiceCollection services)
     {
-        await _dbContainer.StartAsync();
-        _connection = Services.CreateScope().ServiceProvider.GetRequiredService<IDatabaseContext>()
-            .Db.GetDbConnection();
-        await _connection.OpenAsync();
-        _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+        var cacheServiceDescriptor = services.FirstOrDefault(d =>
+            d.ServiceType == typeof(ICacheService));
+
+        if (cacheServiceDescriptor != null)
+            services.Remove(cacheServiceDescriptor);
+
+        services.AddScoped<ICacheService>(_ =>
         {
-            DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public"]
+            Mock<ICacheService> mock = new();
+
+            mock
+                .Setup(m => m.GetAsync<string>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((string _, CancellationToken _) => null);
+
+            mock
+                .Setup(m => m.SetAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            return mock.Object;
         });
     }
-
-    public new async Task DisposeAsync() =>
-        await _dbContainer.DisposeAsync().AsTask();
+    
+    #endregion
 }

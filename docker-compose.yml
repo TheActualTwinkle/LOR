@@ -27,6 +27,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings:DefaultConnection=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - ConnectionStrings:Redis=redis:6379
+      - ConnectionStrings:HangfireDb=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - RabbitMqSettings:Host=${RABBITMQ_HOST}
       - RabbitMqSettings:Username=${RABBITMQ_USER}
       - RabbitMqSettings:Password=${RABBITMQ_PASSWORD}

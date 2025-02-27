@@ -12,7 +12,7 @@ namespace DatabaseApp.Tests.TestContext;
 public class DatabaseAppFactory
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:latest")
+        .WithImage("postgres:16")
         .WithPortBinding(5432)
         .WithDatabase("lor")
         .WithUsername("postgres")
@@ -53,12 +53,13 @@ public class DatabaseAppFactory
         Console.WriteLine("Database started. Initializing respawner...");
 
         _connection = new NpgsqlConnection(_dbContainer.GetConnectionString());
+        
         await _connection.OpenAsync();
         
         _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public"]
+            SchemasToInclude = ["public"] // TODO: https://github.com/TheActualTwinkle/LOR/issues/59
         });
     }
 
@@ -73,5 +74,6 @@ public class DatabaseAppFactory
             _redisContainer.DisposeAsync().AsTask());
     }
 
-    public async Task ResetDatabaseAsync() => await _respawner.ResetAsync(_connection);
+    public async Task ResetDatabaseAsync() => 
+        await _respawner.ResetAsync(_connection);
 }

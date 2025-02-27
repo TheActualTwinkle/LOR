@@ -12,11 +12,10 @@ public class GroupScheduleAppFactory
     public async Task StartAsync()
     {
         DatabaseUpdaterCommunicationClient = new GrpcDatabaseUpdaterClient("http://localhost:31401", Substitute.For<ILogger<GrpcDatabaseUpdaterClient>>());
+        
         await DatabaseUpdaterCommunicationClient.StartAsync();
     }
     
-    public async Task StopAsync()
-    {
+    public async Task StopAsync() =>
         await DatabaseUpdaterCommunicationClient.StopAsync();
-    }
 }

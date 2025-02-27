@@ -1,31 +1,34 @@
-﻿using DatabaseApp.Application.Class;
-using DatabaseApp.Application.Class.Queries.GetClass;
-using DatabaseApp.Application.Class.Queries.GetClasses;
+﻿using DatabaseApp.AppCommunication.Extensions;
+using DatabaseApp.Application.Class;
+using DatabaseApp.Application.Class.Queries;
 using DatabaseApp.Application.Common.ExtensionsMethods;
-using DatabaseApp.Application.Group.Queries.GetGroups;
-using DatabaseApp.Application.Queue.Commands.CreateQueue;
-using DatabaseApp.Application.Queue.Commands.DeleteQueue;
-using DatabaseApp.Application.Queue.Queries.GetQueue;
-using DatabaseApp.Application.Queue.Queries.IsUserInQueue;
+using DatabaseApp.Application.Group.Queries;
+using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
+using DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
+using DatabaseApp.Application.QueueEntries.Queries;
 using DatabaseApp.Application.Subscriber;
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
-using DatabaseApp.Application.Subscriber.Queries.GetSubscribers;
+using DatabaseApp.Application.Subscriber.Queries;
 using DatabaseApp.Application.User.Command.CreateUser;
-using DatabaseApp.Application.User.Queries.GetUserInfo;
+using DatabaseApp.Application.User.Queries;
+using DatabaseApp.Domain.Repositories;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MediatR;
 
 namespace DatabaseApp.AppCommunication.Grpc;
 
-public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
+public class GrpcDatabaseService(
+    ISender mediator,
+    IUnitOfWork unitOfWork) 
+    : Database.DatabaseBase
 {
     public override async Task<GetUserInfoReply> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
     {
         var userDto = await mediator.Send(new GetUserInfoQuery
         {
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (userDto.IsFailed)
@@ -54,7 +57,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var userDto = await mediator.Send(new GetUserInfoQuery
         {
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (userDto.IsFailed)
@@ -63,7 +66,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var classes = await mediator.Send(new GetClassesQuery
         {
-            GroupId = userDto.Value.GroupId
+            GroupName = userDto.Value.GroupName
         }, context.CancellationToken);
 
         if (classes.IsFailed)
@@ -72,9 +75,9 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var classInformation = await classes.Value.ToRepeatedField<ClassInformation, ClassDto>(dto => new ClassInformation
         {
-            ClassId = dto.Id,
-            ClassName = dto.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)dto.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds()
+            Id = dto.Id,
+            Name = dto.Name,
+            ClassDateUnixTimestamp = dto.Date.ToUnixTime()
         });
         
         return new GetAvailableClassesReply { ClassInformation = { classInformation }};
@@ -84,7 +87,7 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
     {
         var result = await mediator.Send(new CreateUserCommand
         {
-            TelegramId = request.UserId,
+            TelegramId = request.TelegramId,
             FullName = request.FullName,
             GroupName = request.GroupName
         }, context.CancellationToken);
@@ -95,57 +98,63 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var userDto = await mediator.Send(new GetUserInfoQuery
         {
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
 
         if (userDto.IsFailed)
             return new SetGroupReply
                 { IsFailed = true, ErrorMessage = userDto.Errors.First().Message };
 
-        return new SetGroupReply { FullName = await request.FullName.Format(), GroupName = userDto.Value.GroupName };
+        return new SetGroupReply { FullName = FullNameFormatter.Format(request.FullName), GroupName = userDto.Value.GroupName };
     }
 
     public override async Task<EnqueueInClassReply> EnqueueInClass(EnqueueInClassRequest request,
         ServerCallContext context)
     {
-        var getClassResult = await mediator.Send(new GetClassQuery
-        {
-            ClassId = request.ClassId
-        }, context.CancellationToken);
-        
         var userInQueue = await mediator.Send(new GetUserInQueueQuery
         {
             ClassId = request.ClassId,
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         });
         
         if (userInQueue.IsFailed)
             return new EnqueueInClassReply
                 { IsFailed = true, ErrorMessage = userInQueue.Errors.First().Message };
         
-        var queueDto = await mediator.Send(new GetClassQueueQuery
+        var queue = await mediator.Send(new GetClassQueueQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
         
-        if (queueDto.IsFailed)
+        if (queue.IsFailed)
             return new EnqueueInClassReply
-                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
+                { IsFailed = true, ErrorMessage = queue.Errors.First().Message };
 
+        var @class = await unitOfWork.ClassRepository
+            .GetClassById(request.ClassId, context.CancellationToken);
+        
+        if (@class is null)
+            return new EnqueueInClassReply
+                { IsFailed = true, ErrorMessage = "Данной пары не существует" };
+        
         // If user already in queue
         if (userInQueue.Value is not null)
             return new EnqueueInClassReply
             {
-                WasAlreadyEnqueued = true,
-                ClassName = getClassResult.Value.Name,
-                ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-                StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+                Class = new ClassInformation
+                {
+                    Id = request.ClassId,
+                    Name = @class.Name,
+                    ClassDateUnixTimestamp = @class.Date.ToUnixTime() 
+                },
+                StudentsQueue = { queue.Value.Select(x => x.FullName) },
+                WasAlreadyEnqueued = true
             };
 
         // If we have to ACTUALLY enqueue user
-        var result = await mediator.Send(new CreateQueueCommand
+        var result = await mediator.Send(new CreateQueueEntryCommand
         {
-            TelegramId = request.UserId,
+            TelegramId = request.TelegramId,
             ClassId = request.ClassId
         }, context.CancellationToken);
         
@@ -153,116 +162,128 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
             return new EnqueueInClassReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
         
-        queueDto = await mediator.Send(new GetClassQueueQuery
+        queue = await mediator.Send(new GetClassQueueQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
         
-        if (queueDto.IsFailed)
+        if (queue.IsFailed)
             return new EnqueueInClassReply
                 { IsFailed = true, ErrorMessage = result.Errors.First().Message };
-
+        
         return new EnqueueInClassReply
         {
-            ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+            Class = new ClassInformation
+            {
+                Id = request.ClassId,
+                Name = @class!.Name,
+                ClassDateUnixTimestamp = @class.Date.ToUnixTime() 
+            },
+            StudentsQueue = { queue.Value.Select(x => x.FullName) }
         };
     }
     
     public override async Task<DequeueFromClassReply> DequeueFromClass(DequeueFromClassRequest request, ServerCallContext context)
     {
-        var getClassResult = await mediator.Send(new GetClassQuery
-        {
-            ClassId = request.ClassId
-        }, context.CancellationToken);
-
-        if (getClassResult.IsFailed)
-            return new DequeueFromClassReply
-                { IsFailed = true, ErrorMessage = getClassResult.Errors.First().Message };
-        
-        var queueDto = await mediator.Send(new GetClassQueueQuery
-        {
-            ClassId = request.ClassId
-        }, context.CancellationToken);
-
-        if (queueDto.IsFailed)
-            return new DequeueFromClassReply 
-                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
-        
         var userInQueue = await mediator.Send(new GetUserInQueueQuery
         {
             ClassId = request.ClassId,
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         });
         
         if (userInQueue.IsFailed)
             return new DequeueFromClassReply
                 { IsFailed = true, ErrorMessage = userInQueue.Errors.First().Message };
 
+        var queue = await mediator.Send(new GetClassQueueQuery
+        {
+            ClassId = request.ClassId
+        }, context.CancellationToken);
+
+        if (queue.IsFailed)
+            return new DequeueFromClassReply 
+                { IsFailed = true, ErrorMessage = queue.Errors.First().Message };
+        
+        var @class = await unitOfWork.ClassRepository
+            .GetClassById(request.ClassId, context.CancellationToken);
+        
+        if (@class is null)
+            return new DequeueFromClassReply
+                { IsFailed = true, ErrorMessage = "Данной пары не существует" };
+        
         // If user is not in queue
         if (userInQueue.Value is null)
             return new DequeueFromClassReply
             {
+                Class = new ClassInformation
+                {
+                    Id = request.ClassId,
+                    Name = @class.Name,
+                    ClassDateUnixTimestamp = @class.Date.ToUnixTime() 
+                },
                 WasAlreadyDequeuedFromClass = true,
-                ClassName = getClassResult.Value.Name,
-                ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-                StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+                StudentsQueue = { queue.Value.Select(x => x.FullName) }
             };
 
         // If we have to ACTUALLY DequeueFromClass user
         var result = await mediator.Send(new DeleteUserFromQueueCommand
         {
             ClassId = request.ClassId,
-            TelegramId = request.UserId
+            TelegramId = request.TelegramId
         }, context.CancellationToken);
             
         if (result.IsFailed) return new DequeueFromClassReply
             { IsFailed = true, ErrorMessage = result.Errors.First().Message };
             
-        queueDto = await mediator.Send(new GetClassQueueQuery
+        queue = await mediator.Send(new GetClassQueueQuery
         {
             ClassId = request.ClassId
         }, context.CancellationToken);
 
-        if (queueDto.IsFailed)
+        if (queue.IsFailed)
             return new DequeueFromClassReply 
-                { IsFailed = true, ErrorMessage = queueDto.Errors.First().Message };
+                { IsFailed = true, ErrorMessage = queue.Errors.First().Message };
 
         return new DequeueFromClassReply
         {
-            ClassName = getClassResult.Value.Name,
-            ClassDateUnixTimestamp = ((DateTimeOffset)getClassResult.Value.Date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)).ToUnixTimeSeconds(),
-            StudentsQueue = { queueDto.Value.Select(x => x.FullName) }
+            Class = new ClassInformation
+            {
+                Id = request.ClassId,
+                Name = @class.Name,
+                ClassDateUnixTimestamp = @class.Date.ToUnixTime() 
+            },
+            StudentsQueue = { queue.Value.Select(x => x.FullName) }
         };
     }
-
-    public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
-    {
-        var result = await mediator.Send(new CreateSubscriberCommand
-        {
-            TelegramId = request.SubscriberId
-        }, context.CancellationToken);
-
-        if (result.IsFailed)
-            return new AddSubscriberReply
-                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
-        
-        return new AddSubscriberReply();
-    }
     
-    public override async Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
+    public override async Task<ViewQueueClassReply> ViewQueueClass(ViewQueueClassRequest request, ServerCallContext context)
     {
-        var result = await mediator.Send(new DeleteSubscriberCommand
+        var queue = await mediator.Send(new GetClassQueueQuery
         {
-            TelegramId = request.SubscriberId
+            ClassId = request.ClassId
         }, context.CancellationToken);
 
-        if (result.IsFailed)
-            return new DeleteSubscriberReply
-                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        if (queue.IsFailed)
+            return new ViewQueueClassReply 
+                { IsFailed = true, ErrorMessage = queue.Errors.First().Message };
+
+        var @class = await unitOfWork.ClassRepository
+            .GetClassById(request.ClassId, context.CancellationToken);
         
-        return new DeleteSubscriberReply();
+        if (@class is null)
+            return new ViewQueueClassReply
+                { IsFailed = true, ErrorMessage = "Данной пары не существует" };
+        
+        return new ViewQueueClassReply
+        {
+            Class = new ClassInformation
+            {
+                Id = request.ClassId,
+                Name = @class.Name,
+                ClassDateUnixTimestamp = @class.Date.ToUnixTime() 
+            },
+            StudentsQueue = { queue.Value.Select(x => x.FullName) }
+        };
     }
 
     public override async Task<GetSubscribersReply> GetSubscribers(Empty request, ServerCallContext context)
@@ -275,10 +296,38 @@ public class GrpcDatabaseService(ISender mediator) : Database.DatabaseBase
 
         var repeatedField = await subscriberDto.Value.ToRepeatedField<SubscriberInformation, SubscriberDto>(dto => new SubscriberInformation
         {
-            UserId = dto.TelegramId,
-            GroupId = dto.GroupId
+            TelegramId = dto.TelegramId,
+            GroupName = dto.GroupName
         });
         
         return new GetSubscribersReply { Subscribers = { repeatedField } };
+    }
+
+    public override async Task<AddSubscriberReply> AddSubscriber(AddSubscriberRequest request, ServerCallContext context)
+    {
+        var result = await mediator.Send(new CreateSubscriberCommand
+        {
+            TelegramId = request.TelegramId
+        }, context.CancellationToken);
+
+        if (result.IsFailed)
+            return new AddSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        return new AddSubscriberReply();
+    }
+
+    public override async Task<DeleteSubscriberReply> DeleteSubscriber(DeleteSubscriberRequest request, ServerCallContext context)
+    {
+        var result = await mediator.Send(new DeleteSubscriberCommand
+        {
+            TelegramId = request.TelegramId
+        }, context.CancellationToken);
+
+        if (result.IsFailed)
+            return new DeleteSubscriberReply
+                { IsFailed = true, ErrorMessage = result.Errors.First().Message };
+        
+        return new DeleteSubscriberReply();
     }
 }

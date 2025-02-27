@@ -20,7 +20,9 @@ public class TelegramBot(
     ILogger<TelegramBot> logger) : ITelegramBot
 {
     private readonly ITelegramBotSettings _settings = TelegramBotSettings.CreateDefault();
+    
     private TelegramCommandFactory _telegramCommandFactory = null!;
+    
     private TelegramCommandQueryFactory _telegramCommandQueryFactory = null!;
 
     public void StartReceiving(CancellationToken cancellationToken)

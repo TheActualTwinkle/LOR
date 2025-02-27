@@ -8,21 +8,29 @@ namespace GroupScheduleApp.ScheduleUpdating;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddSenderService(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJobScheduler(this IServiceCollection services, IConfiguration configuration)
     {
         var hangfireConnectionString = configuration.GetConnectionString("HangfireDb");
 
-        services.AddHangfire(c =>
-            c.UseSimpleAssemblyNameTypeSerializer()
+        services.AddHangfire(c => 
+            c.UseDynamicJobs()
+                .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
                 .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
 
-        services.AddHangfireServer(o => o.SchedulePollingInterval = TimeSpan.FromSeconds(10));
+        services.AddHangfireServer(o =>
+        {
+            o.Queues = ["gsa_queue"];
+            o.SchedulePollingInterval = TimeSpan.FromSeconds(10);
+        });
 
         var intervalString = configuration.GetRequiredSection("ScheduleSendServiceSettings:PollingIntervalCronUtc").Value!;
 
-        services.AddSingleton(_ => new ScheduleSendServiceSettings(intervalString));
+        services.AddSingleton(_ => new ScheduleSendServiceSettings
+        {
+            CronExpression = intervalString
+        });
 
         services.AddSingleton<IScheduleSendService, ScheduleSendService>();
 
