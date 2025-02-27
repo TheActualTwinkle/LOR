@@ -22,7 +22,11 @@ public class ClassReminderService(
         IEnumerable<ClassDto> classesDto,
         CancellationToken cancellationToken = default)
     {
-        foreach (var classDto in classesDto)
+        var notExpiredClasses = classesDto
+            .Where(x => x.Date.ToDateTime(TimeOnly.MinValue) > DateTime.Now)
+            .ToList();
+        
+        foreach (var classDto in notExpiredClasses)
             backgroundJobClient.Schedule(
                 "dba_queue",
                 () => PublishClassesReminderMessage(classDto, cancellationToken),
