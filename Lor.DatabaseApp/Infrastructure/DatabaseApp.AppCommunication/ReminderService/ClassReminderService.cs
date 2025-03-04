@@ -1,4 +1,6 @@
-﻿using DatabaseApp.AppCommunication.Messages;
+﻿using System.Globalization;
+using DatabaseApp.AppCommunication.Common;
+using DatabaseApp.AppCommunication.Messages;
 using DatabaseApp.AppCommunication.ReminderService.Interfaces;
 using DatabaseApp.AppCommunication.ReminderService.Settings;
 using DatabaseApp.Application.Class;
@@ -22,15 +24,31 @@ public class ClassReminderService(
         IEnumerable<ClassDto> classesDto,
         CancellationToken cancellationToken = default)
     {
-        var notExpiredClasses = classesDto
-            .Where(x => x.Date.ToDateTime(TimeOnly.MinValue) > DateTime.Now)
-            .ToList();
+        var classesDtoList = classesDto.ToList();
         
+        var expiredClasses = GetExpiredClasses(classesDtoList);
+
+        foreach (var @class in expiredClasses)
+            logger.LogWarning("Skipping expired class (classId: {classId}, cassName: {classname})",
+                @class.Id, @class.Name);
+
+        var notExpiredClasses = classesDtoList.Except(expiredClasses);
+
         foreach (var classDto in notExpiredClasses)
-            backgroundJobClient.Schedule(
+        {
+            var jobId = backgroundJobClient.Schedule(
                 "dba_queue",
                 () => PublishClassesReminderMessage(classDto, cancellationToken),
                 classDto.Date.ToDateTime(TimeOnly.MinValue).ToUniversalTime() - settings.AdvanceNoticeTime);
+
+            var executionTimeResult = ExecutionTimeProvider.GetNextExecutionTime(jobId);
+            
+            if (executionTimeResult.IsSuccess)
+                logger.LogInformation("Class (classId: {classId}) reminder job scheduled on: {time} UTC",
+                    classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));            
+            else
+                logger.LogError("Class (classId: {classId}) reminder job NOT scheduled! Error: {error}", 
+                    classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));        }
         
         return Task.CompletedTask;
     }
@@ -74,4 +92,10 @@ public class ClassReminderService(
         
         logger.LogInformation("Classes reminder message was published");
     }
+    
+    
+    private List<ClassDto> GetExpiredClasses(IEnumerable<ClassDto> classesDto) =>
+        classesDto
+            .Where(x => x.Date.ToDateTime(TimeOnly.MinValue) < DateTime.Now)
+            .ToList();
 }
