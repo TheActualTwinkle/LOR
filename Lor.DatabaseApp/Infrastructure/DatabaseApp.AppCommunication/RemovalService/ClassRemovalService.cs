@@ -24,10 +24,16 @@ public class ClassRemovalService(
     {
         foreach (var classDto in classesDto)
         {
+            var classDate = classDto.Date.ToDateTime(TimeOnly.MinValue);
+            
+            var enqueueAt = new DateTimeOffset(
+                classDate + settings.RemovalAdvanceTime, 
+                TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow));
+
             var jobId = backgroundJobClient.Schedule(
                 "dba_queue",
                 () => DeleteOutdatedClass(classDto, cancellationToken),
-                classDto.Date.ToDateTime(TimeOnly.MinValue) + settings.RemovalAdvanceTime);
+                enqueueAt);
 
             var executionTimeResult = ExecutionTimeProvider.GetNextExecutionTime(jobId);
             

@@ -29,17 +29,23 @@ public class ClassReminderService(
         var expiredClasses = GetExpiredClasses(classesDtoList);
 
         foreach (var @class in expiredClasses)
-            logger.LogWarning("Skipping expired class (classId: {classId}, cassName: {classname})",
+            logger.LogWarning("Skipping notify expired class (classId: {classId}, cassName: {classname})",
                 @class.Id, @class.Name);
 
         var notExpiredClasses = classesDtoList.Except(expiredClasses);
 
         foreach (var classDto in notExpiredClasses)
         {
+            var classDate = classDto.Date.ToDateTime(TimeOnly.MinValue);
+            
+            var enqueueAt = new DateTimeOffset(
+                classDate - settings.AdvanceNoticeTime, 
+                TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow));
+            
             var jobId = backgroundJobClient.Schedule(
                 "dba_queue",
                 () => PublishClassesReminderMessage(classDto, cancellationToken),
-                classDto.Date.ToDateTime(TimeOnly.MinValue).ToUniversalTime() - settings.AdvanceNoticeTime);
+                enqueueAt);
 
             var executionTimeResult = ExecutionTimeProvider.GetNextExecutionTime(jobId);
             
