@@ -1,4 +1,6 @@
-﻿using DatabaseApp.AppCommunication.RemovalService.Interfaces;
+﻿using System.Globalization;
+using DatabaseApp.AppCommunication.Common;
+using DatabaseApp.AppCommunication.RemovalService.Interfaces;
 using DatabaseApp.AppCommunication.RemovalService.Settings;
 using DatabaseApp.Application.Class;
 using DatabaseApp.Application.Class.Command.DeleteClasses;
@@ -21,10 +23,21 @@ public class ClassRemovalService(
         CancellationToken cancellationToken = default)
     {
         foreach (var classDto in classesDto)
-            backgroundJobClient.Schedule(
+        {
+            var jobId = backgroundJobClient.Schedule(
                 "dba_queue",
                 () => DeleteOutdatedClass(classDto, cancellationToken),
                 classDto.Date.ToDateTime(TimeOnly.MinValue) + settings.RemovalAdvanceTime);
+
+            var executionTimeResult = ExecutionTimeProvider.GetNextExecutionTime(jobId);
+            
+            if (executionTimeResult.IsSuccess)
+                logger.LogInformation("Class (classId: {classId}) removal job scheduled on: {time} UTC", 
+                    classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+            else
+                logger.LogError("Class (classId: {classId}) removal job NOT scheduled! Error: {error}", 
+                    classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+        }
 
         return Task.CompletedTask;
     }
