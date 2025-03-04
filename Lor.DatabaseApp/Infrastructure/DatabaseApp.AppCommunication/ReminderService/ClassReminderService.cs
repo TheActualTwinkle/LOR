@@ -48,7 +48,8 @@ public class ClassReminderService(
                     classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));            
             else
                 logger.LogError("Class (classId: {classId}) reminder job NOT scheduled! Error: {error}", 
-                    classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));        }
+                    classDto.Id, executionTimeResult.Value.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+        }
         
         return Task.CompletedTask;
     }
