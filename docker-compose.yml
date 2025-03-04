@@ -23,6 +23,7 @@ services:
     ports:
       - "31401:31401"
     environment:
+      - TZ=Asia/Novosibirsk
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings:DefaultConnection=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
@@ -44,6 +45,7 @@ services:
       context: .
       dockerfile: Lor.TelegramBotApp/Presentation/TelegramBotApp.Api/Dockerfile
     environment:
+      - TZ=Asia/Novosibirsk
       - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
       - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
       - RabbitMqSettings:Host=${RABBITMQ_HOST}
@@ -58,6 +60,7 @@ services:
       context: .
       dockerfile: Lor.GroupScheduleApp/Presentation/GroupScheduleApp.Api/Dockerfile
     environment:
+      - TZ=Asia/Novosibirsk
       - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
       - ConnectionStrings:HangfireDb=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
