@@ -88,7 +88,7 @@ public class TelegramBot(
             }
             catch (Exception e)
             {
-                await SendErrorMessage(chatId, new Exception($"Внутрення ошибка. {e}"), cancellationToken: cts.Token);
+                await SendErrorMessage(chatId, new Exception($"Внутренняя ошибка. {e}"), cancellationToken: cts.Token);
             }
         }, cancellationToken);
         
