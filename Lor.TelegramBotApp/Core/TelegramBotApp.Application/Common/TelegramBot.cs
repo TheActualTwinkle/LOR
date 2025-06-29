@@ -33,7 +33,11 @@ public class TelegramBot(
         telegramBot.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleError), receiverOptions, cancellationToken);
     }
 
-    public async Task SendMessageAsync(long telegramId, string message, IReplyMarkup? replyMarkup, CancellationToken cancellationToken = default)
+    public async Task SendMessageAsync(
+        long telegramId,
+        string message,
+        IReplyMarkup? replyMarkup = null,
+        CancellationToken cancellationToken = default)
     {
         replyMarkup ??= TelegramCommandFactory.GetCommandButtonsReplyMarkup(); 
             
@@ -80,22 +84,24 @@ public class TelegramBot(
             }
             catch (TaskCanceledException)
             {
-                await SendErrorMessage(chatId, new Exception("Время запроса истекло"), new ReplyKeyboardRemove(), cts.Token);
+                await SendErrorMessage(chatId, new Exception("Время запроса истекло"), cancellationToken: cts.Token);
             }
             catch (Exception e)
             {
-                await SendErrorMessage(chatId, new Exception($"Внутрення ошибка. {e}"), new ReplyKeyboardRemove(), cts.Token);
+                await SendErrorMessage(chatId, new Exception($"Внутрення ошибка. {e}"), cancellationToken: cts.Token);
             }
         }, cancellationToken);
         
         return Task.CompletedTask;
     }
 
-    private async Task SendErrorMessage(long chatIdInner, Exception exception, IReplyMarkup? replyMarkup, CancellationToken cancellationToken)
-    {
+    private async Task SendErrorMessage(
+        long chatIdInner,
+        Exception exception,
+        IReplyMarkup? replyMarkup = null,
+        CancellationToken cancellationToken = default) =>
         await SendMessageAsync(chatIdInner, exception.Message, replyMarkup, cancellationToken);
-    }
-    
+
     private Task HandleError(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
     {
         var errorMessage = exception switch

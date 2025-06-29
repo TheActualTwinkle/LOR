@@ -1,6 +1,5 @@
 ﻿using DatabaseApp.AppCommunication.Messages;
 using MassTransit;
-using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.Domain.Interfaces;
 
@@ -16,12 +15,13 @@ public class UpcomingClassesConsumer(ITelegramBot bot, ConsumerSettings settings
         foreach (var user in context.Message.Users)
         {
             var message = $"Вы в очереди на : {classesString}\nНе забудьте!";
-            
+
+            var cancellationTokenSource = new CancellationTokenSource(settings.DefaultCancellationTimeout);
+
             await bot.SendMessageAsync(
                 user.TelegramId,
                 message,
-                new ReplyKeyboardRemove(), 
-                new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
+                cancellationToken: cancellationTokenSource.Token);
         }
     }
 }

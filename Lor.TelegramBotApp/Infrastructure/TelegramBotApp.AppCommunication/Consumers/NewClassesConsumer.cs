@@ -1,7 +1,6 @@
 ﻿using DatabaseApp.AppCommunication.Messages;
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Domain.Interfaces;
@@ -34,11 +33,12 @@ public class NewClassesConsumer(
         {
             var message = $"Доступны новые лабораторные работы! Используйте /hop для записи:\n{classesString}";
 
+            var cancellationTokenSource = new CancellationTokenSource(settings.DefaultCancellationTimeout);
+
             await bot.SendMessageAsync(
                 subscriber.TelegramId,
                 message,
-                new ReplyKeyboardRemove(),
-                new CancellationTokenSource(settings.DefaultCancellationTimeout).Token);
+                cancellationToken: cancellationTokenSource.Token);
         }
     }
 }
