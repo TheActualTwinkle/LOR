@@ -373,3 +373,5 @@ FodyWeavers.xsd
 # Docker stuff
 .containers/
 *.env
+
+!/scripts/dev/docker/.env
