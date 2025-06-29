@@ -3,7 +3,7 @@ import os
 import subprocess
 
 def main():
-    os.chdir("docker")
+    os.chdir(os.path.join(os.path.dirname(__file__), "docker"))
     
     cmd = [
         "docker-compose",
