@@ -144,7 +144,7 @@ public class GrpcDatabaseService(
 
         if (queue.IsFailed)
             return new EnqueueInClassReply
-                { IsFailed = true, ErrorMessage = createQueueEntryResult.Errors.First().Message };
+                { IsFailed = true, ErrorMessage = queue.Errors.First().Message };
 
         var createQueueEntryResponse = createQueueEntryResult.Value;
 
