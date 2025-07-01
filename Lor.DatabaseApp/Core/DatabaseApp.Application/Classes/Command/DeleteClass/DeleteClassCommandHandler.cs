@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Command.DeleteClasses;
+namespace DatabaseApp.Application.Classes.Command.DeleteClasses;
 
 public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<DeleteClassCommand, Result>

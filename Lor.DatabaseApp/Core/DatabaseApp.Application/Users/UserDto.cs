@@ -1,4 +1,4 @@
-﻿namespace DatabaseApp.Application.User;
+﻿namespace DatabaseApp.Application.Users;
 
 public record UserDto
 {

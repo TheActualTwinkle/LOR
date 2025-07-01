@@ -1,8 +1,8 @@
-﻿using DatabaseApp.Application.Class;
+﻿using DatabaseApp.Application.Classes;
 using DatabaseApp.Application.Group;
 using DatabaseApp.Application.QueueEntries;
 using DatabaseApp.Application.Subscriber;
-using DatabaseApp.Application.User;
+using DatabaseApp.Application.Users;
 using Mapster;
 
 namespace DatabaseApp.Application.Common.Mapping;

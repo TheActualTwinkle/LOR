@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Class.Command;
+namespace DatabaseApp.Application.Classes.Command;
 
 public class CreateClassesCommandValidator : AbstractValidator<CreateClassesCommand>
 {

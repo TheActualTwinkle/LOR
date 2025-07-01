@@ -1,12 +1,12 @@
-﻿using DatabaseApp.Application.Class.Command;
-using DatabaseApp.Application.Class.Queries;
+﻿using DatabaseApp.Application.Classes.Command;
+using DatabaseApp.Application.Classes.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
 using DatabaseApp.Application.Group.Queries;
-using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
+using DatabaseApp.Application.QueueEntries.Commands.CreateEntry;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
-using DatabaseApp.Application.QueueEntries.Commands.DeleteQueue;
+using DatabaseApp.Application.QueueEntries.Commands.DeleteEntry;
 using DatabaseApp.Application.QueueEntries.Queries;
-using DatabaseApp.Application.User.Command.CreateUser;
+using DatabaseApp.Application.Users.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;
@@ -159,7 +159,7 @@ public class QueueEntryTests
     }
     
     [Test]
-    public async Task CreateQueue_WhenUserAlreadyInQueue_Fail()
+    public async Task CreateQueue_WhenUserAlreadyInQueue_SuccessAndMarkedAsRequeuingAttempt()
     {
         // Arrange
         await CreateUserAndClasses();
@@ -184,7 +184,9 @@ public class QueueEntryTests
         // Assert
         Assert.Multiple(() =>
         {
-            Assert.That(createResult.IsFailed, Is.True);
+            Assert.That(createResult.IsSuccess, Is.True);
+            Assert.That(createResult.Value.Class.Id, Is.EqualTo(getClassesResult.Value.First().Id)); 
+            Assert.That(createResult.Value.WasAlreadyEnqueued, Is.True);
             Assert.That(queue.Value, Has.Count.EqualTo(1));
         });
     }
@@ -204,7 +206,7 @@ public class QueueEntryTests
         });
         
         // Act
-        var deleteResult = await _sender.Send(new DeleteUserFromQueueCommand
+        var deleteResult = await _sender.Send(new DeleteQueueEntryCommand
         {
             TelegramId = TestTelegramId,
             ClassId = getClassesResult.Value.First().Id

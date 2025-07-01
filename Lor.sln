@@ -32,7 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.WebApi", "Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\DatabaseApp.WebApi.csproj", "{B0CBD512-4264-4D39-867C-F48FC9F84982}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.AppCommunication", "Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj", "{E31B0FEA-19FF-45D8-B232-2E21D63B28E9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Messaging", "Lor.DatabaseApp\Infrastructure\DatabaseApp.Messaging\DatabaseApp.Messaging.csproj", "{E31B0FEA-19FF-45D8-B232-2E21D63B28E9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GroupScheduleApp.Api", "Lor.GroupScheduleApp\Presentation\GroupScheduleApp.Api\GroupScheduleApp.Api.csproj", "{873A61F2-6F1E-4A4C-8D9A-C7AB3FA2906F}"
 EndProject

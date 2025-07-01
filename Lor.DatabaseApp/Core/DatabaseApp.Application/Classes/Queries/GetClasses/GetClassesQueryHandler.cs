@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Queries;
+namespace DatabaseApp.Application.Classes.Queries;
 
 public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetClassesQuery, Result<List<ClassDto>>>

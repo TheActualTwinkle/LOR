@@ -1,4 +1,4 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
+﻿using DatabaseApp.WebApi.GrpcServices;
 using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;

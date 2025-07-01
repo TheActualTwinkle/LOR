@@ -6,7 +6,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.User.Command.CreateUser;
+namespace DatabaseApp.Application.Users.Command.CreateUser;
 
 public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateUserCommand, Result>

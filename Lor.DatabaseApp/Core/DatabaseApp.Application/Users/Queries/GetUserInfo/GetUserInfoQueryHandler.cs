@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.User.Queries;
+namespace DatabaseApp.Application.Users.Queries;
 
 public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetUserInfoQuery, Result<UserDto>>

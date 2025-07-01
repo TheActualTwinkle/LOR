@@ -2,7 +2,7 @@
 using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Queries;
+namespace DatabaseApp.Application.Classes.Queries;
 
 public class GetOutdatedClassesQueryHandler(IUnitOfWork unitOfWork) 
     : IRequestHandler<GetOutdatedClassesQuery, Result<List<int>>>

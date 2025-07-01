@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.WebApi.GrpcServices";
+
+import "google/protobuf/empty.proto";
+import "Data/users.proto";
+import "Data/classes.proto";
+import "Data/groups.proto";
+import "Data/newClassesSubscribers.proto";
+
+service Database {
+  rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoReply);
+
+  rpc GetAvailableGroups (google.protobuf.Empty) returns (GetAvailableGroupsReply);
+  rpc SetGroup (SetGroupRequest) returns (SetGroupReply);
+  
+  rpc GetAvailableClasses (GetAvailableClassesRequest) returns (GetAvailableClassesReply);
+  rpc EnqueueInClass (EnqueueInClassRequest) returns (EnqueueInClassReply);
+  rpc DequeueFromClass (DequeueFromClassRequest) returns (DequeueFromClassReply);
+  rpc ViewQueueClass (ViewQueueClassRequest) returns (ViewQueueClassReply);
+
+  rpc GetSubscribers (google.protobuf.Empty) returns (GetSubscribersReply);
+  rpc AddSubscriber (AddSubscriberRequest) returns (AddSubscriberReply);
+  rpc DeleteSubscriber (DeleteSubscriberRequest) returns (DeleteSubscriberReply);
+}

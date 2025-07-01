@@ -19,6 +19,7 @@
         <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
         <PackageReference Include="Respawn" Version="6.2.1" />
         <PackageReference Include="Testcontainers.PostgreSql" Version="3.9.0" />
+        <PackageReference Include="Testcontainers.RabbitMq" Version="3.9.0" />
     </ItemGroup>
 
     <ItemGroup>

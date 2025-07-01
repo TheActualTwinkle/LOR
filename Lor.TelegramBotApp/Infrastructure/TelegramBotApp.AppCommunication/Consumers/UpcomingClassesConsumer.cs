@@ -1,4 +1,4 @@
-﻿using DatabaseApp.AppCommunication.Messages;
+﻿using DatabaseApp.Messaging.Messages;
 using MassTransit;
 using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.Domain.Interfaces;
