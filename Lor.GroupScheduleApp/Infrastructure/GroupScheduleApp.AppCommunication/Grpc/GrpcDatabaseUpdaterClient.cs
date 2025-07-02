@@ -1,8 +1,8 @@
-﻿using DatabaseApp.WebApi.GrpcServices;
-using GroupScheduleApp.AppCommunication.Interfaces;
+﻿using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.Shared;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
+using Shared.GrpcServices;
 
 namespace GroupScheduleApp.AppCommunication.Grpc;
 
@@ -28,10 +28,8 @@ public class GrpcDatabaseUpdaterClient(string serviceUrl, ILogger<GrpcDatabaseUp
         return Task.CompletedTask;
     }
 
-    public async Task SetAvailableGroups(IEnumerable<string> availableGroupNames)
-    {
+    public async Task SetAvailableGroups(IEnumerable<string> availableGroupNames) =>
         await _client!.SetAvailableGroupsAsync(new SetAvailableGroupsRequest { GroupNames = { availableGroupNames } });
-    }
 
     public async Task SetAvailableLabClasses(GroupClassesData groupClassesData)
     {

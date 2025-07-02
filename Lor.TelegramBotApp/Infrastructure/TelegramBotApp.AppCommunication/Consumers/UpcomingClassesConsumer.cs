@@ -1,5 +1,5 @@
-﻿using DatabaseApp.Messaging.Messages;
-using MassTransit;
+﻿using MassTransit;
+using Shared.Messaging;
 using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.Domain.Interfaces;
 

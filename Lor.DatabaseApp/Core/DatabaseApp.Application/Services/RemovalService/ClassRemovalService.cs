@@ -51,19 +51,19 @@ public class ClassRemovalService(
 
     // Used by Hangfire
     // ReSharper disable once MemberCanBePrivate.Global
-    public async Task DeleteOutdatedClass(Class classDto, CancellationToken cancellationToken = default)
+    public async Task DeleteOutdatedClass(Class @class, CancellationToken cancellationToken = default)
     {
         await mediator.Send(
             new DeleteQueueForClassCommand
             {
-                ClassId = classDto.Id
+                ClassId = @class.Id
             },
             cancellationToken);
 
         await mediator.Send(
             new DeleteClassCommand
             {
-                ClassId = classDto.Id
+                ClassId = @class.Id
             },
             cancellationToken);
 

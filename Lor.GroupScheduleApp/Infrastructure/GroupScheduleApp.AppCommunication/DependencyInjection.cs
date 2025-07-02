@@ -14,7 +14,7 @@ public static class DependencyInjection
         {
             var logger = s.GetRequiredService<ILogger<GrpcDatabaseUpdaterClient>>();
             
-            var url = configuration.GetSection("profiles:Database-http:applicationUrl").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
+            var url = configuration.GetSection("DatabaseApp:Url").Value ?? throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
             return new GrpcDatabaseUpdaterClient(url, logger);
         });
         return services;

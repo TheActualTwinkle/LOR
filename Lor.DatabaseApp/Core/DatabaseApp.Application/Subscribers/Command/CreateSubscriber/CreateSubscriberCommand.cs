@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
+namespace DatabaseApp.Application.Subscribers.Command.CreateSubscriber;
 
 public record CreateSubscriberCommand : IRequest<Result>
 {

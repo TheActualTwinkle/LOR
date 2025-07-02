@@ -1,4 +1,4 @@
-﻿namespace DatabaseApp.Application.Group;
+﻿namespace DatabaseApp.Application.Groups;
 
 public record GroupDto
 {

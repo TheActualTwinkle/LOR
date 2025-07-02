@@ -27,6 +27,9 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
                 GroupId = group.Id
             }),
             cancellationToken);
+        
+        if (!createdClasses.Any())
+            return Result.Ok();
 
         await publisher.Publish(
             new ClassesCreatedEvent

@@ -5,7 +5,14 @@ using DatabaseApp.Persistence;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi.GrpcServices;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
+using Serilog.Sinks.OpenTelemetry;
 
 namespace DatabaseApp.WebApi;
 
@@ -14,13 +21,33 @@ public class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
+
         builder.Configuration.AddJsonFile("appsettings.json", false, true)
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
             .AddEnvironmentVariables();
-        
-        builder.Host.UseSerilog((context, configuration) => configuration
-            .ReadFrom.Configuration(context.Configuration));
+
+        builder.Services.AddSerilog(cl => cl
+            .ReadFrom.Configuration(builder.Configuration)
+            .WriteTo.OpenTelemetry(c => c.ResourceAttributes.Add("service.name", "DatabaseApp")));
+
+        builder.Services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService("DatabaseApp"))
+            .WithTracing(tracing =>
+            {
+                tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation()
+                    .AddGrpcCoreInstrumentation()
+                    .AddRedisInstrumentation();
+            })
+            .WithMetrics(metrics =>
+            {
+                metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation();
+            })
+            .UseOtlpExporter();
         
         // Order of services registration is important!!!
         builder.Services.AddGrpc();

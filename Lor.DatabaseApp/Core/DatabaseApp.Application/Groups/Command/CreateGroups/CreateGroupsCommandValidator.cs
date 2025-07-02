@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Group.Command.CreateGroup;
+namespace DatabaseApp.Application.Groups.Command.CreateGroup;
 
 public class CreateGroupsCommandValidator : AbstractValidator<CreateGroupsCommand>
 {

@@ -1,16 +1,16 @@
 ﻿using System.Globalization;
-using DatabaseApp.Application.Classes;
 using DatabaseApp.Application.QueueEntries.Queries;
 using DatabaseApp.Application.Services.ReminderService.Common;
 using DatabaseApp.Application.Services.ReminderService.Settings;
 using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Services.ReminderService;
-using DatabaseApp.Messaging.Messages;
 using Hangfire;
+using Lor.Shared.Messaging.Models;
 using Mapster;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Shared.Messaging;
 
 namespace DatabaseApp.Application.Services.ReminderService;
 
@@ -101,7 +101,7 @@ public class ClassReminderService(
         {
             ClassName = @class.Name,
             ClassDate = @class.Date,
-            Users = users.Value.Adapt<IEnumerable<User>>()
+            Users = users.Value.Adapt<IEnumerable<UserModel>>()
         };
 
         await bus.Publish(upcomingClassesMessage, cancellationToken);

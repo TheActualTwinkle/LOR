@@ -1,7 +1,7 @@
 ﻿using DatabaseApp.Application.Classes.Command;
 using DatabaseApp.Application.Classes.Command.DeleteClasses;
 using DatabaseApp.Application.Classes.Queries;
-using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Groups.Command.CreateGroup;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;
