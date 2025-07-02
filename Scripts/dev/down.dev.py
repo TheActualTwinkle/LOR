@@ -10,7 +10,6 @@ def main():
     cmd = [
         "docker-compose",
         "--env-file", ".env",
-        "-p", "lor",
         "-f", "docker-compose.dev.yml",
         "down"
     ]
