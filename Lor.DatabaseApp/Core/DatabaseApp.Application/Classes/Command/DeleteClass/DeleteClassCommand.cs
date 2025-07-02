@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Class.Command.DeleteClasses;
+namespace DatabaseApp.Application.Classes.Command.DeleteClasses;
 
 public record DeleteClassCommand : IRequest<Result>
 {

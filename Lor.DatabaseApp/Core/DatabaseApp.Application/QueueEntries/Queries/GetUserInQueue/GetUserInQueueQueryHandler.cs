@@ -1,4 +1,4 @@
-﻿using DatabaseApp.Application.User;
+﻿using DatabaseApp.Application.Users;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using MapsterMapper;

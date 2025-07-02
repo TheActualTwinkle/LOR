@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.User.Queries;
+namespace DatabaseApp.Application.Users.Queries;
 
 public class GetUserInfoQueryValidator : AbstractValidator<GetUserInfoQuery>
 {

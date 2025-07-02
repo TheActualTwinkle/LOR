@@ -1,9 +1,9 @@
-using DatabaseApp.AppCommunication;
-using DatabaseApp.AppCommunication.Grpc;
+using DatabaseApp.Messaging;
 using DatabaseApp.Application;
 using DatabaseApp.Caching;
 using DatabaseApp.Persistence;
 using DatabaseApp.Persistence.DatabaseContext;
+using DatabaseApp.WebApi.GrpcServices;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 

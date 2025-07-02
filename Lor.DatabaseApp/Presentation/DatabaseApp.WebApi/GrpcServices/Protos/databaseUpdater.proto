@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.WebApi.GrpcServices";
+
+import "google/protobuf/empty.proto";
+import "Data/classes.proto";
+import "Data/groups.proto";
+
+service DatabaseUpdater {
+  rpc SetAvailableGroups (SetAvailableGroupsRequest) returns (google.protobuf.Empty);
+  rpc SetAvailableClasses (SetAvailableClassesRequest) returns (google.protobuf.Empty);
+}

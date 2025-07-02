@@ -1,4 +1,4 @@
-﻿using DatabaseApp.AppCommunication.Grpc;
+﻿using DatabaseApp.WebApi.GrpcServices;
 using GroupScheduleApp.AppCommunication.Interfaces;
 using GroupScheduleApp.Shared;
 using Grpc.Net.Client;

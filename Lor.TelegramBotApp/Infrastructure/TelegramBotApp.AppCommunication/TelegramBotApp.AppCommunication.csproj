@@ -25,13 +25,13 @@
     </ItemGroup>
     
     <ItemGroup>
-      <Protobuf Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\Grpc\Protos\**\*.proto" GrpcServices="Client">
+      <Protobuf Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\GrpcServices\Protos\**\*.proto" GrpcServices="Client">
           <Link>Grpc\Protos\%(RecursiveDir)%(Filename)%(Extension)</Link>
       </Protobuf>
     </ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\DatabaseApp.WebApi.csproj" />
       <ProjectReference Include="..\..\Core\TelegramBotApp.Domain\TelegramBotApp.Domain.csproj" />
     </ItemGroup>
     

@@ -1,4 +1,4 @@
-﻿namespace DatabaseApp.Application.Class;
+﻿namespace DatabaseApp.Application.Classes;
 
 public record ClassDto
 {

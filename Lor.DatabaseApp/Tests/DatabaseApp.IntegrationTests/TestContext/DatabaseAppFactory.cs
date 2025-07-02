@@ -3,6 +3,7 @@ using DatabaseApp.WebApi;
 using Grpc.Net.Client;
 using Npgsql;
 using Respawn;
+using StackExchange.Redis;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 using Testcontainers.Redis;
@@ -74,6 +75,20 @@ public class DatabaseAppFactory
             _redisContainer.DisposeAsync().AsTask());
     }
 
-    public async Task ResetDatabaseAsync() => 
+    public async Task ResetDatabaseAsync()
+    {
         await _respawner.ResetAsync(_connection);
+
+        await ResetRedisAsync();
+    }
+
+    private async Task ResetRedisAsync()
+    {
+        var connection = await ConnectionMultiplexer.ConnectAsync(_redisContainer.GetConnectionString());
+        var database = connection.GetDatabase();
+        
+        await database.ExecuteAsync("FLUSHALL");
+
+        await connection.CloseAsync();
+    }
 }

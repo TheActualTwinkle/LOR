@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "DatabaseApp.WebApi.GrpcServices";
+
+message GetUserInfoRequest {
+  int64 telegramId = 1;
+}
+
+message GetUserInfoReply {
+  string fullName = 1;
+  string groupName = 2;
+  bool isFailed = 3;
+  string errorMessage = 4;
+}

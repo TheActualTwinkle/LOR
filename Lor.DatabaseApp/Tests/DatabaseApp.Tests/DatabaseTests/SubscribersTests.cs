@@ -2,7 +2,7 @@
 using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
 using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
 using DatabaseApp.Application.Subscriber.Queries;
-using DatabaseApp.Application.User.Command.CreateUser;
+using DatabaseApp.Application.Users.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;

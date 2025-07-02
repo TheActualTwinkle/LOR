@@ -1,10 +1,10 @@
-﻿using DatabaseApp.Application.Class.Command;
-using DatabaseApp.Application.Class.Queries;
+﻿using DatabaseApp.Application.Classes.Command;
+using DatabaseApp.Application.Classes.Queries;
 using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.QueueEntries.Commands.CreateQueue;
+using DatabaseApp.Application.QueueEntries.Commands.CreateEntry;
 using DatabaseApp.Application.QueueEntries.Queries;
-using DatabaseApp.Application.User.Command.CreateUser;
-using DatabaseApp.Application.User.Queries;
+using DatabaseApp.Application.Users.Command.CreateUser;
+using DatabaseApp.Application.Users.Queries;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;

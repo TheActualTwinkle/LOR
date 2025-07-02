@@ -12,6 +12,7 @@
         <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
         <PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.63.0" />
         <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.66.0" />
+        <PackageReference Include="MediatR" Version="12.3.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
           <PrivateAssets>all</PrivateAssets>
@@ -25,7 +26,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Infrastructure\DatabaseApp.AppCommunication\DatabaseApp.AppCommunication.csproj" />
+      <ProjectReference Include="..\..\Core\DatabaseApp.Application\DatabaseApp.Application.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\DatabaseApp.Messaging\DatabaseApp.Messaging.csproj" />
       <ProjectReference Include="..\..\Infrastructure\DatabaseApp.Persistence\DatabaseApp.Persistence.csproj" />
     </ItemGroup>
 
@@ -42,6 +44,10 @@
       <Content Update="appsettings.Development.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="GrpcServices\Protos\**\*.proto" GrpcServices="Server" ProtoRoot="GrpcServices\Protos\" />
     </ItemGroup>
 
 </Project>

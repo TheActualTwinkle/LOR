@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <NoWarn>8981</NoWarn>
+        <NoWarn>0436</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentResults" Version="3.15.2"/>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\DatabaseApp.Domain\DatabaseApp.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
