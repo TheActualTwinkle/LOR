@@ -10,8 +10,6 @@ using DatabaseApp.Domain.Services.ReminderService;
 using DatabaseApp.Domain.Services.RemovalService;
 using DatabaseApp.Persistence.UnitOfWorkContext;
 using FluentValidation;
-using Hangfire;
-using Hangfire.PostgreSql;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.Configuration;
@@ -32,39 +30,20 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.AddOpenBehavior(typeof(TracingBehavior<,>));
         });
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;
     }
     
-    public static IServiceCollection AddJobSchedule(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDomainServices(this IServiceCollection services, IConfiguration configuration)
     {
-        AddHangfire(services, configuration);
-
         AddClassReminderService(services, configuration);
 
         AddClassRemovalService(services, configuration);
 
         return services;
-    }
-
-    private static void AddHangfire(IServiceCollection services, IConfiguration configuration)
-    {
-        var hangfireConnectionString = configuration.GetConnectionString("HangfireDb");
-        
-        services.AddHangfire(c =>
-            c.UseDynamicJobs()
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UsePostgreSqlStorage(o => o.UseNpgsqlConnection(hangfireConnectionString))
-                .UseFilter(new AutomaticRetryAttribute { Attempts = 3 }));
-        
-        services.AddHangfireServer(o =>
-        {
-            o.Queues = ["dba_queue"];
-            o.SchedulePollingInterval = TimeSpan.FromSeconds(10);
-        });
     }
 
     private static void AddClassReminderService(IServiceCollection services, IConfiguration configuration)
@@ -78,7 +57,6 @@ public static class DependencyInjection
             AdvanceNoticeTime = advanceNoticeTime
         });
 
-        // Must be scoped to DI Consumers properly
         services.AddScoped<IClassReminderService, ClassReminderService>();
     }
 

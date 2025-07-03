@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using DatabaseApp.Application.QueueEntries.Queries;
 using DatabaseApp.Application.Services.ReminderService.Common;
 using DatabaseApp.Application.Services.ReminderService.Settings;
@@ -22,6 +23,8 @@ public class ClassReminderService(
     ClassReminderServiceSettings settings)
     : IClassReminderService
 {
+    public static readonly ActivitySource ActivitySource = new("DomainServices.ClassReminderService");
+
     public Task ScheduleNotification(
         IEnumerable<Class> classes,
         CancellationToken cancellationToken = default)
@@ -71,6 +74,12 @@ public class ClassReminderService(
         Class @class,
         CancellationToken cancellationToken = default)
     {
+        using var activity = ActivitySource.StartActivity();
+        
+        activity?.SetTag("class.id", @class.Id);
+        activity?.SetTag("class.name", @class.Name);
+        activity?.SetTag("class.date", @class.Date.ToString("O"));
+
         var queue = await mediator.Send(
             new GetClassQueueQuery
             {
@@ -96,6 +105,8 @@ public class ClassReminderService(
 
             return;
         }
+
+        activity?.SetTag("recipients.count", users.Value.Count);
 
         UpcomingClassesMessage upcomingClassesMessage = new()
         {

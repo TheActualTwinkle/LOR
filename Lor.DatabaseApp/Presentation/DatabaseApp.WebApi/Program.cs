@@ -4,6 +4,7 @@ using DatabaseApp.Caching;
 using DatabaseApp.Persistence;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi.GrpcServices;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -18,8 +19,6 @@ public class Program
         builder.Configuration.AddJsonFile("appsettings.json", false, true)
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
             .AddEnvironmentVariables();
-
-        builder.Services.AddOtel(builder.Configuration);
         
         // Order of services registration is important!!!
         builder.Services.AddGrpc();
@@ -28,8 +27,11 @@ public class Program
         builder.Services.AddCaching(builder.Configuration);
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddBus(builder.Configuration);
-        builder.Services.AddJobSchedule(builder.Configuration);
+        builder.Services.AddHangfireService(builder.Configuration);
+        builder.Services.AddDomainServices(builder.Configuration);
 
+        builder.Services.AddOtel(builder.Configuration);
+        
         var app = builder.Build();
         
         try

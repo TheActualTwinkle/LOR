@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using DatabaseApp.Application.Classes;
+﻿using System.Diagnostics;
+using System.Globalization;
 using DatabaseApp.Application.Classes.Command.DeleteClasses;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 using DatabaseApp.Application.Services.ReminderService.Common;
@@ -19,6 +19,8 @@ public class ClassRemovalService(
     ClassRemovalServiceSettings settings)
     : IClassRemovalService
 {
+    public static readonly ActivitySource ActivitySource = new("DomainServices.ClassRemovalService");
+    
     public Task ScheduleRemoval(
         IEnumerable<Class> classes,
         CancellationToken cancellationToken = default)
@@ -53,6 +55,12 @@ public class ClassRemovalService(
     // ReSharper disable once MemberCanBePrivate.Global
     public async Task DeleteOutdatedClass(Class @class, CancellationToken cancellationToken = default)
     {
+        using var activity = ActivitySource.StartActivity();
+        
+        activity?.SetTag("class.id", @class.Id);
+        activity?.SetTag("class.name", @class.Name);
+        activity?.SetTag("class.date", @class.Date.ToString("O"));
+        
         await mediator.Send(
             new DeleteQueueForClassCommand
             {
