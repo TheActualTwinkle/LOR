@@ -67,9 +67,7 @@ public static class DependencyInjection
             {
                 metrics
                     .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddProcessInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddProcessInstrumentation();
             })
             .ConfigureResource(rb => rb.AddAttributes(resource.Attributes))
             .UseOtlpExporter();
