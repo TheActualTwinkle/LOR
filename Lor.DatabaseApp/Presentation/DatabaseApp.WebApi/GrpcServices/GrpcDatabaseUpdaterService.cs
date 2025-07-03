@@ -7,7 +7,7 @@ using Shared.GrpcServices;
 
 namespace DatabaseApp.WebApi.GrpcServices;
 
-public class GrpcDatabaseUpdaterService(ISender mediator, ILogger<GrpcDatabaseUpdaterService> logger) : DatabaseUpdater.DatabaseUpdaterBase
+public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.DatabaseUpdaterBase
 {
     public override async Task<Empty> SetAvailableGroups(SetAvailableGroupsRequest request, ServerCallContext context)
     {
@@ -25,8 +25,6 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ILogger<GrpcDatabaseUp
 
     public override async Task<Empty> SetAvailableClasses(SetAvailableClassesRequest request, ServerCallContext context)
     {
-        logger.LogInformation("Received request to set available classes for group: {GroupName}", request.GroupName);
-        
         var createClassesResult = await mediator.Send(
             new CreateClassesCommand
             {
@@ -40,8 +38,6 @@ public class GrpcDatabaseUpdaterService(ISender mediator, ILogger<GrpcDatabaseUp
         if (createClassesResult.IsFailed)
             throw new RpcException(new Status(StatusCode.Internal, createClassesResult.Errors.First().Message));
         
-        logger.LogInformation("Successfully set available classes for group: {GroupName}", request.GroupName);
-
         return new Empty();
     }
 }
