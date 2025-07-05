@@ -1,10 +1,10 @@
-using DatabaseApp.Messaging;
 using DatabaseApp.Application;
 using DatabaseApp.Caching;
+using DatabaseApp.Messaging;
 using DatabaseApp.Persistence;
 using DatabaseApp.Persistence.DatabaseContext;
 using DatabaseApp.WebApi.GrpcServices;
-using Hangfire;
+using DatabaseApp.WebApi.Middleware.Grpc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -19,9 +19,12 @@ public class Program
         builder.Configuration.AddJsonFile("appsettings.json", false, true)
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
             .AddEnvironmentVariables();
-        
+
+        builder.Services.AddSerilog(cl => cl
+            .ReadFrom.Configuration(builder.Configuration));
+
         // Order of services registration is important!!!
-        builder.Services.AddGrpc();
+        builder.Services.AddGrpc(options => options.Interceptors.Add<MetricsInterceptor>());
         builder.Services.AddGrpcReflection();
         builder.Services.AddApplication();
         builder.Services.AddCaching(builder.Configuration);
@@ -31,9 +34,9 @@ public class Program
         builder.Services.AddDomainServices(builder.Configuration);
 
         builder.Services.AddOtel(builder.Configuration);
-        
+
         var app = builder.Build();
-        
+
         try
         {
             using var scope = app.Services.CreateScope();
@@ -43,17 +46,18 @@ public class Program
         catch (Exception e)
         {
             Log.Fatal("Error on DB migration: {message}", e.Message);
+
             throw;
         }
 
         app.MapGrpcService<GrpcDatabaseService>();
         app.MapGrpcService<GrpcDatabaseUpdaterService>();
-        
+
         if (app.Environment.IsDevelopment())
             app.MapGrpcReflectionService();
 
-        app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. " +
-                              "To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+        app.MapGet(
+            "/", () => "Communication with gRPC endpoints must be made through a gRPC client.");
 
         await app.RunAsync();
     }

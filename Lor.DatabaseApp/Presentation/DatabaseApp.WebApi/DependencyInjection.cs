@@ -2,6 +2,7 @@
 using DatabaseApp.Application.Services.ReminderService;
 using DatabaseApp.Application.Services.RemovalService;
 using DatabaseApp.Caching.Decorators;
+using DatabaseApp.WebApi.Middleware.Grpc;
 using Hangfire;
 using Hangfire.PostgreSql;
 using MassTransit.Logging;
@@ -66,8 +67,9 @@ public static class DependencyInjection
             .WithMetrics(metrics =>
             {
                 metrics
-                    .AddAspNetCoreInstrumentation()
-                    .AddProcessInstrumentation();
+                    .AddMeter("Microsoft.AspNetCore.Hosting")
+                    .AddProcessInstrumentation()
+                    .AddMeter(GrpcMetrics.Meter.Name);
             })
             .ConfigureResource(rb => rb.AddAttributes(resource.Attributes))
             .UseOtlpExporter();
