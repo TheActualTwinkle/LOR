@@ -20,7 +20,7 @@ public class Program
             .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
             .AddEnvironmentVariables();
 
-        builder.Services.AddSerilog(cl => cl
+        builder.Host.UseSerilog((_, configuration) => configuration
             .ReadFrom.Configuration(builder.Configuration));
 
         // Order of services registration is important!!!
@@ -36,7 +36,7 @@ public class Program
         builder.Services.AddOtel(builder.Configuration);
 
         var app = builder.Build();
-
+        
         try
         {
             using var scope = app.Services.CreateScope();
