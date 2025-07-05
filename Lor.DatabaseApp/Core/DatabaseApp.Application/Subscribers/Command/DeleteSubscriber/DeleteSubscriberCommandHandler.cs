@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
+namespace DatabaseApp.Application.Subscribers.Command.DeleteSubscriber;
 
 public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<DeleteSubscriberCommand, Result>

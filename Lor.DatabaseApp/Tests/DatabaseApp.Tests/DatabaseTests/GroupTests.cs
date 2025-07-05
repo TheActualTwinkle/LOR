@@ -1,5 +1,5 @@
-﻿using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Group.Queries;
+﻿using DatabaseApp.Application.Groups.Command.CreateGroup;
+using DatabaseApp.Application.Groups.Queries;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;
 using MediatR;

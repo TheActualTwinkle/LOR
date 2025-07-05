@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-option csharp_namespace = "DatabaseApp.WebApi.GrpcServices";
+option csharp_namespace = "Shared.GrpcServices";
 
 message AddSubscriberRequest {
   int64 telegramId = 1;

@@ -16,7 +16,7 @@ public static class DependencyInjection
         {
             var logger = s.GetRequiredService<ILogger<GrpcDatabaseClient>>();
             
-            var url = configuration.GetRequiredSection("profiles:Database-http:applicationUrl").Value ??
+            var url = configuration.GetRequiredSection("DatabaseApp:Url").Value ??
                       throw new InvalidOperationException("GrpcDatabaseCommunicationClient url is not set.");
             
             return new GrpcDatabaseClient(url, logger);
@@ -54,15 +54,18 @@ public static class DependencyInjection
                     e => e.Consumer<UpcomingClassesConsumer>(context));
             });
         });
-        
-        var defaultCancellationTimeout = configuration
-            .GetRequiredSection("ConsumersSettings")
-            .GetValue<TimeSpan>("DefaultCancellationTimeout");
+
+        var timeoutAsString = configuration.GetRequiredSection("ConsumersSettings")["DefaultCancellationTimeout"];
+
+        if (timeoutAsString is null)
+            throw new InvalidOperationException("Configuration value 'ConsumersSettings:DefaultCancellationTimeout' is missing");
+
+        var defaultCancellationTimeout = TimeSpan.Parse(timeoutAsString);
 
         services.AddScoped<ConsumerSettings>(_ => new ConsumerSettings
-            {
-                DefaultCancellationTimeout = defaultCancellationTimeout
-            });
+        {
+            DefaultCancellationTimeout = defaultCancellationTimeout
+        });
 
         return services;
     }

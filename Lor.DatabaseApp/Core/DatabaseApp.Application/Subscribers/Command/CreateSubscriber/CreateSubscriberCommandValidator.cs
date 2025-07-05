@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
+namespace DatabaseApp.Application.Subscribers.Command.CreateSubscriber;
 
 public class CreateSubscriberCommandValidator : AbstractValidator<CreateSubscriberCommand>
 {

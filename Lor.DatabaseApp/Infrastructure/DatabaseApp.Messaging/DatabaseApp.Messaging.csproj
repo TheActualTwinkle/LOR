@@ -11,10 +11,12 @@
     <ItemGroup>
         <PackageReference Include="FluentResults" Version="3.15.2"/>
         <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
+        <PackageReference Include="Mapster" Version="7.4.0" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.4" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\Lor.Shared\Lor.Shared.csproj" />
       <ProjectReference Include="..\..\Core\DatabaseApp.Domain\DatabaseApp.Domain.csproj" />
     </ItemGroup>
 

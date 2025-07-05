@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\GrpcServices\Protos\**\*.proto" GrpcServices="Client">
+        <Protobuf Include="..\..\..\Lor.Shared\Protos\**\*.proto" GrpcServices="Client">
             <Link>Grpc\Protos\%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Protobuf>
     </ItemGroup>

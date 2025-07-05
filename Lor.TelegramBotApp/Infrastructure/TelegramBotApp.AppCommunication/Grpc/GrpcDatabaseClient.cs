@@ -1,8 +1,8 @@
-﻿using DatabaseApp.WebApi.GrpcServices;
-using FluentResults;
+﻿using FluentResults;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
+using Shared.GrpcServices;
 using TelegramBotApp.AppCommunication.Data;
 using TelegramBotApp.AppCommunication.Interfaces;
 

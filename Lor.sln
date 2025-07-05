@@ -62,6 +62,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.Tests", "Lor.Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseApp.IntegrationTests", "Lor.DatabaseApp\Tests\DatabaseApp.IntegrationTests\DatabaseApp.IntegrationTests.csproj", "{4D694BF2-64E2-4F89-89C0-3988E63F7392}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lor.Shared", "Lor.Shared", "{845A94B8-C42D-4856-93C5-90E9B143ABF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lor.Shared", "Lor.Shared\Lor.Shared.csproj", "{E052240A-28D9-409E-A005-0989ED00B609}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +100,7 @@ Global
 		{8326BF46-ACE4-426F-B1E6-D65317643C30} = {3E36A9F0-EEF9-48E1-B82C-F4A2629BD1E0}
 		{BAE7811D-8652-4428-800C-A7373B0F5896} = {8326BF46-ACE4-426F-B1E6-D65317643C30}
 		{4D694BF2-64E2-4F89-89C0-3988E63F7392} = {8326BF46-ACE4-426F-B1E6-D65317643C30}
+		{E052240A-28D9-409E-A005-0989ED00B609} = {845A94B8-C42D-4856-93C5-90E9B143ABF5}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C3D4568A-A822-4003-BD64-A01BC16F69F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -170,5 +175,9 @@ Global
 		{4D694BF2-64E2-4F89-89C0-3988E63F7392}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D694BF2-64E2-4F89-89C0-3988E63F7392}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D694BF2-64E2-4F89-89C0-3988E63F7392}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E052240A-28D9-409E-A005-0989ED00B609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E052240A-28D9-409E-A005-0989ED00B609}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E052240A-28D9-409E-A005-0989ED00B609}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E052240A-28D9-409E-A005-0989ED00B609}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

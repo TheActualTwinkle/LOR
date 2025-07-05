@@ -26,6 +26,8 @@ services:
       - TZ=Asia/Novosibirsk
       - ASPNETCORE_URLS=${DATABASE_COMMUNICATION_URL}
       - ASPNETCORE_ENVIRONMENT=Production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - ConnectionStrings:DefaultConnection=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - ConnectionStrings:Redis=redis:6379
       - ConnectionStrings:HangfireDb=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
@@ -47,7 +49,7 @@ services:
     environment:
       - TZ=Asia/Novosibirsk
       - TelegramSettings:BotToken=${TELEGRAM_BOT_TOKEN}
-      - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
+      - DatabaseApp:Url=${DATABASE_COMMUNICATION_URL}
       - RabbitMqSettings:Host=${RABBITMQ_HOST}
       - RabbitMqSettings:Username=${RABBITMQ_USER}
       - RabbitMqSettings:Password=${RABBITMQ_PASSWORD}
@@ -61,7 +63,7 @@ services:
       dockerfile: Lor.GroupScheduleApp/Presentation/GroupScheduleApp.Api/Dockerfile
     environment:
       - TZ=Asia/Novosibirsk
-      - Profiles:Database-http:ApplicationUrl=${DATABASE_COMMUNICATION_URL}
+      - DatabaseApp:Url=${DATABASE_COMMUNICATION_URL}
       - ConnectionStrings:HangfireDb=Host=database:31400;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
       database:
@@ -88,3 +90,9 @@ services:
       interval: 15s
       timeout: 15s
       retries: 3
+
+  aspire.dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.1
+    ports:
+      - 18888:18888
+      - 18889:18889

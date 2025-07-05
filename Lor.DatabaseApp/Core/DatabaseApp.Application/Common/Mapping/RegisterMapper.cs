@@ -1,8 +1,10 @@
 ﻿using DatabaseApp.Application.Classes;
-using DatabaseApp.Application.Group;
+using DatabaseApp.Application.Groups;
 using DatabaseApp.Application.QueueEntries;
-using DatabaseApp.Application.Subscriber;
+using DatabaseApp.Application.Subscribers;
 using DatabaseApp.Application.Users;
+using DatabaseApp.Domain.Models;
+using Lor.Shared.Messaging.Models;
 using Mapster;
 
 namespace DatabaseApp.Application.Common.Mapping;
@@ -11,21 +13,34 @@ public class RegisterMapper : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Domain.Models.Class, ClassDto>()
+        config.NewConfig<Class, ClassDto>()
+            .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.Date, src => src.Date);
-        config.NewConfig<Domain.Models.Group, GroupDto>()
+        
+        config.NewConfig<Class, ClassModel>()
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.Date, src => src.Date);
+
+        config.NewConfig<Group, GroupDto>()
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.GroupName, src => src.Name);
-        config.NewConfig<Domain.Models.QueueEntry, QueueEntryDto>()
+
+        config.NewConfig<QueueEntry, QueueEntryDto>()
             .Map(dest => dest.ClassId, src => src.ClassId)
             .Map(dest => dest.FullName, src => src.User.FullName);
-        config.NewConfig<Domain.Models.Subscriber, SubscriberDto>()
+
+        config.NewConfig<Subscriber, SubscriberDto>()
             .Map(dest => dest.TelegramId, src => src.User.TelegramId)
             .Map(dest => dest.GroupName, src => src.User.Group.Name);
-        config.NewConfig<Domain.Models.User, UserDto>()
+
+        config.NewConfig<User, UserDto>()
             .Map(dest => dest.TelegramId, src => src.TelegramId)
             .Map(dest => dest.FullName, src => src.FullName)
             .Map(dest => dest.GroupName, src => src.Group.Name);
+
+        config.NewConfig<User, UserModel>()
+            .Map(dest => dest.TelegramId, src => src.TelegramId);
     }
 }

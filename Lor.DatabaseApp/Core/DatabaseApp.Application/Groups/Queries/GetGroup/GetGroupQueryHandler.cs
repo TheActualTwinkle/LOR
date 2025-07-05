@@ -3,7 +3,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Group.Queries;
+namespace DatabaseApp.Application.Groups.Queries;
 
 public class GetGroupQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     : IRequestHandler<GetGroupQuery, Result<GroupDto>>

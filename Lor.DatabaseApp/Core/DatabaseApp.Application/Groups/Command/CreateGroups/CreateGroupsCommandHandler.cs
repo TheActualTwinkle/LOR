@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Group.Command.CreateGroup;
+namespace DatabaseApp.Application.Groups.Command.CreateGroup;
 
 public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateGroupsCommand, Result>

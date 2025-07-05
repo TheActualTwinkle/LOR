@@ -1,6 +1,6 @@
 ﻿using DatabaseApp.Application.Classes.Command;
 using DatabaseApp.Application.Classes.Queries;
-using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Groups.Command.CreateGroup;
 using DatabaseApp.Application.QueueEntries.Commands.CreateEntry;
 using DatabaseApp.Application.QueueEntries.Queries;
 using DatabaseApp.Application.Users.Command.CreateUser;

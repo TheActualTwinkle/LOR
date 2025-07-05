@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Subscriber.Queries;
+namespace DatabaseApp.Application.Subscribers.Queries;
 
 public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<GetAllSubscribersQuery, Result<List<SubscriberDto>>>
