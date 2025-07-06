@@ -1,10 +1,12 @@
-﻿using DatabaseApp.Domain.Models;
+﻿using Lor.Shared.Messaging.Models;
 
-namespace DatabaseApp.Messaging.Messages;
+namespace Shared.Messaging;
 
 public record UpcomingClassesMessage
 {
     public required string ClassName { get; init; }
+
     public required DateOnly ClassDate { get; init; }
-    public required IEnumerable<User> Users { get; init; }
+
+    public required IEnumerable<UserModel> Users { get; init; }
 }

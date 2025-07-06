@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using MediatR;
 
-namespace DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
+namespace DatabaseApp.Application.Subscribers.Command.DeleteSubscriber;
 
 public record DeleteSubscriberCommand : IRequest<Result>
 {

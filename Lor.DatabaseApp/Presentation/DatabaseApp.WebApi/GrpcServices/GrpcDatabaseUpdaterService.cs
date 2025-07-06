@@ -1,8 +1,9 @@
 ﻿using DatabaseApp.Application.Classes.Command;
-using DatabaseApp.Application.Group.Command.CreateGroup;
+using DatabaseApp.Application.Groups.Command.CreateGroup;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MediatR;
+using Shared.GrpcServices;
 
 namespace DatabaseApp.WebApi.GrpcServices;
 
@@ -36,7 +37,7 @@ public class GrpcDatabaseUpdaterService(ISender mediator) : DatabaseUpdater.Data
 
         if (createClassesResult.IsFailed)
             throw new RpcException(new Status(StatusCode.Internal, createClassesResult.Errors.First().Message));
-
+        
         return new Empty();
     }
 }

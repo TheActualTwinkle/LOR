@@ -23,7 +23,6 @@ public class DefaultAppPipeline : IAppPipeline
                     {
                         config.AddJsonFile("appsettings.json", false, true);
                         config.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", true, true);
-                        config.AddJsonFile("DatabaseSettings/launchSettings.json", false, true);
                         config.AddEnvironmentVariables();
                     })
                 

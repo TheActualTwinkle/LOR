@@ -1,4 +1,4 @@
-﻿namespace DatabaseApp.Application.Subscriber;
+﻿namespace DatabaseApp.Application.Subscribers;
 
 public record SubscriberDto
 {

@@ -5,7 +5,7 @@ using FluentResults;
 using MapsterMapper;
 using MediatR;
 
-namespace DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
+namespace DatabaseApp.Application.Subscribers.Command.CreateSubscriber;
 
 public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
     : IRequestHandler<CreateSubscriberCommand, Result>

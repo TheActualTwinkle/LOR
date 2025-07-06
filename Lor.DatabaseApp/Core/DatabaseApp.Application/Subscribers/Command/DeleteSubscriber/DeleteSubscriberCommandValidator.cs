@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
+namespace DatabaseApp.Application.Subscribers.Command.DeleteSubscriber;
 
 public class DeleteSubscriberCommandValidator : AbstractValidator<DeleteSubscriberCommand>
 {

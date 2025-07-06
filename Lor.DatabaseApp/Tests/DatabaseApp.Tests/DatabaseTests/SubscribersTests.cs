@@ -1,7 +1,7 @@
-﻿using DatabaseApp.Application.Group.Command.CreateGroup;
-using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
-using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
-using DatabaseApp.Application.Subscriber.Queries;
+﻿using DatabaseApp.Application.Groups.Command.CreateGroup;
+using DatabaseApp.Application.Subscribers.Command.CreateSubscriber;
+using DatabaseApp.Application.Subscribers.Command.DeleteSubscriber;
+using DatabaseApp.Application.Subscribers.Queries;
 using DatabaseApp.Application.Users.Command.CreateUser;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Tests.TestContext;

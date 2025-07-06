@@ -4,5 +4,5 @@ namespace DatabaseApp.Domain.Services.RemovalService;
 
 public interface IClassRemovalService
 {
-    public Task ScheduleRemoval(IEnumerable<Class> classesDto, CancellationToken cancellationToken = default);
+    public Task ScheduleRemoval(IEnumerable<Class> classes, CancellationToken cancellationToken = default);
 }

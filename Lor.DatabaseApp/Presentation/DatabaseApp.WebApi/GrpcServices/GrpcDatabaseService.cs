@@ -1,14 +1,14 @@
 ﻿using DatabaseApp.Application.Classes;
 using DatabaseApp.Application.Classes.Queries;
 using DatabaseApp.Application.Common.ExtensionsMethods;
-using DatabaseApp.Application.Group.Queries;
+using DatabaseApp.Application.Groups.Queries;
 using DatabaseApp.Application.QueueEntries.Commands.CreateEntry;
 using DatabaseApp.Application.QueueEntries.Commands.DeleteEntry;
 using DatabaseApp.Application.QueueEntries.Queries;
-using DatabaseApp.Application.Subscriber;
-using DatabaseApp.Application.Subscriber.Command.CreateSubscriber;
-using DatabaseApp.Application.Subscriber.Command.DeleteSubscriber;
-using DatabaseApp.Application.Subscriber.Queries;
+using DatabaseApp.Application.Subscribers;
+using DatabaseApp.Application.Subscribers.Command.CreateSubscriber;
+using DatabaseApp.Application.Subscribers.Command.DeleteSubscriber;
+using DatabaseApp.Application.Subscribers.Queries;
 using DatabaseApp.Application.Users.Command.CreateUser;
 using DatabaseApp.Application.Users.Queries;
 using DatabaseApp.Domain.Repositories;
@@ -16,6 +16,7 @@ using DatabaseApp.WebApi.Extensions;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using MediatR;
+using Shared.GrpcServices;
 
 namespace DatabaseApp.WebApi.GrpcServices;
 

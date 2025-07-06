@@ -35,10 +35,6 @@
       <Content Include="..\..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <Content Include="..\..\..\Lor.DatabaseApp\Presentation\DatabaseApp.WebApi\Properties\launchSettings.json">
-        <Link>DatabaseSettings\launchSettings.json</Link>
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
-﻿using DatabaseApp.Messaging.Messages;
-using MassTransit;
+﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Shared.Messaging;
 using TelegramBotApp.AppCommunication.Consumers.Settings;
 using TelegramBotApp.AppCommunication.Interfaces;
 using TelegramBotApp.Domain.Interfaces;

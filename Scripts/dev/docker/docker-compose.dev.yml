@@ -1,3 +1,4 @@
+name: lor-dev
 services:
   database:
     image: postgres:16
@@ -39,3 +40,9 @@ services:
       interval: 15s
       timeout: 15s
       retries: 3
+
+  aspire.dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.1
+    ports:
+      - 18888:18888
+      - 18889:18889

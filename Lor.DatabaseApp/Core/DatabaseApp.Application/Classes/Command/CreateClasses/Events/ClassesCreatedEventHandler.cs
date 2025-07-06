@@ -1,8 +1,8 @@
-﻿using DatabaseApp.Domain.Models;
-using DatabaseApp.Messaging.Messages;
+﻿using Lor.Shared.Messaging.Models;
 using Mapster;
 using MassTransit;
 using MediatR;
+using Shared.Messaging;
 
 namespace DatabaseApp.Application.Classes.Command.Events;
 
@@ -13,7 +13,7 @@ public class ClassesCreatedEventHandler(IBus bus) : INotificationHandler<Classes
         NewClassesMessage newClassesMessage = new()
         {
             GroupName = notification.GroupName,
-            Classes = notification.Classes.Adapt<IEnumerable<Class>>()
+            Classes = notification.Classes.Adapt<IEnumerable<ClassModel>>()
         };
 
         await bus.Publish(newClassesMessage, cancellationToken);
