@@ -1,9 +1,10 @@
 ﻿using DatabaseApp.Domain.Models;
+using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
 
 namespace DatabaseApp.Persistence.Repositories;
 
-public abstract class RepositoryBase<TEntity>(IDatabaseContext context)
+public class GenericRepository<TEntity>(IDatabaseContext context) : IGenericRepository<TEntity> 
     where TEntity : class, IEntity
 {
     // ReSharper disable once InconsistentNaming

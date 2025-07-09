@@ -18,8 +18,9 @@ public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService
         if (cachedSubscriber is not null)
             return Result.Ok(cachedSubscriber);
 
-        var subscribers = 
-            await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
+        var subscriberRepository = unitOfWork.GetRepository<ISubscriberRepository>();
+        
+        var subscribers = await subscriberRepository.GetAllSubscribers(cancellationToken);
 
         if (subscribers is null) 
             return Result.Fail("Подписчики не найдены");

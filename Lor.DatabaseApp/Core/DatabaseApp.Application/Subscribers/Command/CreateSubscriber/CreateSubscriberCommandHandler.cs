@@ -12,11 +12,15 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result> Handle(CreateSubscriberCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
+        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
-        var subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
+        var subscriberRepository = unitOfWork.GetRepository<ISubscriberRepository>();
+        
+        var subscriber = await subscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
         if (subscriber is not null) return Result.Fail("Вы уже подписаны");
         
@@ -25,11 +29,11 @@ public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
             UserId = user.Id
         };
 
-        await unitOfWork.SubscriberRepository.AddAsync(newSubscriber, cancellationToken);
+        await subscriberRepository.AddAsync(newSubscriber, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
-        var allSubscribers = await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
+        var allSubscribers = await subscriberRepository.GetAllSubscribers(cancellationToken);
         
         await cacheService.SetAsync(Constants.AllSubscribersKey, 
             mapper.From(allSubscribers).AdaptToType<List<SubscriberDto>>(),

@@ -16,9 +16,11 @@ public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cac
         
         if (queueCache is not null) 
             return Result.Ok(queueCache);
+
+        var queueEntryRepository = unitOfWork.GetRepository<IQueueEntryRepository>();
         
         var queueList =
-            await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
+            await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
         
         if (queueList is null) 
             return Result.Fail("Очередь не найдена.");

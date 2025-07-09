@@ -20,7 +20,9 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
         
         if (cachedClasses is not null) return Result.Ok(cachedClasses);
 
-        var classes = await unitOfWork.ClassRepository.GetClassesByGroupName(request.GroupName, cancellationToken);
+        var classRepository = unitOfWork.GetRepository<IClassRepository>();
+        
+        var classes = await classRepository.GetClassesByGroupName(request.GroupName, cancellationToken);
         
         if (classes is null) return Result.Fail("Пары не найдены.");
             

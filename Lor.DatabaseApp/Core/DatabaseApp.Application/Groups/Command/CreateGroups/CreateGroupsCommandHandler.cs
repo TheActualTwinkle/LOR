@@ -12,11 +12,13 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
 {
     public async Task<Result> Handle(CreateGroupsCommand request, CancellationToken cancellationToken)
     {
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        
         foreach (var item in request.GroupNames)
         {
-            var groupName = await unitOfWork.GroupRepository.GetGroupByGroupName(item, cancellationToken);
+            var isGroupExists = await groupRepository.GetGroupByGroupName(item, cancellationToken) == null;
 
-            if (groupName is not null)
+            if (!isGroupExists)
                 continue;
 
             Domain.Models.Group group = new()
@@ -24,12 +26,12 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
                 Name = item
             };
                 
-            await unitOfWork.GroupRepository.AddAsync(group, cancellationToken);
+            await groupRepository.AddAsync(group, cancellationToken);
         }
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
-        var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        var groups = await groupRepository.GetGroups(cancellationToken);
 
         if (groups is null) return Result.Fail("Группы не найдены.");
         

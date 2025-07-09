@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
 
-public class SubscriberRepository(IDatabaseContext context)
-    : RepositoryBase<Subscriber>(context), ISubscriberRepository
+public class SubscriberGenericRepository(IDatabaseContext context)
+    : GenericRepository<Subscriber>(context), ISubscriberRepository
 {
     public async Task<List<Subscriber>?> GetAllSubscribers(CancellationToken cancellationToken) =>
         await _context.Subscribers

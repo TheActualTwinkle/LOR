@@ -17,7 +17,9 @@ public class GetEnqueuedUsersQueryHandler(
 
         foreach (var queueEntry in request.Queue)
         {
-            var user = await unitOfWork.UserRepository.GetUserByFullName(queueEntry.FullName, cancellationToken);
+            var userRepository = unitOfWork.GetRepository<IUserRepository>();
+            
+            var user = await userRepository.GetUserByFullName(queueEntry.FullName, cancellationToken);
             
             if (user is null) 
                 return Result.Fail("User not found");
