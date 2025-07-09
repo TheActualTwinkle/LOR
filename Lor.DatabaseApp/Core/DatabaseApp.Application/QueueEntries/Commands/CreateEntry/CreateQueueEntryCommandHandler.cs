@@ -14,21 +14,29 @@ public class CreateQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result<CreateQueueEntryResponse>> Handle(CreateQueueEntryCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
+        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден.");
 
         // TODO: Проверка группы должна быть на уровне валидации команды
-        var group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        
+        var group = await groupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не поддерживается.");
 
-        var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        var classRepository = unitOfWork.GetRepository<IClassRepository>();
+        
+        var @class = await classRepository.GetClassById(request.ClassId, cancellationToken);
         
         if (@class is null) return Result.Fail("Пара не найдена.");
 
+        var queueEntryRepository = unitOfWork.GetRepository<IQueueEntryRepository>();
+        
         var isUserAlreadyEnqueued =
-            await unitOfWork.QueueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
+            await queueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
 
         if (isUserAlreadyEnqueued)
             return Result.Ok(
@@ -39,7 +47,7 @@ public class CreateQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
                 });
 
         var queueNum =
-            Convert.ToUInt32(await unitOfWork.QueueEntryRepository.GetCurrentQueueNum(request.ClassId));
+            Convert.ToUInt32(await queueEntryRepository.GetCurrentQueueNum(request.ClassId));
         
         QueueEntry queueEntry = new()
         {
@@ -48,13 +56,13 @@ public class CreateQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
             QueueNum = queueNum + 1
         };
         
-        await unitOfWork.QueueEntryRepository.AddAsync(queueEntry, cancellationToken);
+        await queueEntryRepository.AddAsync(queueEntry, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
         await cacheService.SetAsync(
             Constants.QueuePrefix + request.ClassId,
-            (await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).Adapt<List<QueueEntryDto>>(),
+            (await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).Adapt<List<QueueEntryDto>>(),
             cancellationToken: cancellationToken);
 
         return Result.Ok(

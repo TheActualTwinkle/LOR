@@ -2,6 +2,7 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -16,14 +17,16 @@ public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cac
         
         if (queueCache is not null) 
             return Result.Ok(queueCache);
+
+        var queueEntryRepository = unitOfWork.GetRepository<IQueueEntryRepository>();
         
         var queueList =
-            await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
+            await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
         
         if (queueList is null) 
             return Result.Fail("Очередь не найдена.");
 
-        var queueDto = mapper.From(queueList).AdaptToType<List<QueueEntryDto>>();
+        var queueDto = queueList.Adapt<List<QueueEntryDto>>();
         
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto, cancellationToken: cancellationToken);
 

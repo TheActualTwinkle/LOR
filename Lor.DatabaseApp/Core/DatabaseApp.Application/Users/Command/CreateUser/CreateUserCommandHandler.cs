@@ -3,6 +3,7 @@ using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -13,11 +14,15 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.IsUserExists(request.TelegramId, FullNameFormatter.Format(request.FullName), cancellationToken);
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
+        var user = await userRepository.IsUserExists(request.TelegramId, FullNameFormatter.Format(request.FullName), cancellationToken);
 
         if (user is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
 
-        var group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        
+        var group = await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
 
         if (group is null) return Result.Fail("Группа не найдена.");
 
@@ -27,13 +32,13 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
             TelegramId = request.TelegramId,
             GroupId = group.Id
         };
-
-        await unitOfWork.UserRepository.AddAsync(newUser, cancellationToken);
+        
+        await userRepository.AddAsync(newUser, cancellationToken);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, 
-            mapper.From(newUser).AdaptToType<UserDto>(), cancellationToken: cancellationToken);
+            newUser.Adapt<UserDto>(), cancellationToken: cancellationToken);
 
         return Result.Ok();
     }

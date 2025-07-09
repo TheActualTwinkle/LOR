@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
 
-public class ClassRepository(IDatabaseContext context)
-    : RepositoryBase<Class>(context), IClassRepository
+internal class ClassRepository(IDatabaseContext context)
+    : GenericRepository<Class>(context), IClassRepository
 {
     public async Task<Class?> GetClassByNameAndDate(string className, DateOnly classDate, CancellationToken cancellationToken) =>
         await _context.Classes

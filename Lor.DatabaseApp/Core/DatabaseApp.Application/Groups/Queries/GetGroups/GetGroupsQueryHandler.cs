@@ -2,12 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Groups.Queries;
 
-public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<GetGroupsQuery, Result<List<GroupDto>>>
 {
     public async Task<Result<List<GroupDto>>> Handle(GetGroupsQuery request, CancellationToken cancellationToken)
@@ -15,12 +15,14 @@ public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheSe
         var cachedGroups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey, cancellationToken);
 
         if (cachedGroups is not null) return Result.Ok(cachedGroups);
+
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
         
-        var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        var groups = await groupRepository.GetGroups(cancellationToken);
         
         if (groups is null) return Result.Fail("Группы не найдены.");
         
-        var groupsDto = mapper.From(groups).AdaptToType<List<GroupDto>>();
+        var groupsDto = groups.Adapt<List<GroupDto>>();
         
         await cacheService.SetAsync(Constants.AvailableGroupsKey, groupsDto, cancellationToken: cancellationToken);
 

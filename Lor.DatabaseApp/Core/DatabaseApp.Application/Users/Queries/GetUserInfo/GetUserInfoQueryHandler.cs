@@ -2,6 +2,7 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -17,17 +18,21 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cache
         if (cachedUser is not null) 
             return Result.Ok(cachedUser);
         
-        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
+        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) 
             return Result.Fail("Пользователь не найден.");
 
-        var group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        
+        var group = await groupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
 
         if (group is null) 
             return Result.Fail("Группа не найдена.");
 
-        var userDto = mapper.From(user).AdaptToType<UserDto>();
+        var userDto = user.Adapt<UserDto>();
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, userDto, cancellationToken: cancellationToken);
 

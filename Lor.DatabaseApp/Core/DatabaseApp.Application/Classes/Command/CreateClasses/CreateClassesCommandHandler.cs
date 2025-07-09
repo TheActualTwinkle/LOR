@@ -14,11 +14,15 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
 {
     public async Task<Result> Handle(CreateClassesCommand request, CancellationToken cancellationToken)
     {
-        var group = await unitOfWork.GroupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        
+        var group = await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
 
         if (group is null)
             return Result.Fail("Group not found");
 
+        var classRepository = unitOfWork.GetRepository<IClassRepository>();
+        
         var createdClasses = await CreateClasses(
             request.Classes.Select(c => new Class
             {
@@ -26,6 +30,7 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
                 Date = c.Value,
                 GroupId = group.Id
             }),
+            classRepository,
             cancellationToken);
         
         if (!createdClasses.Any())
@@ -38,8 +43,8 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
                 Classes = createdClasses.Adapt<IEnumerable<ClassDto>>()
             },
             cancellationToken);
-
-        var classes = await unitOfWork.ClassRepository.GetClassesByGroupName(request.GroupName, cancellationToken);
+        
+        var classes = await classRepository.GetClassesByGroupName(request.GroupName, cancellationToken);
 
         await cacheService.SetAsync(
             Constants.AvailableClassesPrefix + request.GroupName,
@@ -49,20 +54,20 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
         return Result.Ok();
     }
 
-    private async Task<IEnumerable<Class>> CreateClasses(IEnumerable<Class> classes, CancellationToken cancellationToken = new())
+    private async Task<IEnumerable<Class>> CreateClasses(IEnumerable<Class> classes, IClassRepository classRepository, CancellationToken cancellationToken = new())
     {
         var createdClasses = new List<Class>();
 
         foreach (var @class in classes)
         {
-            var classExist = await unitOfWork.ClassRepository.GetClassByNameAndDate(@class.Name, @class.Date, cancellationToken);
+            var classExist = await classRepository.GetClassByNameAndDate(@class.Name, @class.Date, cancellationToken);
 
             if (classExist is not null)
                 continue;
 
             createdClasses.Add(@class);
-
-            await unitOfWork.ClassRepository.AddAsync(@class, cancellationToken);
+            
+            await classRepository.AddAsync(@class, cancellationToken);
         }
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);

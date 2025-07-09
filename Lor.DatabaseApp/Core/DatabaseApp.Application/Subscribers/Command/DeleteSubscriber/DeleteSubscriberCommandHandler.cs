@@ -2,6 +2,7 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -12,22 +13,26 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result> Handle(DeleteSubscriberCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
+        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
-        var subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
+        var subscriberRepository = unitOfWork.GetRepository<ISubscriberRepository>();
+        
+        var subscriber = await subscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
         if (subscriber is null) return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
 
-        unitOfWork.SubscriberRepository.Delete(subscriber);
+        subscriberRepository.Delete(subscriber);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        var allSubscribers = await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
+        var allSubscribers = await subscriberRepository.GetAllSubscribers(cancellationToken);
         
         await cacheService.SetAsync(Constants.AllSubscribersKey, 
-            mapper.From(allSubscribers).AdaptToType<List<SubscriberDto>>(),
+            allSubscribers.Adapt<List<SubscriberDto>>(),
             cancellationToken: cancellationToken);
 
         return Result.Ok();
