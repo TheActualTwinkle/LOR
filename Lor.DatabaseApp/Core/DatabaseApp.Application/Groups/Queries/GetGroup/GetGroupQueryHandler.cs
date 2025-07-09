@@ -14,10 +14,8 @@ public class GetGroupQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
         
         var group = await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
             
-        if (group == null)
-            return Result.Fail("Группа не найдена");
-        
-        return Result.Ok(mapper.From(
-            await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken)).AdaptToType<GroupDto>());
+        return group == null 
+            ? Result.Fail("Группа не найдена") 
+            : Result.Ok(mapper.From(mapper.From(group)).AdaptToType<GroupDto>());
     }
 }

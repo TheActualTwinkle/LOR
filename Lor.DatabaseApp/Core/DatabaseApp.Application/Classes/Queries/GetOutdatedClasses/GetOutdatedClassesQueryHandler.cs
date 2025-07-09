@@ -13,7 +13,6 @@ public class GetOutdatedClassesQueryHandler(IUnitOfWork unitOfWork)
         
         var classes = await classRepository.GetOutdatedClassesId(cancellationToken);
 
-        return classes;
+        return Result.Ok(classes);
     }
-        
 }
