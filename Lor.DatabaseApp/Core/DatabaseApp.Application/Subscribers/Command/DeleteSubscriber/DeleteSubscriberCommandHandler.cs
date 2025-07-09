@@ -2,6 +2,7 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -31,7 +32,7 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
         var allSubscribers = await subscriberRepository.GetAllSubscribers(cancellationToken);
         
         await cacheService.SetAsync(Constants.AllSubscribersKey, 
-            mapper.From(allSubscribers).AdaptToType<List<SubscriberDto>>(),
+            allSubscribers.Adapt<List<SubscriberDto>>(),
             cancellationToken: cancellationToken);
 
         return Result.Ok();

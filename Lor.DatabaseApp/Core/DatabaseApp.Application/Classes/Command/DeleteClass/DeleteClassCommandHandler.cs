@@ -2,12 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Classes.Command.DeleteClasses;
 
-public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<DeleteClassCommand, Result>
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
@@ -36,8 +36,8 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
 
             if (classes is null) continue;
             
-            await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, mapper.From(classes)
-                .AdaptToType<List<ClassDto>>(), cancellationToken: cancellationToken);
+            await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, classes
+                .Adapt<List<ClassDto>>(), cancellationToken: cancellationToken);
         }
         
         return Result.Ok();

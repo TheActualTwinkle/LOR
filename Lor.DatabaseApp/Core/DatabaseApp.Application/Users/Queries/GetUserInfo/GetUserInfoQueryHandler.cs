@@ -2,6 +2,7 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -31,7 +32,7 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cache
         if (group is null) 
             return Result.Fail("Группа не найдена.");
 
-        var userDto = mapper.From(user).AdaptToType<UserDto>();
+        var userDto = user.Adapt<UserDto>();
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, userDto, cancellationToken: cancellationToken);
 

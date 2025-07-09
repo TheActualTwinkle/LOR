@@ -3,6 +3,7 @@ using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -37,7 +38,7 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
         await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, 
-            mapper.From(newUser).AdaptToType<UserDto>(), cancellationToken: cancellationToken);
+            newUser.Adapt<UserDto>(), cancellationToken: cancellationToken);
 
         return Result.Ok();
     }

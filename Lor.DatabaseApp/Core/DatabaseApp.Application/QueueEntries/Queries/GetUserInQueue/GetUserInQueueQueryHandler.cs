@@ -1,6 +1,7 @@
 ﻿using DatabaseApp.Application.Users;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -33,7 +34,7 @@ public class GetUserInQueueQueryHandler(
             await queueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
         return isUserInQueue ?
-            Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) :
+            Result.Ok(user.Adapt<UserDto?>()) :
             Result.Ok<UserDto?>(null);
     }
 }

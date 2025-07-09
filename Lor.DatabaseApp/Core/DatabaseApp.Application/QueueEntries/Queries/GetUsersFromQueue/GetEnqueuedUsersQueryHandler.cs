@@ -1,6 +1,7 @@
 ﻿using DatabaseApp.Application.Users;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -27,6 +28,6 @@ public class GetEnqueuedUsersQueryHandler(
             users.Add(user);
         }
         
-        return Result.Ok(mapper.From(users).AdaptToType<List<UserDto>>());
+        return Result.Ok(users.Adapt<List<UserDto>>());
     }
 }

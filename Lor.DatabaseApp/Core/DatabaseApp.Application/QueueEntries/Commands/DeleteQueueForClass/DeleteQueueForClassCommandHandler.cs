@@ -2,12 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
-public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<DeleteQueueForClassCommand, Result>
 {
     public async Task<Result> Handle(DeleteQueueForClassCommand request, CancellationToken cancellationToken)
@@ -21,7 +21,7 @@ public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheSer
         foreach (var queue in outdatedQueueList)
             queueEntryRepository.Delete(queue);
 
-        var queues = mapper.From(await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).AdaptToType<List<QueueEntryDto>>();
+        var queues = (await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).Adapt<List<QueueEntryDto>>();
             
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queues, cancellationToken: cancellationToken);
         

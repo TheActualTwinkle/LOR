@@ -2,12 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Classes.Queries;
 
-public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<GetClassesQuery, Result<List<ClassDto>>>
 {
     public async Task<Result<List<ClassDto>>> Handle(GetClassesQuery request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
         
         if (classes is null) return Result.Fail("Пары не найдены.");
             
-        var classesDto = mapper.From(classes).AdaptToType<List<ClassDto>>();
+        var classesDto = classes.Adapt<List<ClassDto>>();
         
         await cacheService.SetAsync(Constants.AvailableClassesPrefix + request.GroupName, classesDto, cancellationToken: cancellationToken);
             

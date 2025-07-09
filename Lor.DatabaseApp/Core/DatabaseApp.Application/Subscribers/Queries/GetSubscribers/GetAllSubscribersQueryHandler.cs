@@ -2,6 +2,7 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
+using Mapster;
 using MapsterMapper;
 using MediatR;
 
@@ -25,7 +26,7 @@ public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService
         if (subscribers is null) 
             return Result.Fail("Подписчики не найдены");
         
-        var subscribersDto = mapper.From(subscribers).AdaptToType<List<SubscriberDto>>();
+        var subscribersDto = subscribers.Adapt<List<SubscriberDto>>();
             
         await cacheService.SetAsync(Constants.AllSubscribersKey, subscribersDto, cancellationToken: cancellationToken);
         

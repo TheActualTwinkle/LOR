@@ -21,7 +21,7 @@ public static class DependencyInjection
         
         services.AddScoped<IClassRepository, ClassRepository>();
         services.AddScoped<IGroupRepository, GroupGenericRepository>();
-        services.AddScoped<IQueueEntryRepository, QueueEntryEntryGenericRepository>();
+        services.AddScoped<IQueueEntryRepository, QueueEntryGenericRepository>();
         services.AddScoped<ISubscriberRepository, SubscriberGenericRepository>();
         services.AddScoped<IUserRepository, UserGenericRepository>();
 
