@@ -3,12 +3,11 @@ using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Queries;
 
-public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<GetClassQueueQuery, Result<List<QueueEntryDto>>>
 {
     public async Task<Result<List<QueueEntryDto>>> Handle(GetClassQueueQuery request, CancellationToken cancellationToken)

@@ -3,12 +3,11 @@ using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Users.Queries;
 
-public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<GetUserInfoQuery, Result<UserDto>>
 {
     public async Task<Result<UserDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)

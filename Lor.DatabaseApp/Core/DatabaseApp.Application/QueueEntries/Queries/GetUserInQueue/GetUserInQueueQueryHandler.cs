@@ -2,14 +2,12 @@
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetUserInQueueQueryHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper)
+    IUnitOfWork unitOfWork)
     : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>
 {
     public async Task<Result<UserDto?>> Handle(GetUserInQueueQuery request, CancellationToken cancellationToken)

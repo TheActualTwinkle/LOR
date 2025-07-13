@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
 
-public class UserGenericRepository(IDatabaseContext context)
+public class UserRepository(IDatabaseContext context)
     : GenericRepository<User>(context), IUserRepository
 {
     public async Task<User?> IsUserExists(long telegramId, string fullName, CancellationToken cancellationToken) =>

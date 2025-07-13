@@ -3,12 +3,11 @@ using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Subscribers.Queries;
 
-public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class GetAllSubscribersQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<GetAllSubscribersQuery, Result<List<SubscriberDto>>>
 {
     public async Task<Result<List<SubscriberDto>>> Handle(GetAllSubscribersQuery request, CancellationToken cancellationToken)

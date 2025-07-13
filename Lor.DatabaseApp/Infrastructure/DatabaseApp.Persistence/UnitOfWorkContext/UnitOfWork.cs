@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DatabaseApp.Persistence.UnitOfWorkContext;
 
@@ -23,9 +24,8 @@ public sealed class UnitOfWork(
         return (T)_repositories.GetOrAdd(
             type, _ =>
             {
-                var repo = (T)serviceProvider.GetService(type)!
-                           ?? throw new InvalidOperationException($"Repository {type.Name} is not registered");
-
+                var repo = (T)serviceProvider.GetRequiredService(type);
+                
                 return repo;
             });
     }

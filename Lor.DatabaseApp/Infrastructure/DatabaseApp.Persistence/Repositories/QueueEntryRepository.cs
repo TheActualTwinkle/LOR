@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseApp.Persistence.Repositories;
 
-public class QueueEntryGenericRepository(IDatabaseContext context)
+public class QueueEntryRepository(IDatabaseContext context)
     : GenericRepository<QueueEntry>(context), IQueueEntryRepository
 {
     public async Task<int> GetCurrentQueueNum(int classId) =>

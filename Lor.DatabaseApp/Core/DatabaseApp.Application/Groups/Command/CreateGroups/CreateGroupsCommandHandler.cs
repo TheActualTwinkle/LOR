@@ -2,12 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Groups.Command.CreateGroup;
 
-public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<CreateGroupsCommand, Result>
 {
     public async Task<Result> Handle(CreateGroupsCommand request, CancellationToken cancellationToken)
@@ -35,7 +35,7 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
 
         if (groups is null) return Result.Fail("Группы не найдены.");
         
-        var groupDtos = mapper.Map<List<GroupDto>>(groups);
+        var groupDtos = groups.Adapt<List<GroupDto>>();
         
         await cacheService.SetAsync(Constants.AvailableGroupsKey, groupDtos, cancellationToken: cancellationToken);
 

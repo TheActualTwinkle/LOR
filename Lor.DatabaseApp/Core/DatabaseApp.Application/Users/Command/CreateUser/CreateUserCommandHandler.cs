@@ -4,12 +4,11 @@ using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Users.Command.CreateUser;
 
-public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<CreateUserCommand, Result>
 {
     public async Task<Result> Handle(CreateUserCommand request, CancellationToken cancellationToken)

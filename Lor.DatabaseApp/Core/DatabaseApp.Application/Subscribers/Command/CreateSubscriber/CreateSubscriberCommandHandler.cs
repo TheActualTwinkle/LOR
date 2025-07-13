@@ -3,12 +3,11 @@ using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
-using MapsterMapper;
 using MediatR;
 
 namespace DatabaseApp.Application.Subscribers.Command.CreateSubscriber;
 
-public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class CreateSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<CreateSubscriberCommand, Result>
 {
     public async Task<Result> Handle(CreateSubscriberCommand request, CancellationToken cancellationToken)
