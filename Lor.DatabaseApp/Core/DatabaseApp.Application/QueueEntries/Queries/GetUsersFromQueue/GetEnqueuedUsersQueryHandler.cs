@@ -14,11 +14,11 @@ public class GetEnqueuedUsersQueryHandler(
     {
         var users = new List<Domain.Models.User>();
 
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
         foreach (var queueEntry in request.Queue)
         {
-            var userRepository = unitOfWork.GetRepository<IUserRepository>();
-            
-            var user = await userRepository.GetUserByFullName(queueEntry.FullName, cancellationToken);
+           var user = await userRepository.GetUserByFullName(queueEntry.FullName, cancellationToken);
             
             if (user is null) 
                 return Result.Fail("User not found");

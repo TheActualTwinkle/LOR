@@ -1,5 +1,6 @@
 ﻿using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
@@ -16,12 +17,12 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
         
         foreach (var item in request.GroupNames)
         {
-            var isGroupExists = await groupRepository.GetGroupByGroupName(item, cancellationToken) == null;
+            var existingGroup = await groupRepository.GetGroupByGroupName(item, cancellationToken);
 
-            if (!isGroupExists)
+            if (existingGroup is not null)
                 continue;
 
-            Domain.Models.Group group = new()
+            Group group = new()
             {
                 Name = item
             };

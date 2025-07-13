@@ -19,7 +19,7 @@ public sealed class UnitOfWork(
     {
         ObjectDisposedException.ThrowIf(_disposed, nameof(UnitOfWork));
 
-        var type = (typeof(T));
+        var type = typeof(T);
 
         return (T)_repositories.GetOrAdd(
             type, _ =>

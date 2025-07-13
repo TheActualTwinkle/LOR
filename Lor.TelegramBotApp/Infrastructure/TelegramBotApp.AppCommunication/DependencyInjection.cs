@@ -46,11 +46,11 @@ public static class DependencyInjection
                 });
                 
                 cfg.ReceiveEndpoint(
-                    "dba-new-classes", 
+                    "tba-new-classes", 
                     e => e.Consumer<NewClassesConsumer>(context));
                 
                 cfg.ReceiveEndpoint(
-                    "dba-upcoming-classes", 
+                    "tba-upcoming-classes", 
                     e => e.Consumer<UpcomingClassesConsumer>(context));
             });
         });
