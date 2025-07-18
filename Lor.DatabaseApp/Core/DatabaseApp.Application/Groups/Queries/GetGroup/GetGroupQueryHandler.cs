@@ -10,9 +10,7 @@ public class GetGroupQueryHandler(IUnitOfWork unitOfWork)
 {
     public async Task<Result<GroupDto>> Handle(GetGroupQuery request, CancellationToken cancellationToken)
     {
-        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
-        
-        var group = await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        var group = await unitOfWork.GetRepository<IGroupRepository>().GetGroupByGroupName(request.GroupName, cancellationToken);
             
         return group == null 
             ? Result.Fail("Группа не найдена") 

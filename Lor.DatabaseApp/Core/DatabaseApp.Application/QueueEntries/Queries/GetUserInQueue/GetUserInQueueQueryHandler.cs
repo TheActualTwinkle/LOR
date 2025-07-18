@@ -12,24 +12,17 @@ public class GetUserInQueueQueryHandler(
 {
     public async Task<Result<UserDto?>> Handle(GetUserInQueueQuery request, CancellationToken cancellationToken)
     {
-        var userRepository = unitOfWork.GetRepository<IUserRepository>();
-        
-        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken); 
+        var user = await unitOfWork.GetRepository<IUserRepository>().GetUserByTelegramId(request.TelegramId, cancellationToken); 
 
         if (user is null)
             return Result.Fail("Пользователь не найден.");
-
-        var classRepository = unitOfWork.GetRepository<IClassRepository>();
         
-        var @class = await classRepository.GetClassById(request.ClassId, cancellationToken);
+        var @class = await unitOfWork.GetRepository<IClassRepository>().GetClassById(request.ClassId, cancellationToken);
         
         if (@class is null)
             return Result.Fail("Такой пары не существует.");
         
-        var queueEntryRepository = unitOfWork.GetRepository<IQueueEntryRepository>();
-        
-        var isUserInQueue =
-            await queueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
+        var isUserInQueue = await unitOfWork.GetRepository<IQueueEntryRepository>().IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
         return isUserInQueue ?
             Result.Ok(user.Adapt<UserDto?>()) :

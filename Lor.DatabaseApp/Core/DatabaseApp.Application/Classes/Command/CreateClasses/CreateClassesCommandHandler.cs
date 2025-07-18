@@ -14,9 +14,7 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
 {
     public async Task<Result> Handle(CreateClassesCommand request, CancellationToken cancellationToken)
     {
-        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
-        
-        var group = await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        var group = await unitOfWork.GetRepository<IGroupRepository>().GetGroupByGroupName(request.GroupName, cancellationToken);
 
         if (group is null)
             return Result.Fail("Group not found");
@@ -60,9 +58,9 @@ public class CreateClassesCommandHandler(IUnitOfWork unitOfWork, ICacheService c
 
         foreach (var @class in classes)
         {
-            var classExist = await classRepository.GetClassByNameAndDate(@class.Name, @class.Date, cancellationToken);
+            var existingClass = await classRepository.GetClassByNameAndDate(@class.Name, @class.Date, cancellationToken);
 
-            if (classExist is not null)
+            if (existingClass is not null)
                 continue;
 
             createdClasses.Add(@class);

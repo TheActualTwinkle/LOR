@@ -23,9 +23,7 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
-        
-        var groups = await groupRepository.GetGroups(cancellationToken);
+        var groups = await  unitOfWork.GetRepository<IGroupRepository>().GetGroups(cancellationToken);
 
         if (groups is null) 
             return Result.Fail("Группы не найдены.");
@@ -34,10 +32,13 @@ public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cac
         {
             var classes = await classRepository.GetClassesByGroupId(group.Id, cancellationToken);
 
-            if (classes is null) continue;
+            if (classes is null) 
+                continue;
             
-            await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, classes
-                .Adapt<List<ClassDto>>(), cancellationToken: cancellationToken);
+            await cacheService.SetAsync(
+                Constants.AvailableClassesPrefix + group.Name, 
+                classes.Adapt<List<ClassDto>>(), 
+                cancellationToken: cancellationToken);
         }
         
         return Result.Ok();

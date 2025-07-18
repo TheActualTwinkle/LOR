@@ -12,17 +12,17 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result> Handle(DeleteSubscriberCommand request, CancellationToken cancellationToken)
     {
-        var userRepository = unitOfWork.GetRepository<IUserRepository>();
-        
-        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.GetRepository<IUserRepository>().GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
+        if (user is null) 
+            return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
         var subscriberRepository = unitOfWork.GetRepository<ISubscriberRepository>();
         
         var subscriber = await subscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
         
-        if (subscriber is null) return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
+        if (subscriber is null) 
+            return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
 
         subscriberRepository.Delete(subscriber);
 
@@ -30,7 +30,8 @@ public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheServic
         
         var allSubscribers = await subscriberRepository.GetAllSubscribers(cancellationToken);
         
-        await cacheService.SetAsync(Constants.AllSubscribersKey, 
+        await cacheService.SetAsync(
+            Constants.AllSubscribersKey, 
             allSubscribers.Adapt<List<SubscriberDto>>(),
             cancellationToken: cancellationToken);
 

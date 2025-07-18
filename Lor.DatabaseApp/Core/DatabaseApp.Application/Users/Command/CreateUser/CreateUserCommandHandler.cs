@@ -1,6 +1,7 @@
 ﻿using DatabaseApp.Application.Common.ExtensionsMethods;
 using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
@@ -15,17 +16,17 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
     {
         var userRepository = unitOfWork.GetRepository<IUserRepository>();
         
-        var user = await userRepository.IsUserExists(request.TelegramId, FullNameFormatter.Format(request.FullName), cancellationToken);
+        var user = await unitOfWork.GetRepository<IUserRepository>().IsUserExists(request.TelegramId, FullNameFormatter.Format(request.FullName), cancellationToken);
 
-        if (user is not null) return Result.Fail("Пользователь c таким именем или id уже существует.");
-
-        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        if (user is not null) 
+            return Result.Fail("Пользователь c таким именем или id уже существует.");
         
-        var group = await groupRepository.GetGroupByGroupName(request.GroupName, cancellationToken);
+        var group = await unitOfWork.GetRepository<IGroupRepository>().GetGroupByGroupName(request.GroupName, cancellationToken);
 
-        if (group is null) return Result.Fail("Группа не найдена.");
+        if (group is null) 
+            return Result.Fail("Группа не найдена.");
 
-        Domain.Models.User newUser = new()
+        var newUser = new User()
         {
             FullName = FullNameFormatter.Format(request.FullName),
             TelegramId = request.TelegramId,
@@ -36,8 +37,10 @@ public class CreateUserCommandHandler(IUnitOfWork unitOfWork, ICacheService cach
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        await cacheService.SetAsync(Constants.UserPrefix + request.TelegramId, 
-            newUser.Adapt<UserDto>(), cancellationToken: cancellationToken);
+        await cacheService.SetAsync(
+            Constants.UserPrefix + request.TelegramId, 
+            newUser.Adapt<UserDto>(), 
+            cancellationToken: cancellationToken);
 
         return Result.Ok();
     }

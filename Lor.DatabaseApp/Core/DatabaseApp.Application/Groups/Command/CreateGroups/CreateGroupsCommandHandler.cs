@@ -15,16 +15,16 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
     {
         var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
         
-        foreach (var item in request.GroupNames)
+        foreach (var name in request.GroupNames)
         {
-            var existingGroup = await groupRepository.GetGroupByGroupName(item, cancellationToken);
+            var existingGroup = await groupRepository.GetGroupByGroupName(name, cancellationToken);
 
             if (existingGroup is not null)
                 continue;
 
-            Group group = new()
+            var group = new Group()
             {
-                Name = item
+                Name = name
             };
                 
             await groupRepository.AddAsync(group, cancellationToken);
@@ -34,7 +34,8 @@ public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService ca
 
         var groups = await groupRepository.GetGroups(cancellationToken);
 
-        if (groups is null) return Result.Fail("Группы не найдены.");
+        if (groups is null) 
+            return Result.Fail("Группы не найдены.");
         
         var groupDtos = groups.Adapt<List<GroupDto>>();
         

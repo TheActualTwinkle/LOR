@@ -17,16 +17,12 @@ public class GetUserInfoQueryHandler(IUnitOfWork unitOfWork, ICacheService cache
         if (cachedUser is not null) 
             return Result.Ok(cachedUser);
         
-        var userRepository = unitOfWork.GetRepository<IUserRepository>();
-        
-        var user = await userRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.GetRepository<IUserRepository>().GetUserByTelegramId(request.TelegramId, cancellationToken);
 
         if (user is null) 
             return Result.Fail("Пользователь не найден.");
-
-        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
         
-        var group = await groupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        var group = await unitOfWork.GetRepository<IGroupRepository>().GetGroupByGroupId(user.GroupId, cancellationToken);
 
         if (group is null) 
             return Result.Fail("Группа не найдена.");

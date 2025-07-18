@@ -1,4 +1,5 @@
 ﻿using DatabaseApp.Application.Users;
+using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
 using Mapster;
@@ -12,7 +13,7 @@ public class GetEnqueuedUsersQueryHandler(
 {
     public async Task<Result<List<UserDto>>> Handle(GetEnqueuedUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = new List<Domain.Models.User>();
+        var users = new List<User>();
 
         var userRepository = unitOfWork.GetRepository<IUserRepository>();
         

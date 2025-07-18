@@ -14,17 +14,18 @@ public class GetClassesQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheS
     {
         var cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + request.GroupName, cancellationToken: cancellationToken);
 
-        if (cachedClasses is not null) return Result.Ok(cachedClasses);
+        if (cachedClasses is not null) 
+            return Result.Ok(cachedClasses);
             
         cachedClasses = await cacheService.GetAsync<List<ClassDto>>(Constants.AvailableClassesPrefix + request.GroupName, cancellationToken: cancellationToken);
         
-        if (cachedClasses is not null) return Result.Ok(cachedClasses);
-
-        var classRepository = unitOfWork.GetRepository<IClassRepository>();
+        if (cachedClasses is not null) 
+            return Result.Ok(cachedClasses);
         
-        var classes = await classRepository.GetClassesByGroupName(request.GroupName, cancellationToken);
+        var classes = await unitOfWork.GetRepository<IClassRepository>().GetClassesByGroupName(request.GroupName, cancellationToken);
         
-        if (classes is null) return Result.Fail("Пары не найдены.");
+        if (classes is null) 
+            return Result.Fail("Пары не найдены.");
             
         var classesDto = classes.Adapt<List<ClassDto>>();
         

@@ -16,14 +16,15 @@ public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheSer
         
         var outdatedQueueList = await queueEntryRepository.GetOutdatedQueueListByClassId(request.ClassId, cancellationToken);
         
-        if (outdatedQueueList is null) return Result.Fail($"Очередь для {request.ClassId} не найдена");
+        if (outdatedQueueList is null) 
+            return Result.Fail($"Очередь для {request.ClassId} не найдена");
         
-        foreach (var queue in outdatedQueueList)
-            queueEntryRepository.Delete(queue);
+        foreach (var queueEntry in outdatedQueueList)
+            queueEntryRepository.Delete(queueEntry);
 
-        var queues = (await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).Adapt<List<QueueEntryDto>>();
+        var queue = (await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).Adapt<List<QueueEntryDto>>();
             
-        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queues, cancellationToken: cancellationToken);
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queue, cancellationToken: cancellationToken);
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         

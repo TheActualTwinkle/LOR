@@ -14,13 +14,13 @@ public class GetGroupsQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheSe
     {
         var cachedGroups = await cacheService.GetAsync<List<GroupDto>>(Constants.AvailableGroupsKey, cancellationToken);
 
-        if (cachedGroups is not null) return Result.Ok(cachedGroups);
+        if (cachedGroups is not null) 
+            return Result.Ok(cachedGroups);
 
-        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        var groups = await unitOfWork.GetRepository<IGroupRepository>().GetGroups(cancellationToken);
         
-        var groups = await groupRepository.GetGroups(cancellationToken);
-        
-        if (groups is null) return Result.Fail("Группы не найдены.");
+        if (groups is null) 
+            return Result.Fail("Группы не найдены.");
         
         var groupsDto = groups.Adapt<List<GroupDto>>();
         
