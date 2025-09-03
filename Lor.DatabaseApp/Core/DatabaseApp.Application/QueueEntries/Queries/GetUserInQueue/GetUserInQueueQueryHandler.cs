@@ -1,35 +1,31 @@
 ﻿using DatabaseApp.Application.Users;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetUserInQueueQueryHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper)
+    IUnitOfWork unitOfWork)
     : IRequestHandler<GetUserInQueueQuery, Result<UserDto?>>
 {
     public async Task<Result<UserDto?>> Handle(GetUserInQueueQuery request, CancellationToken cancellationToken)
     {
-        var user =
-            await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken); 
+        var user = await unitOfWork.GetRepository<IUserRepository>().GetUserByTelegramId(request.TelegramId, cancellationToken); 
 
         if (user is null)
             return Result.Fail("Пользователь не найден.");
         
-        var @class = 
-            await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        var @class = await unitOfWork.GetRepository<IClassRepository>().GetClassById(request.ClassId, cancellationToken);
         
         if (@class is null)
             return Result.Fail("Такой пары не существует.");
         
-        var isUserInQueue =
-            await unitOfWork.QueueEntryRepository.IsUserInQueue(user.Id, request.ClassId, cancellationToken);
+        var isUserInQueue = await unitOfWork.GetRepository<IQueueEntryRepository>().IsUserInQueue(user.Id, request.ClassId, cancellationToken);
         
         return isUserInQueue ?
-            Result.Ok(mapper.From(user).AdaptToType<UserDto?>()) :
+            Result.Ok(user.Adapt<UserDto?>()) :
             Result.Ok<UserDto?>(null);
     }
 }

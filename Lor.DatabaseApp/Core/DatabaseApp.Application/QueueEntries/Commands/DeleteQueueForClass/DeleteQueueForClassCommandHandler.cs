@@ -2,26 +2,29 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Commands.DeleteOutdatedQueues;
 
-public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class DeleteQueueForClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<DeleteQueueForClassCommand, Result>
 {
     public async Task<Result> Handle(DeleteQueueForClassCommand request, CancellationToken cancellationToken)
     {
-        var outdatedQueueList = await unitOfWork.QueueEntryRepository.GetOutdatedQueueListByClassId(request.ClassId, cancellationToken);
+        var queueEntryRepository = unitOfWork.GetRepository<IQueueEntryRepository>();
         
-        if (outdatedQueueList is null) return Result.Fail($"Очередь для {request.ClassId} не найдена");
+        var outdatedQueueList = await queueEntryRepository.GetOutdatedQueueListByClassId(request.ClassId, cancellationToken);
         
-        foreach (var queue in outdatedQueueList)
-            unitOfWork.QueueEntryRepository.Delete(queue);
+        if (outdatedQueueList is null) 
+            return Result.Fail($"Очередь для {request.ClassId} не найдена");
+        
+        foreach (var queueEntry in outdatedQueueList)
+            queueEntryRepository.Delete(queueEntry);
 
-        var queues = mapper.From(await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).AdaptToType<List<QueueEntryDto>>();
+        var queue = (await queueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken)).Adapt<List<QueueEntryDto>>();
             
-        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queues, cancellationToken: cancellationToken);
+        await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queue, cancellationToken: cancellationToken);
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         

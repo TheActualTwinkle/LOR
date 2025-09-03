@@ -1,39 +1,43 @@
 ﻿using DatabaseApp.Caching;
 using DatabaseApp.Caching.Interfaces;
+using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Groups.Command.CreateGroup;
 
-public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class CreateGroupsCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<CreateGroupsCommand, Result>
 {
     public async Task<Result> Handle(CreateGroupsCommand request, CancellationToken cancellationToken)
     {
-        foreach (var item in request.GroupNames)
+        var groupRepository = unitOfWork.GetRepository<IGroupRepository>();
+        
+        foreach (var name in request.GroupNames)
         {
-            var groupName = await unitOfWork.GroupRepository.GetGroupByGroupName(item, cancellationToken);
+            var existingGroup = await groupRepository.GetGroupByGroupName(name, cancellationToken);
 
-            if (groupName is not null)
+            if (existingGroup is not null)
                 continue;
 
-            Domain.Models.Group group = new()
+            var group = new Group()
             {
-                Name = item
+                Name = name
             };
                 
-            await unitOfWork.GroupRepository.AddAsync(group, cancellationToken);
+            await groupRepository.AddAsync(group, cancellationToken);
         }
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
 
-        var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        var groups = await groupRepository.GetGroups(cancellationToken);
 
-        if (groups is null) return Result.Fail("Группы не найдены.");
+        if (groups is null) 
+            return Result.Fail("Группы не найдены.");
         
-        var groupDtos = mapper.Map<List<GroupDto>>(groups);
+        var groupDtos = groups.Adapt<List<GroupDto>>();
         
         await cacheService.SetAsync(Constants.AvailableGroupsKey, groupDtos, cancellationToken: cancellationToken);
 

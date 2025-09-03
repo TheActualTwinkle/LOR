@@ -2,12 +2,12 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Queries;
 
-public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<GetClassQueueQuery, Result<List<QueueEntryDto>>>
 {
     public async Task<Result<List<QueueEntryDto>>> Handle(GetClassQueueQuery request, CancellationToken cancellationToken)
@@ -17,13 +17,12 @@ public class GetClassQueueQueryHandler(IUnitOfWork unitOfWork, ICacheService cac
         if (queueCache is not null) 
             return Result.Ok(queueCache);
         
-        var queueList =
-            await unitOfWork.QueueEntryRepository.GetQueueByClassId(request.ClassId, cancellationToken);
+        var queueList = await unitOfWork.GetRepository<IQueueEntryRepository>().GetQueueByClassId(request.ClassId, cancellationToken);
         
         if (queueList is null) 
             return Result.Fail("Очередь не найдена.");
 
-        var queueDto = mapper.From(queueList).AdaptToType<List<QueueEntryDto>>();
+        var queueDto = queueList.Adapt<List<QueueEntryDto>>();
         
         await cacheService.SetAsync(Constants.QueuePrefix + request.ClassId, queueDto, cancellationToken: cancellationToken);
 

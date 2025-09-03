@@ -13,24 +13,30 @@ public class DeleteQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
 {
     public async Task<Result<DeleteQueueEntryResponse>> Handle(DeleteQueueEntryCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.GetRepository<IUserRepository>().GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден.");
+        if (user is null) 
+            return Result.Fail("Пользователь не найден.");
 
         // TODO: Проверка группы должна быть на уровне валидации команды
-        var group = await unitOfWork.GroupRepository.GetGroupByGroupId(user.GroupId, cancellationToken);
+        var group = await unitOfWork.GetRepository<IGroupRepository>().GetGroupByGroupId(user.GroupId, cancellationToken);
 
-        if (group is null) return Result.Fail("Группа не поддерживается.");
-
-        var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        if (group is null) 
+            return Result.Fail("Группа не поддерживается.");
         
-        if (@class is null) return Result.Fail("Пара не найдена.");
+        var @class = await unitOfWork.GetRepository<IClassRepository>().GetClassById(request.ClassId, cancellationToken);
+        
+        if (@class is null) 
+            return Result.Fail("Пара не найдена.");
 
-        var classQueue = await unitOfWork.QueueEntryRepository.GetQueueByClassId(@class.Id, cancellationToken);
+        var queueEntryRepository = unitOfWork.GetRepository<IQueueEntryRepository>();
+        
+        var classQueue = await queueEntryRepository.GetQueueByClassId(@class.Id, cancellationToken);
             
-        if (classQueue is null) return Result.Fail($"Очередь на пару '{@class.Name}' не найдена");
+        if (classQueue is null) 
+            return Result.Fail($"Очередь на пару '{@class.Name}' не найдена");
         
-        var userQueueNum = await unitOfWork.QueueEntryRepository.GetUserQueueNum(request.TelegramId, request.ClassId, cancellationToken);
+        var userQueueNum = await queueEntryRepository.GetUserQueueNum(request.TelegramId, request.ClassId, cancellationToken);
             
         var queueEntry = classQueue.FirstOrDefault(x => x.QueueNum == userQueueNum);
 
@@ -42,7 +48,7 @@ public class DeleteQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
                     WasAlreadyDequeued = true
                 });
         
-        unitOfWork.QueueEntryRepository.Delete(queueEntry);
+        queueEntryRepository.Delete(queueEntry);
         
         var queueAfterDeletedEntry = classQueue.Where(x => x.QueueNum > userQueueNum);
 
@@ -50,7 +56,7 @@ public class DeleteQueueEntryCommandHandler(IUnitOfWork unitOfWork, ICacheServic
         {
             item.QueueNum -= 1;
             
-            unitOfWork.QueueEntryRepository.Update(item);
+            queueEntryRepository.Update(item);
         }
 
         classQueue.Remove(queueEntry);

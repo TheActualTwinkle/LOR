@@ -1,23 +1,25 @@
 ﻿using DatabaseApp.Application.Users;
+using DatabaseApp.Domain.Models;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.QueueEntries.Queries;
 
 public class GetEnqueuedUsersQueryHandler(
-    IUnitOfWork unitOfWork,
-    IMapper mapper)
+    IUnitOfWork unitOfWork)
     : IRequestHandler<GetEnqueuedUsersQuery, Result<List<UserDto>>>
 {
     public async Task<Result<List<UserDto>>> Handle(GetEnqueuedUsersQuery request, CancellationToken cancellationToken)
     {
-        var users = new List<Domain.Models.User>();
+        var users = new List<User>();
 
+        var userRepository = unitOfWork.GetRepository<IUserRepository>();
+        
         foreach (var queueEntry in request.Queue)
         {
-            var user = await unitOfWork.UserRepository.GetUserByFullName(queueEntry.FullName, cancellationToken);
+           var user = await userRepository.GetUserByFullName(queueEntry.FullName, cancellationToken);
             
             if (user is null) 
                 return Result.Fail("User not found");
@@ -25,6 +27,6 @@ public class GetEnqueuedUsersQueryHandler(
             users.Add(user);
         }
         
-        return Result.Ok(mapper.From(users).AdaptToType<List<UserDto>>());
+        return Result.Ok(users.Adapt<List<UserDto>>());
     }
 }

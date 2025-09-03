@@ -2,38 +2,43 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Classes.Command.DeleteClasses;
 
-public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class DeleteClassCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<DeleteClassCommand, Result>
 {
     public async Task<Result> Handle(DeleteClassCommand request, CancellationToken cancellationToken)
     {
-        var @class = await unitOfWork.ClassRepository.GetClassById(request.ClassId, cancellationToken);
+        var classRepository = unitOfWork.GetRepository<IClassRepository>();
+        
+        var @class = await classRepository.GetClassById(request.ClassId, cancellationToken);
             
         if (@class is null) 
             return Result.Fail($"Пара {@class?.Name} не найдена.");
             
-        unitOfWork.ClassRepository.Delete(@class);
+        classRepository.Delete(@class);
         
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        var groups = await unitOfWork.GroupRepository.GetGroups(cancellationToken);
+        var groups = await  unitOfWork.GetRepository<IGroupRepository>().GetGroups(cancellationToken);
 
         if (groups is null) 
             return Result.Fail("Группы не найдены.");
 
         foreach (var group in groups)
         {
-            var classes = await unitOfWork.ClassRepository.GetClassesByGroupId(group.Id, cancellationToken);
+            var classes = await classRepository.GetClassesByGroupId(group.Id, cancellationToken);
 
-            if (classes is null) continue;
+            if (classes is null) 
+                continue;
             
-            await cacheService.SetAsync(Constants.AvailableClassesPrefix + group.Id, mapper.From(classes)
-                .AdaptToType<List<ClassDto>>(), cancellationToken: cancellationToken);
+            await cacheService.SetAsync(
+                Constants.AvailableClassesPrefix + group.Name, 
+                classes.Adapt<List<ClassDto>>(), 
+                cancellationToken: cancellationToken);
         }
         
         return Result.Ok();

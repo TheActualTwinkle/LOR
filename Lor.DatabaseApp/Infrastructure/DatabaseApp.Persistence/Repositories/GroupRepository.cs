@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DatabaseApp.Persistence.Repositories;
 
 public class GroupRepository(IDatabaseContext context)
-    : RepositoryBase<Group>(context), IGroupRepository
+    : GenericRepository<Group>(context), IGroupRepository
 {
     public async Task<Group?> GetGroupByGroupName(string groupName, CancellationToken cancellationToken) =>
         await _context.Groups

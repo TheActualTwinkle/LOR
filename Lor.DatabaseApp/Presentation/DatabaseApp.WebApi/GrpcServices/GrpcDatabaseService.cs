@@ -214,7 +214,7 @@ public class GrpcDatabaseService(
             return new ViewQueueClassReply
                 { IsFailed = true, ErrorMessage = queue.Errors.First().Message };
 
-        var @class = await unitOfWork.ClassRepository
+        var @class = await unitOfWork.GetRepository<IClassRepository>()
             .GetClassById(request.ClassId, context.CancellationToken);
 
         if (@class is null)

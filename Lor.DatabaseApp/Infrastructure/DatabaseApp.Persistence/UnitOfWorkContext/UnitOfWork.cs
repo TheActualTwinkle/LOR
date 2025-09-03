@@ -1,23 +1,34 @@
-﻿using DatabaseApp.Domain.Repositories;
+﻿using System.Collections.Concurrent;
+using DatabaseApp.Domain.Repositories;
 using DatabaseApp.Persistence.DatabaseContext;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DatabaseApp.Persistence.UnitOfWorkContext;
 
 public sealed class UnitOfWork(
     IDatabaseContext context,
-    IClassRepository classRepository,
-    IGroupRepository groupRepository,
-    IQueueEntryRepository queueEntryRepository,
-    ISubscriberRepository subscriberRepository,
-    IUserRepository userRepository) : IUnitOfWork
+    IServiceProvider serviceProvider)
+    : IUnitOfWork
 {
     private bool _disposed;
+    
+    private readonly ConcurrentDictionary<Type, object> _repositories = new();
 
-    public IClassRepository ClassRepository => classRepository;
-    public IGroupRepository GroupRepository => groupRepository;
-    public IQueueEntryRepository QueueEntryRepository => queueEntryRepository;
-    public ISubscriberRepository SubscriberRepository => subscriberRepository;
-    public IUserRepository UserRepository => userRepository;
+    public T GetRepository<T>()
+        where T : IRepository
+    {
+        ObjectDisposedException.ThrowIf(_disposed, nameof(UnitOfWork));
+
+        var type = typeof(T);
+
+        return (T)_repositories.GetOrAdd(
+            type, _ =>
+            {
+                var repo = (T)serviceProvider.GetRequiredService(type);
+                
+                return repo;
+            });
+    }
 
     public Task SaveDbChangesAsync(CancellationToken cancellationToken) =>
         context.SaveDbChangesAsync(cancellationToken);

@@ -2,32 +2,37 @@
 using DatabaseApp.Caching.Interfaces;
 using DatabaseApp.Domain.Repositories;
 using FluentResults;
-using MapsterMapper;
+using Mapster;
 using MediatR;
 
 namespace DatabaseApp.Application.Subscribers.Command.DeleteSubscriber;
 
-public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService, IMapper mapper)
+public class DeleteSubscriberCommandHandler(IUnitOfWork unitOfWork, ICacheService cacheService)
     : IRequestHandler<DeleteSubscriberCommand, Result>
 {
     public async Task<Result> Handle(DeleteSubscriberCommand request, CancellationToken cancellationToken)
     {
-        var user = await unitOfWork.UserRepository.GetUserByTelegramId(request.TelegramId, cancellationToken);
+        var user = await unitOfWork.GetRepository<IUserRepository>().GetUserByTelegramId(request.TelegramId, cancellationToken);
 
-        if (user is null) return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
+        if (user is null) 
+            return Result.Fail("Пользователь не найден. Возможно вы не авторизированны?");
 
-        var subscriber = await unitOfWork.SubscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
+        var subscriberRepository = unitOfWork.GetRepository<ISubscriberRepository>();
         
-        if (subscriber is null) return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
+        var subscriber = await subscriberRepository.GetSubscriberByUserId(user.Id, cancellationToken);
+        
+        if (subscriber is null) 
+            return Result.Fail("Вы отписаны от уведомлений о новых лабораторных работах");
 
-        unitOfWork.SubscriberRepository.Delete(subscriber);
+        subscriberRepository.Delete(subscriber);
 
         await unitOfWork.SaveDbChangesAsync(cancellationToken);
         
-        var allSubscribers = await unitOfWork.SubscriberRepository.GetAllSubscribers(cancellationToken);
+        var allSubscribers = await subscriberRepository.GetAllSubscribers(cancellationToken);
         
-        await cacheService.SetAsync(Constants.AllSubscribersKey, 
-            mapper.From(allSubscribers).AdaptToType<List<SubscriberDto>>(),
+        await cacheService.SetAsync(
+            Constants.AllSubscribersKey, 
+            allSubscribers.Adapt<List<SubscriberDto>>(),
             cancellationToken: cancellationToken);
 
         return Result.Ok();
